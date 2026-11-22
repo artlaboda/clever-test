@@ -6291,7 +6291,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
         { id: 'vitebsk', label: 'Дача', street: '4-й Сенненский пер., 1', city: 'Витебск', flat: '', entr: '', floor: '', icon: 'i-pin', note: 'Частный дом, чёрная кровля' }
     ];
     function addr(id) { for (var i = 0; i < ADDRS.length; i++) if (ADDRS[i].id === id) return ADDRS[i]; }
-    /* Города. Город выбирают при первом запуске и меняют в шторке адреса. Адрес всегда в выбранном городе;
+    /* Города. При первом запуске открывается Минск, сменить город можно в шторке адреса. Адрес всегда в выбранном городе;
        если сохранённых адресов в городе нет, адрес пустой — «Укажите адрес».
        Список — города с clever.by (подвал сайта и страницы городов), сверить с актуальным. big — областные центры, идут первыми */
     var CITIES = [
@@ -6383,7 +6383,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '21.11 · 14:10';
+    var BUILD = '22.11 · 14:56';
 
     /* ── состояние ── */
     var S = {
@@ -14548,11 +14548,11 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
             });
         });
     }
-    // город: при первом запуске (first) — с пояснением, потом — из шторки адреса.
+    // На стенде начальный экран выбора города (first) с пояснением; в приложении выбор открывается из шторки адреса.
     // Городов больше сорока, поэтому сверху поиск, дальше областные центры, потом остальные по алфавиту с буквами
     /* Выбор города (стенд → «Выбор города»): «Список» — областные центры плашками и все города по алфавиту,
        «Плитки» — областные центры крупными плитками, «Полёт» — карта отлетает к стране, города точками, список ниже.
-       Из адреса на «Одном экране» — отдельной шторкой поверх карты; при первом запуске — обычной шторкой */
+       Из адреса на «Одном экране» — отдельной шторкой поверх карты; на стенде — обычной шторкой */
     function cityPickHTML(first, overlay) {
         var v = app.dataset.citydz || 'list'; if (v === 'fly' && !overlay) v = 'list';
         var own = function (c) { return ADDRS.filter(function (a) { return cityOf(a) === c.id; }); };
@@ -14816,12 +14816,10 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
             { duration: ms, easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
         setTimeout(function () { if (done) done(); box.remove(); }, ms + 10);   // сначала новый текст под ластиком, потом убираем ластик
     }
-    // первый запуск: после заставки спрашиваем город
     function afterSplash() {
         // библиотеку карты грузим заранее, чтобы шторка адреса открывалась уже с картой
         setTimeout(function () { loadMapLib().catch(function () {}); }, 1500);
-        if (openFromHash()) return;
-        if (!S.city) setTimeout(function () { openSheet('city', { first: true }); }, 250);
+        openFromHash();
     }
     /* пришли по ссылке «Поделиться» (r/<id>.html → #rest=<id>) — сразу на страницу заведения: при запуске и если метка
        появилась в уже открытом приложении. Город — его (Минск); метку из адреса убираем, чтобы «назад» и обновление вели как обычно */
@@ -22331,8 +22329,8 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
     }
 
     /* ── старт ── */
-    // сохранённый город главнее адреса по умолчанию: если адрес из другого города — берём адрес этого города или «Укажите адрес»
-    if (S.city) setCity(S.city);
+    // При первом открытии используем город по умолчанию; сохранённый город важнее адреса по умолчанию.
+    setCity(S.city || city().id);
     try { var savedFont = localStorage.getItem('clever2-font'); if (savedFont === 'golos' || savedFont === 'onest') setFont(savedFont); } catch (e) {}
     try { var savedMe = JSON.parse(localStorage.getItem('clever2-me') || 'null'); if (savedMe && savedMe.phone) { S.me = savedMe; S.me.avoid = S.me.avoid || {}; } } catch (e) {}
     var savedTheme = 'light';
