@@ -391,7 +391,7 @@ test('главная: девять промо — свои цвета, веду�
         await m.waitForTimeout(300);
         const r = await m.evaluate(() => { const rgb = c => { const v = c.match(/[\d.]+/g).slice(0, 3).map(Number); return /^color\(/.test(c) ? v.map(x => x * 255) : v; }, cards = [...document.querySelectorAll('.promo')];
             const rest = id => [...document.querySelectorAll('#homeScroll .rest[data-id="' + id + '"]')][0];
-            return { n: cards.length, ids: cards.map(c => c.dataset.id), bg: cards.map(c => rgb(getComputedStyle(c).backgroundColor)), act: cards.map(c => c.dataset.act),
+            return { n: cards.length, ids: cards.map(c => c.dataset.id), bg: cards.map(c => rgb(getComputedStyle(c.querySelector(".promo__banner")).backgroundColor)), act: cards.map(c => c.dataset.act),
                 badge: cards.map(c => { const b = rest(c.dataset.id); return b ? b.querySelector('.rest__badges').textContent.replace(/ /g, ' ').replace(/\u2060/g, '').trim() : null; }),
                 text: cards.map(c => c.querySelector('.promo__title').textContent.replace(/ /g, ' ')), dots: document.querySelectorAll('#promoPager i').length, on0: document.querySelector('#promoPager i.on') === document.querySelector('#promoPager i') }; });
         // пейджер перелистывается

@@ -112,7 +112,8 @@ html.desk .screen.is-tab .h, html.desk #s-rest .h { font-size: 28px; }
 html.desk #s-home .filters { flex-wrap: wrap; overflow: visible; }
 html.desk #s-home .rests { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 24px; }
 html.desk #s-home .sec--rests2 { padding-top: 36px; }
-html.desk #s-home .promo { width: 380px; height: 204px; padding: 20px 22px 22px; transition: transform .35s var(--dease), box-shadow .3s; }
+html.desk #s-home .promo { width: 380px; gap: 12px; transition: transform .35s var(--dease), box-shadow .3s; }
+html.desk #s-home .promo__banner { height: 204px; padding: 20px 22px 22px; }
 html.desk #s-home .promo:hover { transform: translateY(-4px); }
 html.desk #s-home .promo .promo__cut { transition: scale .5s var(--dease), rotate .5s var(--dease); scale: 1.16; transform-origin: 70% 50%; }
 html.desk #s-home .promo:hover .promo__cut { scale: 1.24; }
