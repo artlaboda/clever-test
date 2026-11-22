@@ -1,0 +1,1472 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Шторка оценки блюд</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&display=swap">
+<style>
+[hidden] { display: none !important; }
+/*
+ * Стенд шторки «Как вам блюдо?» · v4.
+ * Слева телефон с живой шторкой, справа сценарии; ниже звёзды, тексты и шрифтовая шкала.
+ * Шторка: тарелка с блюдом наполовину выходит над краем, имя блюда — главный заголовок,
+ * подпись под звёздами меняется вместе с оценкой. Шрифт — системный SF Pro;
+ * там, где его нет, подставляется Golos Text (близкий гротеск с хорошей кириллицей).
+ * Цвета приложения сохранены: акцент #0085ff, звезда #ffb400, галочка #7ac142.
+ */
+:root {
+    /* стенд */
+    --bg: #eef1f5;
+    --fg: #12161c;
+    --muted: #5d6877;
+    --card: #ffffff;
+    --line: #dfe4ea;
+    --link: #0075e0;
+
+    /* шторка: макет приложения, всегда светлый */
+    --s-bg: #ffffff;
+    --s-fg: #101318;
+    --s-muted: #7a8393;
+    --s-soft: #f3f4f7;
+    --s-line: #e9ecf1;
+    --selection: #ffe08a;
+    --accent: #0085ff;
+    --accent-ink: #0067c7;
+    --accent-tint: #e9f3ff;
+    --amber: #b86b00;
+    --star: #ffb400;
+    --star-off: #e5e8ed;
+    --ok: #7ac142;
+    --screen: #f4f5f8;
+
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Golos Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Golos Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --ease-sheet: cubic-bezier(.32, .72, 0, 1);
+    --ease-pop: cubic-bezier(.34, 1.56, .64, 1);
+    color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #101317;
+        --fg: #e8ecf1;
+        --muted: #95a0ae;
+        --card: #181c22;
+        --line: #283039;
+        --link: #5cb0ff;
+        color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --bg: #101317;
+    --fg: #e8ecf1;
+    --muted: #95a0ae;
+    --card: #181c22;
+    --line: #283039;
+    --link: #5cb0ff;
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 15px/1.55 var(--font);
+    -webkit-font-smoothing: antialiased;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+button { font-family: inherit; }
+/* выделение тёплое жёлтое, текст поверх тёмный: на сером тексте не выглядит грязно */
+::selection { background: var(--selection); color: #101318; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-block: 36px 80px; }
+
+/* — шапка стенда — */
+.pageHead { max-width: 640px; }
+.eyebrow {
+    margin: 0 0 10px;
+    font: 600 12px/16px var(--font);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.pageHead h1 {
+    margin: 0 0 12px;
+    font: 700 32px/38px var(--font-display);
+    letter-spacing: -.025em;
+    text-wrap: balance;
+}
+.pageHead p { margin: 0; color: var(--muted); max-width: 60ch; }
+
+.board { display: flex; gap: 40px; margin-top: 36px; align-items: flex-start; flex-wrap: wrap; }
+.board__phone { flex: 0 1 auto; padding: 11px; max-width: 100%; box-sizing: border-box; }
+.board__panel { flex: 1 1 320px; min-width: 0; display: grid; gap: 16px; }
+
+/* — телефон — */
+.phone {
+    width: 375px; max-width: 100%;
+    height: 740px;
+    border-radius: 46px;
+    background: var(--screen);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 0 10px #0d0f13, 0 0 0 11px #30353d, 0 34px 70px rgba(10, 14, 30, .3);
+    font-family: var(--font);
+    color: var(--s-fg);
+    -webkit-tap-highlight-color: transparent;
+}
+.phone__status {
+    height: 50px; padding: 0 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    font: 600 15px/20px var(--font-display);
+    color: var(--s-fg);
+}
+.phone__status i { display: inline-block; width: 24px; height: 11px; border: 1.5px solid currentColor; border-radius: 4px; position: relative; opacity: .8; }
+.phone__status i::after { content: ""; position: absolute; inset: 1.5px 5px 1.5px 1.5px; background: currentColor; border-radius: 1.5px; }
+.app { padding: 8px 18px; }
+.app__title { margin: 0 0 14px; font: 700 30px/36px var(--font-display); letter-spacing: -.025em; }
+.order { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 10px; background: var(--s-bg); border-radius: 20px; }
+.order__pic { flex: 0 0 52px; height: 52px; border-radius: 50%; overflow: hidden; }
+.order__pic svg { display: block; width: 100%; height: 100%; }
+.order__lines { flex: 1; display: grid; gap: 7px; }
+.order__lines b { display: block; height: 10px; width: 62%; border-radius: 5px; background: #dfe3e9; }
+.order__lines b + b { width: 38%; background: #eceff3; }
+
+.scrim { position: absolute; inset: 0; background: rgba(12, 16, 24, .4); transition: opacity .4s ease; }
+.phone.is-closed .scrim { opacity: 0; pointer-events: none; }
+
+/* — шторка — */
+.sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 0 20px 26px;
+    background: var(--s-bg);
+    border-radius: 32px 32px 0 0;
+    box-shadow: 0 -12px 44px rgba(10, 14, 30, .2);
+    transition: transform .55s var(--ease-sheet);
+}
+.phone.is-closed .sheet { transform: translateY(calc(100% + 90px)); }
+.sheet.is-dragging { transition: none; }
+
+.sheet__grip { position: relative; height: 70px; cursor: grab; touch-action: none; }
+.sheet__grip::before {
+    content: ""; position: absolute; top: 8px; left: 50%; width: 36px; height: 5px; margin-left: -18px;
+    border-radius: 3px; background: #dadde3; opacity: 0;
+}
+.sheet.is-dragging .sheet__grip { cursor: grabbing; }
+
+.plates { position: absolute; left: 50%; top: -60px; width: 120px; height: 120px; margin-left: -60px; pointer-events: none; }
+.plate {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    border: 5px solid var(--s-bg);
+    background: var(--s-bg);
+    box-shadow: 0 16px 32px -8px rgba(20, 24, 40, .35);
+    overflow: hidden;
+    transition: transform .6s var(--ease-sheet), opacity .45s ease;
+}
+.plate svg { display: block; width: 100%; height: 100%; }
+.plate--enter { transform: translateX(160%) rotate(80deg); opacity: 0; transition: none; }
+.plate--leave { transform: translateX(-160%) rotate(-80deg); opacity: 0; }
+.plate--check { display: grid; place-items: center; background: var(--ok); }
+.plate--check svg { width: 54px; height: 54px; }
+.plate--check path { fill: none; stroke: #fff; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; animation: draw .45s cubic-bezier(.65, 0, .45, 1) .35s forwards; }
+.plate--pop { animation: platePop .55s var(--ease-pop); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes platePop { 0% { transform: scale(.6); opacity: 0; } 100% { transform: none; opacity: 1; } }
+
+.progress {
+    position: absolute; left: 0; top: 18px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--s-soft);
+    font: 600 13px/18px var(--font);
+    color: var(--s-muted);
+    font-variant-numeric: tabular-nums;
+}
+.closeBtn {
+    position: absolute; right: -6px; top: 12px;
+    width: 36px; height: 36px; padding: 0;
+    display: grid; place-items: center;
+    border: 0; border-radius: 50%;
+    background: var(--s-soft); color: #687183;
+    cursor: pointer; transition: transform .15s ease, background .15s ease;
+}
+.closeBtn:hover { background: #e9ebf0; }
+.closeBtn:active { transform: scale(.92); }
+.closeBtn svg { width: 14px; height: 14px; }
+
+/* Кнопки действий живут под прокруткой, а не внутри неё: прокручиваемый блок
+   обрезает всё по своему краю, и тень синей кнопки резалась бы вместе с ним */
+.drate { max-height: 542px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+.drate::-webkit-scrollbar { display: none; }
+.sheetBody.has-actions .drate { max-height: 476px; }
+/* края прокрутки растворяются, а не обрубаются */
+.drate.fade-top { -webkit-mask-image: linear-gradient(transparent, #000 22px); mask-image: linear-gradient(transparent, #000 22px); }
+.drate.fade-bottom { -webkit-mask-image: linear-gradient(#000 calc(100% - 22px), transparent); mask-image: linear-gradient(#000 calc(100% - 22px), transparent); }
+.drate.fade-top.fade-bottom { -webkit-mask-image: linear-gradient(transparent, #000 22px, #000 calc(100% - 22px), transparent); mask-image: linear-gradient(transparent, #000 22px, #000 calc(100% - 22px), transparent); }
+.sheetBody.is-morphing { overflow: clip; overflow-clip-margin: 30px; transition: height .5s var(--ease-sheet); }
+
+.actions { display: flex; align-items: center; gap: 6px; padding-top: 14px; animation: rise .4s var(--ease-sheet) .12s both; }
+.actions .btn { flex: 1 1 auto; }
+/* «Без комментария» той же высоты и формы, что «Отправить»: плашка при наведении совпадает */
+.actions .textBtn { flex: none; height: 54px; padding: 0 20px; border-radius: 16px; }
+
+.swap { transition: opacity .2s ease, transform .32s var(--ease-sheet); }
+.swap.is-out { opacity: 0; transform: translateX(-20px); }
+.swap.is-in { opacity: 0; transform: translateX(20px); transition: none; }
+
+.dish { text-align: center; }
+.dish__ask { margin: 0; font: 600 15px/20px var(--font); color: var(--amber); }
+.dish__name {
+    margin: 4px auto 0; max-width: 300px;
+    font: 700 26px/31px var(--font-display);
+    letter-spacing: -.024em;
+    color: var(--s-fg);
+    text-wrap: balance;
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;
+}
+.dish__name--long { font-size: 22px; line-height: 27px; letter-spacing: -.018em; text-wrap: pretty; max-width: none; }
+.drate.is-low .dish__name { -webkit-line-clamp: 2; }
+.dish__meta {
+    margin: 6px 0 0; display: flex; justify-content: center;
+    font: 400 14px/19px var(--font); color: var(--s-muted);
+}
+/* заведение режется многоточием, дата заказа всегда видна целиком */
+.dish__place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dish__date { flex: none; white-space: nowrap; }
+
+.stars { display: flex; justify-content: center; gap: 4px; margin-top: 10px; padding-block: 6px; }
+.star {
+    width: 54px; height: 54px; padding: 4px;
+    border: 0; border-radius: 16px; background: none;
+    cursor: pointer;
+}
+.star:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
+.star svg { display: block; width: 46px; height: 46px; overflow: visible; }
+.star__base { fill: var(--star-off); transition: fill .2s ease; }
+.star__fill {
+    fill: url(#starGold);
+    transform-origin: 12px 13px;
+    transform: scale(0);
+    transition: transform .42s var(--ease-pop) var(--d, 0ms), opacity .2s ease;
+}
+.star--on .star__fill { transform: scale(1); }
+.star--preview .star__fill { transform: scale(1); opacity: .4; transition-delay: 0ms; }
+.star--spring svg { animation: spring .38s ease; }
+.star--dance svg { animation: dance .9s cubic-bezier(.3, .7, .4, 1) var(--d, 0ms) both; }
+@keyframes spring { 40% { transform: scale(1.24); } }
+@keyframes dance {
+    0% { transform: none; }
+    28% { transform: translateY(-14px) rotate(-16deg) scale(1.18); }
+    56% { transform: translateY(0) rotate(9deg) scale(1.04); }
+    78% { transform: rotate(-4deg); }
+    100% { transform: none; }
+}
+
+.caption {
+    margin: 8px 0 0; min-height: 22px;
+    text-align: center;
+    font: 500 15px/22px var(--font);
+    color: var(--s-muted);
+}
+.caption--set { font: 600 17px/22px var(--font); color: var(--s-fg); }
+.caption--top { color: var(--amber); }
+.caption--pop { animation: rise .32s var(--ease-sheet); }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.drate__footer { margin-top: 12px; text-align: center; }
+.textBtn {
+    padding: 10px 16px; border: 0; border-radius: 12px; background: none;
+    font: 500 15px/20px var(--font); color: var(--s-muted);
+    cursor: pointer; transition: background .15s ease, color .15s ease;
+}
+.textBtn:hover { background: var(--s-soft); color: var(--s-fg); }
+
+/* «Что пошло не так?» */
+.why { margin-top: 14px; padding-top: 16px; border-top: 1px solid var(--s-line); }
+.why > * { animation: rise .4s var(--ease-sheet) both; }
+.why > :nth-child(2) { animation-delay: .04s; }
+.why > :nth-child(3) { animation-delay: .08s; }
+.why > :nth-child(4) { animation-delay: .12s; }
+.why > :nth-child(5) { animation-delay: .16s; }
+.why__title { margin: 0; font: 700 19px/24px var(--font-display); letter-spacing: -.015em; }
+.why__sub { margin: 4px 0 0; font: 400 14px/19px var(--font); color: var(--s-muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip {
+    padding: 7px 13px;
+    border: 1.5px solid var(--s-line); border-radius: 999px;
+    background: var(--s-bg); color: var(--s-fg);
+    font: 500 15px/20px var(--font);
+    cursor: pointer; transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
+}
+.chip:active { transform: scale(.96); }
+.chip[aria-pressed="true"] { background: var(--accent-tint); border-color: var(--accent); color: var(--accent-ink); }
+.field {
+    position: relative; margin-top: 12px;
+    height: 48px; overflow: hidden;
+    border-radius: 16px; background: var(--s-soft);
+    transition: background .15s ease, box-shadow .15s ease;
+}
+.field:focus-within { background: var(--s-bg); box-shadow: inset 0 0 0 1.5px var(--accent); }
+/*
+ * Поле растёт от одной строки до четырёх, дальше прокрутка с тонким ползунком в духе iOS.
+ * Сам textarea сразу получает нужную высоту, поэтому текст и курсор внутри не дёргаются;
+ * плавно растёт только рамка .field вокруг него, которой высоту задаёт скрипт.
+ */
+.why__input {
+    display: block; width: 100%; box-sizing: border-box;
+    height: 48px; resize: none;
+    border: 0; background: transparent;
+    padding: 13px 18px 13px 16px;
+    font: 400 16px/22px var(--font); color: var(--s-fg);
+    caret-color: var(--accent);
+    outline: none;
+    overflow-y: hidden; scrollbar-width: none;
+}
+.why__input::-webkit-scrollbar { display: none; }
+/* когда текст прокручен, его края мягко растворяются у рамки (фон у поля прозрачный, гаснет только текст) */
+.why__input.fade-top { -webkit-mask-image: linear-gradient(transparent 4px, #000 16px); mask-image: linear-gradient(transparent 4px, #000 16px); }
+.why__input.fade-bottom { -webkit-mask-image: linear-gradient(#000 calc(100% - 16px), transparent calc(100% - 4px)); mask-image: linear-gradient(#000 calc(100% - 16px), transparent calc(100% - 4px)); }
+.why__input.fade-top.fade-bottom { -webkit-mask-image: linear-gradient(transparent 4px, #000 16px, #000 calc(100% - 16px), transparent calc(100% - 4px)); mask-image: linear-gradient(transparent 4px, #000 16px, #000 calc(100% - 16px), transparent calc(100% - 4px)); }
+.why__input::placeholder { color: #9aa2b0; }
+/* невидимый двойник поля: по нему меряем высоту текста, не трогая настоящее поле */
+.field__mirror { position: absolute; left: 0; top: 0; height: 0 !important; visibility: hidden; pointer-events: none; }
+.field__bar {
+    position: absolute; top: 6px; right: 5px;
+    width: 3px; border-radius: 2px;
+    background: rgba(16, 19, 24, .3);
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease;
+}
+.field__bar.is-on { opacity: 1; transition-duration: .12s; }
+.drate.is-low .dish__meta { display: none; }
+.drate.is-low .stars { margin-top: 10px; }
+
+.btn {
+    height: 54px; padding: 0 20px;
+    border: 0; border-radius: 16px;
+    font: 600 17px/54px var(--font);
+    cursor: pointer; transition: transform .15s ease, filter .15s ease;
+}
+.btn:active { transform: scale(.98); }
+.btn--primary { background: var(--accent); color: #fff; box-shadow: 0 8px 18px -8px rgba(0, 133, 255, .75); }
+.btn--primary:hover { filter: brightness(1.06); }
+.btn:focus-visible, .chip:focus-visible, .textBtn:focus-visible, .closeBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* финал */
+.thanks { text-align: center; }
+.thanks__title { margin: 0; font: 700 26px/31px var(--font-display); letter-spacing: -.024em; text-wrap: balance; }
+.thanks__text { margin: 8px auto 0; max-width: 30ch; font: 400 15px/21px var(--font); color: var(--s-muted); text-wrap: balance; }
+.recap { margin: 20px 0 0; padding: 4px 14px; list-style: none; background: var(--s-soft); border-radius: 20px; text-align: left; }
+.recap li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; animation: rise .4s var(--ease-sheet) both; }
+.recap li + li { border-top: 1px solid var(--s-line); }
+.recap__pic { flex: 0 0 40px; height: 40px; border-radius: 50%; overflow: hidden; }
+.recap__pic svg { display: block; width: 100%; height: 100%; }
+.recap__body { flex: 1; min-width: 0; }
+.recap__name { font: 500 15px/20px var(--font); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.recap__note { font: 400 13px/18px var(--font); color: var(--s-muted); }
+.recap__stars + .recap__note { margin-top: 4px; }
+.recap__stars { display: flex; gap: 2px; margin-top: 3px; }
+.recap__stars svg { width: 15px; height: 15px; }
+.recap__edit {
+    flex: none; align-self: flex-start;
+    width: 32px; height: 32px; margin: -6px -8px 0 0; padding: 0;
+    display: grid; place-items: center;
+    border: 0; border-radius: 10px; background: none; color: #aeb5c1;
+    cursor: pointer; transition: color .18s ease;
+}
+.recap__edit:hover, .recap__edit.is-writing { color: #6c7586; }
+.recap__edit:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.recap__edit svg { width: 17px; height: 17px; overflow: visible; }
+/* по клику карандаш «расписывается»: качается на кончике и оставляет короткий штрих */
+.recap__edit .pencil { transform-origin: 4.5px 19.5px; }
+/* Штрих рисует сам кончик: карандаш вращается вокруг кончика и едет вправо ровно с той
+   скоростью, с какой растёт линия (одинаковые ключевые кадры, линейное время) */
+.recap__edit .pencil__line { stroke-dasharray: 8 20; stroke-dashoffset: 8.5; }
+.recap__edit.is-writing .pencil { animation: pencilWrite .5s linear forwards; }
+.recap__edit.is-writing .pencil__line { animation: pencilLine .5s linear forwards; }
+@keyframes pencilWrite {
+    0%   { transform: none; }
+    15%  { transform: translateX(0) rotate(-10deg); }
+    40%  { transform: translateX(2.86px) rotate(-3deg); }
+    60%  { transform: translateX(5.14px) rotate(-11deg); }
+    85%  { transform: translateX(8px) rotate(-5deg); }
+    100% { transform: translateX(8px) rotate(0); }
+}
+@keyframes pencilLine {
+    0%, 15% { stroke-dashoffset: 8; }
+    40%  { stroke-dashoffset: 5.14; }
+    60%  { stroke-dashoffset: 2.86; }
+    85%, 100% { stroke-dashoffset: 0; }
+}
+
+.confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.toast {
+    position: absolute; left: 14px; right: 14px; bottom: 20px;
+    padding: 13px 16px;
+    background: rgba(20, 23, 29, .94); color: #fff;
+    border-radius: 18px;
+    font: 400 14px/19px var(--font);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, .3);
+    transition: opacity .3s ease, transform .3s var(--ease-sheet);
+    pointer-events: none;
+}
+.toast b { color: #ffd76e; font-weight: 600; }
+.toast--hidden { opacity: 0; transform: translateY(12px); }
+
+.reopen {
+    position: absolute; left: 50%; top: 52%;
+    transform: translate(-50%, -50%);
+    padding: 0 22px; height: 48px;
+    border: 0; border-radius: 999px;
+    background: var(--s-fg); color: #fff;
+    font: 600 15px/48px var(--font);
+    box-shadow: 0 12px 30px rgba(10, 14, 30, .25);
+    cursor: pointer;
+}
+
+/* — панель стенда — */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
+.card h2 { margin: 0 0 4px; font: 700 18px/24px var(--font-display); letter-spacing: -.012em; }
+.card > p { margin: 0; color: var(--muted); font-size: 14px; line-height: 20px; }
+.tries { margin: 14px 0 0; display: grid; gap: 10px; }
+.tries div { display: flex; gap: 12px; align-items: baseline; }
+.tries dt { flex: 0 0 68px; font: 600 13px/20px var(--font); color: var(--fg); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tries dt span { color: var(--star); }
+.tries dd { margin: 0; font-size: 14px; line-height: 20px; color: var(--muted); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.controls--tight { margin-top: 12px; padding-top: 0; border-top: 0; }
+.controls__note { margin: 12px 0 0; font-size: 13px; line-height: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.controls__label { font: 500 14px/20px var(--font); color: var(--muted); margin-right: 2px; }
+.seg { display: inline-flex; padding: 3px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); }
+.seg button {
+    min-width: 40px; height: 32px; padding: 0 10px;
+    border: 0; border-radius: 9px; background: none; color: var(--fg);
+    font: 600 14px/32px var(--font); font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(0, 0, 0, .14); }
+.ghostBtn {
+    height: 38px; padding: 0 14px; margin-left: auto;
+    border: 1px solid var(--line); border-radius: 12px; background: none; color: var(--fg);
+    font: 600 14px/36px var(--font); cursor: pointer;
+}
+.ghostBtn:hover { border-color: var(--muted); }
+.seg button:focus-visible, .ghostBtn:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+.changes { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.changes li { position: relative; padding-left: 20px; font-size: 14px; line-height: 20px; color: var(--muted); }
+.changes li::before { content: ""; position: absolute; left: 2px; top: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--star); }
+.changes b { color: var(--fg); font-weight: 600; }
+
+/* — разделы под стендом — */
+.section { margin-top: 64px; }
+.section__head { max-width: 620px; margin-bottom: 20px; }
+.section__head h2 { margin: 0 0 6px; font: 700 24px/30px var(--font-display); letter-spacing: -.02em; }
+.section__head p { margin: 0; color: var(--muted); }
+
+.starGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.starCell { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; }
+.starCell--now { border-color: var(--star); box-shadow: 0 0 0 1px var(--star); }
+.starCell h3 { margin: 0; font: 600 15px/20px var(--font); display: flex; justify-content: space-between; gap: 8px; }
+.starCell h3 span { font-weight: 500; color: var(--muted); }
+.starCell__geo { margin: 16px auto 8px; width: 150px; height: 150px; }
+.starCell__geo svg { width: 100%; height: 100%; overflow: visible; }
+.starCell p { margin: 8px 0 14px; font-size: 14px; line-height: 20px; color: var(--muted); flex: 1; }
+.starCell__row { display: flex; gap: 4px; }
+.starCell__row svg { width: 30px; height: 30px; }
+
+.copy { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 4px 20px; }
+.copy__row { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; padding: 14px 0; }
+.copy__row + .copy__row { border-top: 1px solid var(--line); }
+.copy__where { font: 600 13px/20px var(--font); color: var(--muted); }
+.copy__text { min-width: 0; font-size: 15px; line-height: 22px; }
+.copy__text q { quotes: "«" "»"; }
+.copy__text small { display: block; margin-top: 2px; font-size: 13px; line-height: 18px; color: var(--muted); }
+.copy__labels { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+.copy__labels li { display: flex; gap: 10px; }
+.copy__labels span { flex: 0 0 auto; color: var(--star); letter-spacing: 1px; font-size: 13px; width: 76px; }
+.copy__labels--idle { margin-top: 6px; }
+.copy__labels--idle span { color: var(--muted); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+
+.type { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 4px 20px; overflow-x: auto; }
+.type__row { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 20px; align-items: baseline; padding: 16px 0; }
+.type__row + .type__row { border-top: 1px solid var(--line); }
+.type__meta { font: 500 13px/18px var(--font); color: var(--muted); font-variant-numeric: tabular-nums; }
+.type__meta b { display: block; color: var(--fg); font-weight: 600; }
+.type__sample { min-width: 0; }
+
+@media (max-width: 640px) {
+    .copy__row, .type__row { grid-template-columns: 1fr; gap: 4px; }
+    .pageHead h1 { font-size: 27px; line-height: 33px; }
+}
+@media (max-width: 460px) {
+    .phone { height: 700px; }
+    .drate { max-height: 502px; }
+    .sheetBody.has-actions .drate { max-height: 436px; }
+    .board { gap: 20px; }
+    .board__phone { padding: 11px 0; margin-inline: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sheet, .plate, .swap, .star__fill, .scrim, .toast { transition-duration: .01ms !important; }
+    .star--spring svg, .star--dance svg, .caption--pop, .why > *, .recap li, .plate--pop, .recap__edit * { animation: none !important; }
+    .plate--check path { animation-duration: .01ms; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+        <linearGradient id="starGold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffcf4d"/>
+            <stop offset=".55" stop-color="#ffb400"/>
+            <stop offset="1" stop-color="#ff9f00"/>
+        </linearGradient>
+    </defs>
+</svg>
+
+<div class="wrap">
+    <header class="pageHead">
+        <p class="eyebrow">app4 · оценка блюд · версия 1.0 · основная</p>
+        <h1>Шторка «Как вам блюдо?»</h1>
+        <p>Шторка в телефоне живая: ставьте оценки, отмечайте причины, закрывайте крестиком или смахивайте вниз. Справа можно поменять число блюд в заказе.</p>
+    </header>
+
+    <div class="board">
+        <div class="board__phone">
+            <div class="phone is-closed" id="phone">
+                <div class="phone__status"><span>9:41</span><i aria-hidden="true"></i></div>
+                <div class="app" aria-hidden="true">
+                    <p class="app__title">Заказы</p>
+                    <div class="order"><div class="order__pic" data-pic="0"></div><div class="order__lines"><b></b><b></b></div></div>
+                    <div class="order"><div class="order__pic" data-pic="1"></div><div class="order__lines"><b></b><b></b></div></div>
+                    <div class="order"><div class="order__pic" data-pic="2"></div><div class="order__lines"><b></b><b></b></div></div>
+                    <div class="order"><div class="order__pic" data-pic="0"></div><div class="order__lines"><b></b><b></b></div></div>
+                </div>
+
+                <div class="scrim" id="scrim"></div>
+                <button type="button" class="reopen" id="reopen" hidden>Показать шторку</button>
+
+                <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="dishName">
+                    <div class="sheet__grip" id="grip">
+                        <div class="plates" id="plates"></div>
+                        <span class="progress" id="progress">1 из 2</span>
+                        <button type="button" class="closeBtn" id="closeBtn" aria-label="Закрыть">
+                            <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                        </button>
+                    </div>
+
+                    <div class="sheetBody" id="sheetBody">
+                    <div class="drate" id="drate">
+                        <div id="stage">
+                            <div class="swap" id="swapBox">
+                                <div class="dish">
+                                    <p class="dish__ask" id="dishAsk">Как вам блюдо?</p>
+                                    <h2 class="dish__name" id="dishName">Ролл «Филадельфия»</h2>
+                                    <p class="dish__meta"><span class="dish__place" id="dishPlace">Ракета</span><span class="dish__date">&nbsp;· 18 октября</span></p>
+                                </div>
+                                <div class="stars" id="stars" role="radiogroup" aria-labelledby="dishName"></div>
+                            </div>
+                            <p class="caption" id="caption" aria-live="polite"></p>
+
+                            <div class="why" id="why" hidden>
+                                <p class="why__title">Что пошло не так?</p>
+                                <p class="why__sub">Ресторан увидит и постарается исправить</p>
+                                <div class="chips" id="chips"></div>
+                                <div class="field" id="field">
+                                    <textarea class="why__input" id="whyText" rows="1" placeholder="Или расскажите своими словами"></textarea>
+                                    <textarea class="why__input field__mirror" id="fieldMirror" rows="1" tabindex="-1" aria-hidden="true"></textarea>
+                                    <div class="field__bar" id="fieldBar" hidden></div>
+                                </div>
+                            </div>
+
+                            <div class="drate__footer" id="footer">
+                                <button type="button" class="textBtn" id="skipBtn">Пропустить</button>
+                            </div>
+                        </div>
+
+                        <div class="thanks" id="thanks" hidden>
+                            <h2 class="thanks__title" id="thanksTitle">Спасибо, что поделились!</h2>
+                            <p class="thanks__text" id="thanksText"></p>
+                            <ul class="recap" id="recap"></ul>
+                        </div>
+                    </div>
+
+                    <div class="actions" id="whyActions" hidden>
+                        <button type="button" class="btn btn--primary" id="whySend">Отправить</button>
+                        <button type="button" class="textBtn" id="whyPass">Без комментария</button>
+                    </div>
+                    <div class="actions" id="doneActions" hidden>
+                        <button type="button" class="btn btn--primary" id="doneBtn">Готово</button>
+                    </div>
+                    </div>
+                </section>
+
+                <canvas class="confetti" id="confetti"></canvas>
+                <div class="toast toast--hidden" id="toast" role="status"></div>
+            </div>
+        </div>
+
+        <div class="board__panel">
+            <div class="card">
+                <h2>Что попробовать</h2>
+                <p>Каждая оценка ведёт себя по-своему.</p>
+                <dl class="tries">
+                    <div><dt><span>★</span> 1–2</dt><dd>Раскрываются причины одним касанием и поле для комментария.</dd></div>
+                    <div><dt><span>★</span> 3–4</dt><dd>Подпись под звёздами, и через полсекунды следующее блюдо.</dd></div>
+                    <div><dt><span>★</span> 5</dt><dd>Звёзды подпрыгивают волной, из углов летит мишура.</dd></div>
+                    <div><dt>Финал</dt><dd>Карандаш у блюда открывает его заново: оценку можно поправить, причины сохранены.</dd></div>
+                    <div><dt>✕ / вниз</dt><dd>Шторка уезжает, внизу видно, когда покажем её снова.</dd></div>
+                </dl>
+                <div class="controls">
+                    <span class="controls__label">Блюд в заказе</span>
+                    <div class="seg" id="countSeg">
+                        <button type="button" data-count="1" aria-pressed="false">1</button>
+                        <button type="button" data-count="2" aria-pressed="true">2</button>
+                        <button type="button" data-count="3" aria-pressed="false">3</button>
+                    </div>
+                    <button type="button" class="ghostBtn" id="restartBtn">Начать заново</button>
+                </div>
+                <div class="controls controls--tight">
+                    <span class="controls__label">Названия</span>
+                    <div class="seg" id="namesSeg">
+                        <button type="button" data-long="0" aria-pressed="true">Короткие</button>
+                        <button type="button" data-long="1" aria-pressed="false">Длинные</button>
+                    </div>
+                </div>
+                <p class="controls__note" id="idleNote"></p>
+            </div>
+
+            <div class="card">
+                <h2>Что поменялось с v3</h2>
+                <ul class="changes">
+                    <li><b>Блюдо крупно.</b> Тарелка выходит над краем шторки, и сразу понятно, что оцениваем. Между блюдами тарелки уезжают и приезжают.</li>
+                    <li><b>Вопрос вместо команды.</b> «Как вам блюдо?» вместо «Оцените блюдо», имя блюда стало заголовком.</li>
+                    <li><b>Подпись отвечает на оценку.</b> От «Совсем не понравилось» до «Пальчики оближешь!».</li>
+                    <li><b>Ровные плечи у звёзд.</b> Правильная пятиконечная звезда, кончики скруглены, заполнение бежит слева направо.</li>
+                    <li><b>Причины в одно касание.</b> На 1–2 звезды не нужно ничего печатать, хватит отметить «Холодное».</li>
+                    <li><b>Финал подводит итог.</b> Список оценок и разное спасибо: за похвалу, за честную критику, за пропуск.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="section__head">
+            <h2>Звёзды</h2>
+            <p>Пунктир проведён через кончики боковых лучей. У ровноплечей звезды на нём же лежат оба внутренних угла, у горбатой они торчат выше.</p>
+        </div>
+        <div class="starGrid" id="starGrid"></div>
+    </section>
+
+    <section class="section">
+        <div class="section__head">
+            <h2>Тексты</h2>
+            <p>Говорим на «вы», коротко и по-человечески. Каждая фраза объясняет, зачем оценивать, или отвечает на то, что человек только что сделал.</p>
+        </div>
+        <div class="copy">
+            <div class="copy__row"><div class="copy__where">Шапка</div><div class="copy__text"><q>Как вам блюдо?</q> + название блюда<small>Ниже ресторан и дата заказа: «Ракета · 18 октября»</small></div></div>
+            <div class="copy__row"><div class="copy__where">Длинные названия</div><div class="copy__text">Блюдо длиннее 30 знаков набирается 22/27 и занимает до трёх строк, дальше многоточие. Пока открыт блок причин, до двух строк.<small>Заведение всегда в одну строку с многоточием, дата заказа не обрезается. В финале у блюда до двух строк.</small></div></div>
+            <div class="copy__row"><div class="copy__where">До оценки</div><div class="copy__text">Случайно для каждого блюда, подряд не повторяется:<ul class="copy__labels copy__labels--idle"><li><span>1 · главный</span>Подскажите другим, что вкусно</li><li><span>2</span>Кухня старалась. Как получилось?</li><li><span>3</span>Повар ждёт вашего вердикта!</li><li><span>4</span>Одно касание, и готово!</li><li><span>5</span>Всего пара секунд, а польза большая</li><li><span>6</span>Вкусно, так себе или ах?</li></ul><small>Номер показанного варианта отправляем вместе с оценкой: так увидим, после какой подписи оценивают чаще.</small></div></div>
+            <div class="copy__row"><div class="copy__where">Подпись к оценке</div><div class="copy__text"><ul class="copy__labels" id="copyLabels"></ul></div></div>
+            <div class="copy__row"><div class="copy__where">1–2 звезды</div><div class="copy__text"><q>Что пошло не так?</q><small>«Ресторан увидит и постарается исправить». Причины: Холодное, Невкусно, Пересолено, Маленькая порция, Не как на фото. Поле: «Или расскажите своими словами». Кнопки: «Отправить», «Без комментария».</small></div></div>
+            <div class="copy__row"><div class="copy__where">Пропуск блюда</div><div class="copy__text"><q>Пропустить</q></div></div>
+            <div class="copy__row"><div class="copy__where">Правка в финале</div><div class="copy__text">Карандаш справа от блюда<small>Открывает блюдо заново: над названием «Поправим оценку?», причины и комментарий на месте, внизу «Оставить как было». Блюдо без оценки в списке: «Не оценено». Комментарий до 100 знаков без отмеченных причин показываем целиком, в кавычках; иначе пишем «есть комментарий».</small></div></div>
+            <div class="copy__row"><div class="copy__where">Финал, обычный</div><div class="copy__text"><q>Спасибо, что поделились!</q><small>«Теперь другим проще выбрать, а мы лучше знаем, что вам по вкусу»</small></div></div>
+            <div class="copy__row"><div class="copy__where">Финал, была критика</div><div class="copy__text"><q>Спасибо за честность</q><small>«Передадим ресторану. Пусть в следующий раз будет вкуснее»</small></div></div>
+            <div class="copy__row"><div class="copy__where">Финал, всё пропущено</div><div class="copy__text"><q>Хорошо, в другой раз</q><small>«Если передумаете, нажмите на карандаш рядом с блюдом»</small></div></div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section__head">
+            <h2>Шрифтовая шкала шторки</h2>
+            <p>Системный SF Pro: Display для заголовков с плотным трекингом, Text для всего остального. Поле ввода 16 px, чтобы iOS не приближала экран при фокусе.</p>
+        </div>
+        <div class="type">
+            <div class="type__row"><div class="type__meta"><b>Заголовок</b>Display 700 · 26/31 · −2,4 %</div><div class="type__sample" style="font:700 26px/31px var(--font-display);letter-spacing:-.024em">Ролл «Филадельфия»</div></div>
+            <div class="type__row"><div class="type__meta"><b>Вопрос</b>Text 600 · 15/20 · янтарный</div><div class="type__sample" style="font:600 15px/20px var(--font);color:var(--amber)">Как вам блюдо?</div></div>
+            <div class="type__row"><div class="type__meta"><b>Подпись к оценке</b>Text 600 · 17/22</div><div class="type__sample" style="font:600 17px/22px var(--font)">Вкусно!</div></div>
+            <div class="type__row"><div class="type__meta"><b>Подзаголовок блока</b>Display 700 · 19/24</div><div class="type__sample" style="font:700 19px/24px var(--font-display);letter-spacing:-.015em">Что пошло не так?</div></div>
+            <div class="type__row"><div class="type__meta"><b>Основной и чипы</b>Text 500 · 15/20</div><div class="type__sample" style="font:500 15px/20px var(--font)">Маленькая порция</div></div>
+            <div class="type__row"><div class="type__meta"><b>Мета</b>Text 400 · 14/19 · серый</div><div class="type__sample" style="font:400 14px/19px var(--font);color:var(--muted)">Ракета · 18 октября</div></div>
+            <div class="type__row"><div class="type__meta"><b>Кнопка</b>Text 600 · 17/54 · r16</div><div class="type__sample"><span style="display:inline-block;padding:0 28px;border-radius:16px;background:#0085ff;color:#fff;font:600 17px/54px var(--font)">Отправить</span></div></div>
+        </div>
+    </section>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ——— звёзды ———
+       Правильная звезда {5/2}: внутренний радиус = 0,382 внешнего, поэтому верхние кромки
+       боковых лучей и оба верхних внутренних угла лежат на одной прямой (y = 9.87).
+       Кончики скруглены квадратичными кривыми, внутренние углы почти острые. */
+    var STAR = 'M11.35 3.86Q12 1.86 12.65 3.86L14.43 9.35Q14.6 9.87 15.15 9.87L20.93 9.87Q23.03 9.87 21.33 11.11L16.66 14.5Q16.21 14.83 16.38 15.35L18.17 20.85Q18.82 22.84 17.12 21.61L12.44 18.21Q12 17.89 11.56 18.21L6.88 21.61Q5.18 22.84 5.83 20.85L7.62 15.35Q7.79 14.83 7.34 14.5L2.67 11.11Q0.97 9.87 3.07 9.87L8.85 9.87Q9.4 9.87 9.57 9.35Z';
+    var STAR_V2 = 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z';
+    var STAR_V3 = 'M12 2 L14.97 8.01 21.61 8.98 16.8 13.66 17.94 20.27 12 17.15 6.06 20.27 7.2 13.66 2.39 8.98 9.03 8.01 Z';
+
+    var LABELS = ['', 'Совсем не понравилось', 'Могло быть вкуснее', 'Неплохо', 'Вкусно!', 'Пальчики оближешь!'];
+    /* Подпись до оценки выбирается случайно для каждого блюда, подряд не повторяется.
+       Номер варианта уходит вместе с оценкой, чтобы сравнить, какая подпись лучше работает */
+    var IDLES = [
+        'Подскажите другим, что вкусно',
+        'Кухня старалась. Как получилось?',
+        'Повар ждёт вашего вердикта!',
+        'Одно касание, и готово!',
+        'Всего пара секунд, а польза большая',
+        'Вкусно, так себе или ах?'
+    ];
+    var idleIdx = -1;
+    function pickIdle() {
+        var n;
+        do { n = Math.floor(Math.random() * IDLES.length); } while (n === idleIdx && IDLES.length > 1);
+        idleIdx = n;
+        el('idleNote').textContent = 'Подпись под звёздами: вариант ' + (n + 1) + ' из ' + IDLES.length;
+    }
+    var REASONS = ['Холодное', 'Невкусно', 'Пересолено', 'Маленькая порция', 'Не как на фото'];
+    var LADDER = [
+        'Считаем случайностью: <b>покажем снова при следующем заходе</b>.',
+        'Записали в лог: <b>следующий показ через 3 дня</b>.',
+        '<b>Следующий показ через месяц</b>.',
+        '<b>Больше не показываем</b>.'
+    ];
+
+    /* ——— иллюстрации блюд (заглушки вместо фото) ——— */
+    function sushi(u) {
+        function piece(x, y, rot) {
+            var grains = '';
+            for (var a = 0; a < 360; a += 30) {
+                var r = (a + rot) * Math.PI / 180;
+                grains += '<ellipse cx="' + (12.4 * Math.cos(r)).toFixed(1) + '" cy="' + (12.4 * Math.sin(r)).toFixed(1) +
+                    '" rx="1.7" ry=".9" transform="rotate(' + (a + rot + 90) + ' ' + (12.4 * Math.cos(r)).toFixed(1) + ' ' + (12.4 * Math.sin(r)).toFixed(1) + ')"/>';
+            }
+            return '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ')">' +
+                '<circle cx="2" cy="4" r="22" fill="#0b0f13" opacity=".35"/>' +
+                '<circle r="21.5" fill="url(#salmon' + u + ')"/>' +
+                '<path d="M-19 -8Q-8 -14 4 -20M-20 4Q-6 -4 12 -17M-14 14Q2 4 19 -8M-2 20Q10 10 20 6" stroke="#ffd9c7" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".75"/>' +
+                '<circle r="15.6" fill="#fbf7ee"/>' +
+                '<g fill="#e8dfcb">' + grains + '</g>' +
+                '<circle r="9.2" fill="#1d2823"/>' +
+                '<circle r="7.6" fill="#fffaf1"/>' +
+                '<ellipse cx="2.6" cy="-1.8" rx="3.4" ry="2.5" fill="#8fc45a"/>' +
+                '</g>';
+        }
+        return '<svg viewBox="0 0 120 120" aria-hidden="true"><defs>' +
+            '<radialGradient id="slate' + u + '" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#3d4a57"/><stop offset="1" stop-color="#1e252c"/></radialGradient>' +
+            '<radialGradient id="salmon' + u + '" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffa074"/><stop offset="1" stop-color="#f2713f"/></radialGradient>' +
+            '</defs><rect width="120" height="120" fill="url(#slate' + u + ')"/>' +
+            '<g fill="#f7b6bb"><ellipse cx="26" cy="86" rx="9" ry="5" transform="rotate(-30 26 86)"/><ellipse cx="31" cy="92" rx="8" ry="4.5" fill="#f39ea8" transform="rotate(10 31 92)"/></g>' +
+            '<path d="M86 84q6-7 12-1 5 6-1 11-7 4-12-1-3-4 1-9z" fill="#a7c83c"/><path d="M89 85q4-3 7 0" stroke="#d3e67f" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+            piece(38, 46, 0) + piece(82, 44, 40) + piece(60, 82, -30) + '</svg>';
+    }
+    function ribs(u) {
+        var bones = '', sears = '', bits = '';
+        for (var i = 0; i < 5; i++) {
+            bones += '<rect x="' + (-37 + i * 17) + '" y="-30" width="8" height="16" rx="4"/><rect x="' + (-37 + i * 17) + '" y="14" width="8" height="15" rx="4"/>';
+        }
+        for (var j = 0; j < 5; j++) sears += '<path d="M' + (-27 + j * 16) + ' -15L' + (-35 + j * 16) + ' 14"/>';
+        var seeds = [[-22, -6], [-6, 4], [10, -8], [24, 6], [-14, 10], [4, -12], [30, -4]];
+        seeds.forEach(function (s, k) {
+            bits += k % 2
+                ? '<rect x="' + s[0] + '" y="' + s[1] + '" width="5" height="2.4" rx="1.2" fill="#7cc04e" transform="rotate(' + (k * 40) + ' ' + s[0] + ' ' + s[1] + ')"/>'
+                : '<ellipse cx="' + s[0] + '" cy="' + s[1] + '" rx="1.8" ry="1" fill="#fff4dc" transform="rotate(' + (k * 30) + ' ' + s[0] + ' ' + s[1] + ')"/>';
+        });
+        return '<svg viewBox="0 0 120 120" aria-hidden="true"><defs>' +
+            '<linearGradient id="wood' + u + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6b47c"/><stop offset="1" stop-color="#bf7d45"/></linearGradient>' +
+            '<linearGradient id="glaze' + u + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b04d20"/><stop offset="1" stop-color="#5f1f0a"/></linearGradient>' +
+            '</defs><rect width="120" height="120" fill="url(#wood' + u + ')"/>' +
+            '<g stroke="#a8693a" stroke-width="1.2" fill="none" opacity=".35"><path d="M0 28Q40 22 120 34"/><path d="M0 70Q60 62 120 76"/><path d="M0 100Q50 94 120 104"/></g>' +
+            '<g transform="translate(60 62) rotate(-14)">' +
+            '<ellipse cx="3" cy="8" rx="50" ry="26" fill="#3b1a08" opacity=".28"/>' +
+            '<g fill="#f3e6d1">' + bones + '</g>' +
+            '<rect x="-46" y="-21" width="92" height="42" rx="17" fill="url(#glaze' + u + ')"/>' +
+            '<g stroke="#2e0e03" stroke-width="3.2" stroke-linecap="round" opacity=".45">' + sears + '</g>' +
+            '<path d="M-36 -14Q0 -22 36 -14" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none" opacity=".18"/>' +
+            bits + '</g></svg>';
+    }
+    function tomyum(u) {
+        var leaves = '';
+        [[48, 40, 20], [76, 52, -40], [56, 74, 70], [40, 62, -10]].forEach(function (l) {
+            leaves += '<ellipse cx="' + l[0] + '" cy="' + l[1] + '" rx="5" ry="2.6" fill="#4f9a3a" transform="rotate(' + l[2] + ' ' + l[0] + ' ' + l[1] + ')"/>';
+        });
+        function shrimp(x, y, rot) {
+            return '<g transform="translate(' + x + ' ' + y + ') rotate(' + rot + ')">' +
+                '<path d="M-9 4A10 10 0 1 1 8 6" stroke="#ff9c80" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+                '<path d="M-9 4A10 10 0 1 1 8 6" stroke="#ffd3c4" stroke-width="2" fill="none" stroke-dasharray="2 4" stroke-linecap="round"/>' +
+                '<path d="M8 6l5 4-1-6z" fill="#ff7a5a"/></g>';
+        }
+        return '<svg viewBox="0 0 120 120" aria-hidden="true"><defs>' +
+            '<radialGradient id="broth' + u + '" cx=".45" cy=".4" r=".65"><stop offset="0" stop-color="#ff9a52"/><stop offset="1" stop-color="#d94a1c"/></radialGradient>' +
+            '</defs><rect width="120" height="120" fill="#2f2a27"/>' +
+            '<circle cx="62" cy="64" r="50" fill="#120e0c" opacity=".4"/>' +
+            '<circle cx="60" cy="60" r="50" fill="#f6f1ea"/><circle cx="60" cy="60" r="41" fill="url(#broth' + u + ')"/>' +
+            '<g fill="#ffd08a" opacity=".55"><circle cx="40" cy="48" r="2.2"/><circle cx="74" cy="38" r="1.6"/><circle cx="82" cy="70" r="2.4"/><circle cx="50" cy="84" r="1.8"/><circle cx="66" cy="58" r="1.4"/></g>' +
+            '<g fill="#f0e2c6"><ellipse cx="68" cy="76" rx="6" ry="4"/><ellipse cx="44" cy="70" rx="5" ry="3.4"/></g>' +
+            shrimp(50, 50, 10) + shrimp(74, 64, 140) + leaves +
+            '<path d="M88 32a12 12 0 0 1 -6 22z" fill="#b6d84a" stroke="#7fae2a" stroke-width="1.5"/></svg>';
+    }
+
+    var LONG_PLACE = 'Гастробар «Северная Пальмира на Петроградской»';
+    var ALL_DISHES = [
+        { name: 'Ролл «Филадельфия»', place: 'Ракета', art: sushi,
+          long: { name: 'Ролл «Филадельфия» с лососем, сливочным сыром, огурцом и икрой тобико', place: LONG_PLACE } },
+        { name: 'Свиные рёбра BBQ', place: 'Ракета', art: ribs,
+          long: { name: 'Свиные рёбра BBQ в медово-горчичной глазури с картофелем по-деревенски', place: LONG_PLACE } },
+        { name: 'Том ям с креветками', place: 'Ракета', art: tomyum,
+          long: { name: 'Том ям с королевскими креветками, кокосовым молоком и рисом жасмин', place: LONG_PLACE } }
+    ];
+    var uid = 0;
+    function art(dish) { return dish.art('u' + (uid++)); }
+
+    /* ——— состояние ——— */
+    var count = 2;
+    var longNames = false;
+    var dishes = [];
+    var idx = 0;
+    var results = [];
+    var dismissCount = 0;
+    var busy = false;
+    var editing = false;
+    var timers = [];
+
+    var el = function (id) { return document.getElementById(id); };
+    var phone = el('phone'), sheet = el('sheet'), sheetBody = el('sheetBody'), drate = el('drate'), stage = el('stage'), thanks = el('thanks');
+    var plates = el('plates'), starsBox = el('stars'), caption = el('caption'), why = el('why'), footer = el('footer');
+    var swapBox = el('swapBox'), whyText = el('whyText'), toast = el('toast'), reopen = el('reopen');
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+    function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+    function reflow(node) { void node.offsetWidth; }
+    function retrigger(node, cls) { node.classList.remove(cls); reflow(node); node.classList.add(cls); }
+
+    /* Предлоги и союзы из одной-двух букв не висят в конце строки: приклеиваем их
+       неразрывным пробелом к следующему слову («в\u00a0следующий», «и\u00a0постарается») */
+    function nbsp(text) {
+        return text.replace(/(^|[\s(«])([а-яёa-z]{1,2})\s+/gi, '$1$2\u00a0');
+    }
+    function nbspTree(root) {
+        var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+            acceptNode: function (n) { return /^(SCRIPT|STYLE|TEXTAREA)$/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT; }
+        });
+        for (var n = walker.nextNode(); n; n = walker.nextNode()) n.nodeValue = nbsp(n.nodeValue);
+    }
+
+    function starSvg(path) {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="star__base" d="' + path + '"/><path class="star__fill" d="' + path + '"/></svg>';
+    }
+
+    /* Высота шторки меняется плавно: меряем до и после и анимируем между ними */
+    function morph(change) {
+        var h0 = sheetBody.offsetHeight;
+        change();
+        updateFades();
+        var h1 = sheetBody.offsetHeight;
+        if (h0 === h1 || reduceMotion) return;
+        sheetBody.style.height = h0 + 'px';
+        sheetBody.classList.add('is-morphing');
+        reflow(sheetBody);
+        sheetBody.style.height = h1 + 'px';
+        later(function () {
+            sheetBody.style.height = '';
+            sheetBody.classList.remove('is-morphing');
+        }, 520);
+    }
+    function updateFades() {
+        var max = drate.scrollHeight - drate.clientHeight;
+        drate.classList.toggle('fade-top', drate.scrollTop > 1);
+        drate.classList.toggle('fade-bottom', max - drate.scrollTop > 1);
+    }
+    drate.addEventListener('scroll', updateFades);
+    // строки, въезжающие с translateY, на время раздувают прокрутку — пересчитываем после анимации
+    drate.addEventListener('animationend', updateFades);
+    if (window.ResizeObserver) {
+        var fadeObserver = new ResizeObserver(updateFades);
+        fadeObserver.observe(drate);
+        fadeObserver.observe(document.getElementById('stage'));
+        fadeObserver.observe(document.getElementById('thanks'));
+    }
+    function setActions(which) {
+        el('whyActions').hidden = which !== 'why';
+        el('doneActions').hidden = which !== 'done';
+        sheetBody.classList.toggle('has-actions', !!which);
+    }
+
+    /* ——— звёзды в шторке ——— */
+    function buildStars() {
+        starsBox.innerHTML = '';
+        for (var i = 1; i <= 5; i++) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'star';
+            b.setAttribute('role', 'radio');
+            b.setAttribute('aria-checked', 'false');
+            b.setAttribute('aria-label', i + ' из 5, ' + LABELS[i].replace('!', '').toLowerCase());
+            b.dataset.value = i;
+            b.innerHTML = starSvg(STAR);
+            starsBox.appendChild(b);
+        }
+    }
+    function paint(value, from) {
+        var buttons = starsBox.children;
+        for (var i = 0; i < buttons.length; i++) {
+            var on = i < value;
+            // новые звёзды загораются по очереди слева направо
+            buttons[i].style.setProperty('--d', on && i >= from ? ((i - from) * 55) + 'ms' : '0ms');
+            buttons[i].classList.toggle('star--on', on);
+            buttons[i].setAttribute('aria-checked', String(i + 1 === value));
+        }
+    }
+    function preview(value) {
+        var buttons = starsBox.children;
+        for (var i = 0; i < buttons.length; i++) buttons[i].classList.toggle('star--preview', i < value && !buttons[i].classList.contains('star--on'));
+    }
+    function setCaption(value) {
+        caption.textContent = nbsp(value ? LABELS[value] : IDLES[idleIdx]);
+        caption.classList.toggle('caption--set', !!value);
+        caption.classList.toggle('caption--top', value === 5);
+        retrigger(caption, 'caption--pop');
+    }
+
+    starsBox.addEventListener('click', function (e) {
+        var b = e.target.closest('.star');
+        if (b) tapStar(+b.dataset.value, b);
+    });
+    starsBox.addEventListener('pointerover', function (e) {
+        var b = e.target.closest('.star');
+        if (b && e.pointerType === 'mouse' && !busy) preview(+b.dataset.value);
+    });
+    starsBox.addEventListener('pointerleave', function () { preview(0); });
+
+    function current() { return results[idx]; }
+
+    function tapStar(value, node) {
+        if (busy) return;
+        var prev = current().value || 0;
+        current().value = value;
+        current().skipped = false;
+        preview(0);
+        retrigger(node, 'star--spring');
+        paint(value, prev);
+        setCaption(value);
+
+        if (value <= 2) {
+            if (why.hidden) later(openWhy, 260);
+            return;
+        }
+        busy = true;
+        current().reasons = [];
+        current().comment = '';
+        if (!why.hidden) closeWhy();
+        if (value === 5) {
+            dance();
+            later(next, 1250);
+        } else {
+            later(next, 750);
+        }
+    }
+
+    function dance() {
+        if (reduceMotion) return;
+        var buttons = starsBox.children;
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].style.setProperty('--d', (i * 70) + 'ms');
+            retrigger(buttons[i], 'star--dance');
+        }
+        burst();
+    }
+
+    /* ——— «Что пошло не так?» ——— */
+    function buildChips() {
+        var box = el('chips');
+        box.innerHTML = '';
+        REASONS.forEach(function (r) {
+            var c = document.createElement('button');
+            c.type = 'button';
+            c.className = 'chip';
+            c.textContent = r;
+            c.setAttribute('aria-pressed', 'false');
+            box.appendChild(c);
+        });
+    }
+    el('chips').addEventListener('click', function (e) {
+        var c = e.target.closest('.chip');
+        if (!c) return;
+        c.setAttribute('aria-pressed', String(c.getAttribute('aria-pressed') !== 'true'));
+    });
+    function openWhy() {
+        morph(function () {
+            why.hidden = false;
+            footer.hidden = true;
+            drate.classList.add('is-low');
+            setActions('why');
+        });
+    }
+    function closeWhy() {
+        morph(function () {
+            why.hidden = true;
+            footer.hidden = false;
+            drate.classList.remove('is-low');
+            setActions(null);
+        });
+    }
+    function submitWhy(withText) {
+        if (busy) return;
+        var picked = [].map.call(why.querySelectorAll('.chip[aria-pressed="true"]'), function (c) { return c.textContent; });
+        current().reasons = picked;
+        current().comment = withText ? whyText.value.trim() : '';
+        busy = true;
+        next();
+    }
+    /* ——— поле комментария: плавный рост и свой ползунок ——— */
+    var FIELD_MIN = 48, FIELD_MAX = 4 * 22 + 26;   // одна строка … четыре строки
+    var fieldBar = el('fieldBar'), barTimer;
+    var field = el('field'), mirror = el('fieldMirror'), fieldAnim = 0;
+    function fitField() {
+        mirror.value = whyText.value;
+        var want = Math.min(Math.max(mirror.scrollHeight, FIELD_MIN), FIELD_MAX);
+        if (whyText.offsetHeight !== want) {
+            whyText.style.height = want + 'px';
+            whyText.style.overflowY = want >= FIELD_MAX ? 'auto' : 'hidden';
+            growField(want);
+        }
+        // пишут в конце: показываем последнюю строку целиком, вместе с нижним отступом
+        if (want >= FIELD_MAX && whyText.selectionEnd === whyText.value.length) whyText.scrollTop = whyText.scrollHeight;
+        updateBar();
+    }
+    /* Рамка поля доезжает до новой высоты за 240 мс. Если шторка уже упёрлась в верх,
+       в каждом кадре докручиваем её ровно на прирост, и низ поля стоит на месте */
+    function growField(to) {
+        cancelAnimationFrame(fieldAnim);
+        var from = field.offsetHeight;
+        if (reduceMotion || from === to) { field.style.height = to + 'px'; pinField(); return; }
+        var start = performance.now(), dur = 240;
+        (function frame(now) {
+            var t = Math.min(1, (now - start) / dur);
+            var e = 1 - Math.pow(1 - t, 3);
+            field.style.height = (from + (to - from) * e) + 'px';
+            pinField();
+            if (t < 1) fieldAnim = requestAnimationFrame(frame);
+        })(start);
+    }
+    function pinField() {
+        var over = field.getBoundingClientRect().bottom + 4 - drate.getBoundingClientRect().bottom;
+        if (over > 0) drate.scrollTop += over;
+    }
+    function updateBar() {
+        var sh = whyText.scrollHeight, ch = whyText.clientHeight;
+        var scrolls = sh > ch + 1 && whyText.offsetHeight >= FIELD_MAX;
+        whyText.classList.toggle('fade-top', scrolls && whyText.scrollTop > 1);
+        whyText.classList.toggle('fade-bottom', scrolls && sh - ch - whyText.scrollTop > 1);
+        // ползунок нужен, только когда текст не влезает в четыре строки
+        if (sh <= ch + 1 || whyText.offsetHeight < FIELD_MAX) { fieldBar.hidden = true; return; }
+        fieldBar.hidden = false;
+        var track = FIELD_MAX - 12;
+        var h = Math.max(20, track * ch / sh);
+        var y = (track - h) * whyText.scrollTop / (sh - ch);
+        fieldBar.style.height = h + 'px';
+        fieldBar.style.transform = 'translateY(' + y + 'px)';
+        fieldBar.classList.add('is-on');
+        clearTimeout(barTimer);
+        barTimer = setTimeout(function () { fieldBar.classList.remove('is-on'); }, 900);
+    }
+    whyText.addEventListener('input', fitField);
+    whyText.addEventListener('scroll', updateBar);
+
+    el('whySend').addEventListener('click', function () { submitWhy(true); });
+    el('whyPass').addEventListener('click', function () { submitWhy(false); });
+
+    /* ——— блюда ——— */
+    function putPlate(node, animate) {
+        var old = plates.lastElementChild;
+        if (animate && old && !reduceMotion) {
+            node.classList.add('plate--enter');
+            plates.appendChild(node);
+            reflow(node);
+            node.classList.remove('plate--enter');
+            old.classList.add('plate--leave');
+            later(function () { old.remove(); }, 650);
+        } else {
+            plates.innerHTML = '';
+            plates.appendChild(node);
+        }
+    }
+    function dishPlate(dish) {
+        var p = document.createElement('div');
+        p.className = 'plate';
+        p.innerHTML = art(dish);
+        return p;
+    }
+
+    function fillDish() {
+        var dish = dishes[idx];
+        // предлоги и союзы из одной-двух букв не висят в конце строки
+        el('dishName').textContent = nbsp(dish.name);
+        el('dishName').classList.toggle('dish__name--long', dish.name.length > 30);
+        el('dishPlace').textContent = dish.place;
+        el('dishPlace').title = dish.place;
+        el('dishAsk').textContent = 'Как вам блюдо?';
+        el('skipBtn').textContent = 'Пропустить';
+        el('progress').textContent = (idx + 1) + ' из ' + dishes.length;
+        el('progress').hidden = dishes.length < 2;
+        whyText.value = '';
+        whyText.style.height = '';
+        whyText.style.overflowY = '';
+        cancelAnimationFrame(fieldAnim);
+        field.style.height = '';
+        el('fieldBar').hidden = true;
+        buildChips();
+        [].forEach.call(starsBox.children, function (b) { b.classList.remove('star--dance', 'star--spring'); });
+        paint(0, 0);
+        pickIdle();
+        if (results[idx] && !results[idx].idleVariant) results[idx].idleVariant = idleIdx + 1;
+        setCaption(0);
+    }
+
+    function next() {
+        if (editing) { finish(); return; }
+        idx++;
+        if (idx >= dishes.length) { finish(); return; }
+        putPlate(dishPlate(dishes[idx]), true);
+        swapBox.classList.add('is-out');
+        caption.style.opacity = '0';
+        later(function () {
+            morph(function () {
+                why.hidden = true;
+                footer.hidden = false;
+                drate.classList.remove('is-low');
+                setActions(null);
+                fillDish();
+            });
+            swapBox.classList.remove('is-out');
+            swapBox.classList.add('is-in');
+            reflow(swapBox);
+            swapBox.classList.remove('is-in');
+            caption.style.opacity = '';
+            busy = false;
+        }, 230);
+    }
+
+    el('skipBtn').addEventListener('click', function () {
+        if (busy) return;
+        if (editing) { finish(); return; }
+        current().skipped = true;
+        busy = true;
+        next();
+    });
+
+    /* ——— финал ——— */
+    function thanksCopy() {
+        var rated = results.filter(function (r) { return r.value; });
+        if (!rated.length) return ['Хорошо, в другой раз', 'Если передумаете, нажмите на карандаш рядом с блюдом'];
+        if (rated.some(function (r) { return r.value <= 2; })) return ['Спасибо за честность', 'Передадим ресторану. Пусть в следующий раз будет вкуснее'];
+        return ['Спасибо, что поделились!', 'Теперь другим проще выбрать, а мы лучше знаем, что вам по вкусу'];
+    }
+    function recapNote(r) {
+        if (!r.value) return 'Не оценено';
+        var bits = (r.reasons || []).slice();
+        // короткий комментарий без отмеченных причин показываем целиком
+        if (r.comment && !bits.length && r.comment.length <= 100) return nbsp('«' + r.comment + '»');
+        if (r.comment) bits.push(bits.length ? 'есть комментарий' : 'Есть комментарий');
+        return nbsp(bits.join(', '));
+    }
+    function recapStars(i) {
+        var b = '';
+        for (var v = 1; v <= 5; v++) {
+            b += '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + STAR + '" style="fill:var(' + (v <= results[i].value ? '--star' : '--star-off') + ')"/></svg>';
+        }
+        return b;
+    }
+    var PENCIL = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path class="pencil__line" d="M4.5 19.5h8"/>' +
+        '<g class="pencil"><path d="M4.5 19.5l1-4.2L15.8 5a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.7 18.5z"/><path d="M14 6.8l3.2 3.2"/></g></svg>';
+    function renderRecap() {
+        var recap = el('recap');
+        recap.innerHTML = '';
+        dishes.forEach(function (dish, i) {
+            var li = document.createElement('li');
+            li.style.animationDelay = (120 + i * 70) + 'ms';
+            li.innerHTML = '<div class="recap__pic">' + art(dish) + '</div>' +
+                '<div class="recap__body"><div class="recap__name"></div>' +
+                '<div class="recap__stars" role="img">' + recapStars(i) + '</div>' +
+                '<div class="recap__note"></div></div>' +
+                '<button type="button" class="recap__edit" data-i="' + i + '">' + PENCIL + '</button>';
+            li.querySelector('.recap__name').textContent = nbsp(dish.name);
+            var stars = li.querySelector('.recap__stars');
+            stars.setAttribute('aria-label', results[i].value ? results[i].value + ' из 5' : 'Без оценки');
+            stars.hidden = !results[i].value;
+            li.querySelector('.recap__edit').setAttribute('aria-label', 'Изменить оценку: ' + dish.name);
+            var note = li.querySelector('.recap__note');
+            note.textContent = recapNote(results[i]);
+            note.hidden = !note.textContent;
+            recap.appendChild(li);
+        });
+    }
+    function setThanksCopy(animate) {
+        var c = thanksCopy().map(nbsp), t = el('thanksTitle'), x = el('thanksText');
+        if (t.textContent === c[0] && x.textContent === c[1]) return;
+        t.textContent = c[0];
+        x.textContent = c[1];
+        if (animate) { retrigger(t, 'caption--pop'); retrigger(x, 'caption--pop'); }
+    }
+
+    function finish() {
+        editing = false;
+        var check = document.createElement('div');
+        check.className = 'plate plate--check plate--pop';
+        check.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.6 4.6L19 7.7"/></svg>';
+        putPlate(check, false);
+        el('progress').hidden = true;
+
+        morph(function () {
+            stage.hidden = true;
+            thanks.hidden = false;
+            drate.classList.remove('is-low');
+            setActions('done');
+            setThanksCopy(false);
+            renderRecap();
+        });
+        busy = false;
+    }
+
+    /* Карандаш в финале открывает блюдо заново. Отправка или новая оценка возвращают в финал,
+       «Оставить как было» тоже, ничего не меняя */
+    el('recap').addEventListener('click', function (e) {
+        var b = e.target.closest('.recap__edit');
+        if (!b || busy) return;
+        busy = true;
+        if (reduceMotion) { editDish(+b.dataset.i); return; }
+        // даём карандашу расписаться и только потом открываем блюдо
+        retrigger(b, 'is-writing');
+        later(function () { editDish(+b.dataset.i); }, 560);
+    });
+
+    function editDish(i) {
+        editing = true;
+        busy = false;
+        idx = i;
+        var r = results[i];
+        putPlate(dishPlate(dishes[i]), true);
+        morph(function () {
+            thanks.hidden = true;
+            stage.hidden = false;
+            swapBox.classList.remove('is-out', 'is-in');
+            caption.style.opacity = '';
+            fillDish();
+            el('dishAsk').textContent = 'Поправим оценку?';
+            el('progress').hidden = true;
+            paint(r.value, 0);
+            setCaption(r.value);
+            el('skipBtn').textContent = 'Оставить как было';
+            [].forEach.call(why.querySelectorAll('.chip'), function (c) {
+                c.setAttribute('aria-pressed', String(r.reasons.indexOf(c.textContent) !== -1));
+            });
+            whyText.value = r.comment;
+            var low = r.value > 0 && r.value <= 2;
+            why.hidden = !low;
+            footer.hidden = low;
+            drate.classList.toggle('is-low', low);
+            setActions(low ? 'why' : null);
+            if (low) fitField();
+        });
+        drate.scrollTop = 0;
+    }
+    el('doneBtn').addEventListener('click', function () { closeSheet(false); });
+
+    /* ——— открытие и закрытие ——— */
+    function openSheet() {
+        clearTimers();
+        dishes = ALL_DISHES.slice(0, count).map(function (d) {
+            return longNames ? { name: d.long.name, place: d.long.place, art: d.art } : d;
+        });
+        results = dishes.map(function () { return { value: 0, reasons: [], comment: '', skipped: false }; });
+        idx = 0;
+        busy = false;
+        sheetBody.style.height = '';
+        sheetBody.classList.remove('is-morphing');
+        setActions(null);
+        stage.hidden = false;
+        thanks.hidden = true;
+        why.hidden = true;
+        footer.hidden = false;
+        drate.classList.remove('is-low');
+        swapBox.classList.remove('is-out', 'is-in');
+        caption.style.opacity = '';
+        putPlate(dishPlate(dishes[0]), false);
+        fillDish();
+        reopen.hidden = true;
+        sheet.style.transform = '';
+        phone.classList.remove('is-closed');
+    }
+
+    function closeSheet(dismissed) {
+        clearTimers();
+        busy = true;
+        sheet.style.transform = '';
+        phone.classList.add('is-closed');
+        if (dismissed) {
+            dismissCount = Math.min(dismissCount + 1, 4);
+            showToast('<b>Закрыли в ' + dismissCount + '-й раз.</b> ' + LADDER[dismissCount - 1]);
+        }
+        setTimeout(function () { reopen.hidden = false; }, 450);
+    }
+
+    function showToast(html) {
+        toast.innerHTML = html;
+        toast.classList.remove('toast--hidden');
+        clearTimeout(showToast.t);
+        showToast.t = setTimeout(function () { toast.classList.add('toast--hidden'); }, 4200);
+    }
+
+    el('closeBtn').addEventListener('click', function () { closeSheet(true); });
+    reopen.addEventListener('click', openSheet);
+    el('restartBtn').addEventListener('click', openSheet);
+
+    /* смахивание вниз за верхнюю часть шторки */
+    (function () {
+        var grip = el('grip'), startY = 0, dy = 0, dragging = false;
+        grip.addEventListener('pointerdown', function (e) {
+            if (e.target.closest('button') || phone.classList.contains('is-closed')) return;
+            dragging = true;
+            startY = e.clientY;
+            dy = 0;
+            grip.setPointerCapture(e.pointerId);
+            sheet.classList.add('is-dragging');
+        });
+        grip.addEventListener('pointermove', function (e) {
+            if (!dragging) return;
+            dy = e.clientY - startY;
+            // вверх тянется туго, вниз свободно
+            var y = dy > 0 ? dy : dy / 6;
+            sheet.style.transform = 'translateY(' + y + 'px)';
+        });
+        function end() {
+            if (!dragging) return;
+            dragging = false;
+            sheet.classList.remove('is-dragging');
+            if (dy > 90) closeSheet(true);
+            else sheet.style.transform = '';
+        }
+        grip.addEventListener('pointerup', end);
+        grip.addEventListener('pointercancel', end);
+    })();
+
+    /* ——— мишура: две пушки из нижних углов ——— */
+    var confetti = el('confetti'), ctx = confetti.getContext('2d'), bits = [], running = false;
+    function burst() {
+        var r = confetti.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+        confetti.width = r.width * dpr;
+        confetti.height = r.height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var colors = ['#ffb400', '#ffd76e', '#7ac142', '#0085ff', '#ff6f91', '#ffffff'];
+        gun(r.width * .04, r.height * .96, 1, colors);
+        gun(r.width * .96, r.height * .96, -1, colors);
+        if (!running) { running = true; requestAnimationFrame(tick); }
+    }
+    function gun(x0, y0, dir, colors) {
+        for (var i = 0; i < 38; i++) {
+            var a = (38 + Math.random() * 34) * Math.PI / 180, v = 9 + Math.random() * 7;
+            bits.push({
+                x: x0, y: y0, vx: dir * v * Math.cos(a), vy: -v * Math.sin(a),
+                s: 4 + Math.random() * 5, rot: Math.random() * Math.PI, vr: (Math.random() - .5) * .3,
+                color: colors[i % colors.length], ribbon: Math.random() < .72,
+                phase: Math.random() * Math.PI * 2, pv: .08 + Math.random() * .06, sway: .4 + Math.random() * .5,
+                life: 80 + Math.random() * 30
+            });
+        }
+    }
+    function tick() {
+        var w = confetti.width, h = confetti.height;
+        ctx.clearRect(0, 0, w, h);
+        bits = bits.filter(function (p) { return p.life > 0; });
+        bits.forEach(function (p) {
+            p.vy += .23; p.y += p.vy; p.life--;
+            if (p.vy < 0) { p.x += p.vx; p.rot += p.vr; }
+            else { p.vx *= .985; p.x += p.vx + Math.sin(p.phase) * p.sway; p.phase += p.pv; p.rot += Math.sin(p.phase) * .12; }
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.globalAlpha = Math.min(1, p.life / 30);
+            ctx.fillStyle = p.color;
+            if (p.ribbon) {
+                ctx.scale(1, Math.cos(p.phase * 1.6));
+                ctx.fillRect(-p.s * 1.3, -p.s * .28, p.s * 2.6, p.s * .56);
+            } else {
+                ctx.beginPath(); ctx.arc(0, 0, p.s * .45, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
+        });
+        if (bits.length) requestAnimationFrame(tick);
+        else { ctx.clearRect(0, 0, w, h); running = false; }
+    }
+
+    /* ——— панель стенда ——— */
+    el('countSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        count = +b.dataset.count;
+        [].forEach.call(this.children, function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        openSheet();
+    });
+
+    el('namesSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        longNames = b.dataset.long === '1';
+        [].forEach.call(this.children, function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+        openSheet();
+    });
+
+    /* сравнение звёзд: пунктир через кончики боковых лучей, точки — верхние внутренние углы */
+    function paintAttr(color, stroke) {
+        return ' style="fill:' + color + (stroke ? ';stroke:' + color + ';stroke-width:1.6;stroke-linejoin:round' : '') + '"';
+    }
+    function geo(path, stroke, tipY, innerY, innerX) {
+        var ok = Math.abs(tipY - innerY) < .05;
+        var dot = ok ? '#3aa55d' : '#e5484d';
+        return '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+            '<path d="' + path + '"' + paintAttr('var(--star)', stroke) + '/>' +
+            '<line x1="-1" x2="25" y1="' + tipY + '" y2="' + tipY + '" style="stroke:var(--fg)" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" opacity=".55"/>' +
+            '<circle cx="' + (12 - innerX) + '" cy="' + innerY + '" r=".55" fill="' + dot + '" style="stroke:var(--card)" stroke-width=".25"/>' +
+            '<circle cx="' + (12 + innerX) + '" cy="' + innerY + '" r=".55" fill="' + dot + '" style="stroke:var(--card)" stroke-width=".25"/>' +
+            '</svg>';
+    }
+    function row(path, stroke) {
+        var s = '';
+        for (var i = 0; i < 5; i++) s += '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + path + '"' + paintAttr(i < 4 ? 'var(--star)' : 'var(--line)', stroke) + '/></svg>';
+        return s;
+    }
+    var CELLS = [
+        { t: 'v2', n: 'Material', path: STAR_V2, tip: 9.24, inner: 8.63, ix: 2.81,
+          p: 'Внутренние углы выше кончиков лучей: плечи уходят вверх, звезда сутулится.' },
+        { t: 'v3', n: 'скруглённая обводкой', path: STAR_V3, tip: 8.98, inner: 8.01, ix: 2.97, stroke: true,
+          p: 'Горб стал ещё выше, а толстая обводка раздувает лучи и превращает звезду в кляксу.' },
+        { t: 'v4', n: 'сейчас', path: STAR, tip: 9.87, inner: 9.87, ix: 2.6, now: true,
+          p: 'Правильная пятиконечная звезда: плечи лежат на одной прямой. Скруглены только кончики, углы остаются чёткими.' }
+    ];
+    el('starGrid').innerHTML = CELLS.map(function (c) {
+        return '<div class="starCell' + (c.now ? ' starCell--now' : '') + '">' +
+            '<h3>' + c.t + ' <span>' + c.n + '</span></h3>' +
+            '<div class="starCell__geo">' + geo(c.path, c.stroke, c.tip, c.inner, c.ix) + '</div>' +
+            '<p>' + c.p + '</p>' +
+            '<div class="starCell__row">' + row(c.path, c.stroke) + '</div></div>';
+    }).join('');
+
+    el('copyLabels').innerHTML = LABELS.slice(1).map(function (l, i) {
+        return '<li><span>' + new Array(i + 2).join('★') + '</span>' + l + '</li>';
+    }).join('');
+
+    [].forEach.call(document.querySelectorAll('[data-pic]'), function (n) {
+        n.innerHTML = art(ALL_DISHES[+n.dataset.pic]);
+    });
+
+    nbspTree(document.body);
+    buildStars();
+    // въезд шторки снизу после первого кадра, чтобы сработал transition
+    requestAnimationFrame(function () { requestAnimationFrame(openSheet); });
+})();
+</script>

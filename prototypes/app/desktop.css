@@ -1,0 +1,377 @@
+/* ── Десктопный сайт (12.11: «делаем десктопный сайт»; один адаптивный в том же файле) ──
+   Всё здесь — под классом html.desk: его ставит deskSync(), когда окно шире 860 px, есть мышь (hover + точный указатель) и
+   панель стенда выключена. Телефон (и телефон боком) этих правил не видит.
+   12.11, позже: «ты взял всё с мобильной версии и перенёс на десктоп. Но у десктопа своё поведение. Должны быть свои уверенные
+   окна. Корзина должна быть сверху, но открываться справа при клике. В корзине кросс-селлинг должен скроллиться — для этого
+   нужны стрелочки. При ховере должно везде что-то происходить».
+   Устройство: шапка (логотип, адрес, поиск, избранное, профиль, корзина) — это прежний таб-бар; вкладки и заведение — страницы
+   под шапкой; корзина и оформление — панель справа; остальные экраны поверх и все шторки — окна по центру над затемнением
+   (app[data-dtop] ставит deskChrome: page / drawer / win) */
+/* прячет десктопное на телефоне — НЕ здесь, а в index.html (телефон этот файл не скачивает; 13.11 перенос сюда показал на
+   телефоне пустые кнопки над таб-баром) */
+html.desk body { padding: 0; background: var(--chrome, #f4efe6); }
+html.desk .stand { display: block; padding: 0; height: 100%; min-height: 0; }
+html.desk .frame { width: 100% !important; height: 100% !important; }
+html.desk .frame__inner { width: 100%; height: 100%; border-radius: 0; box-shadow: none; transform: none !important; }
+html.desk .sbar, html.desk .home-ind, html.desk .cartbar, html.desk .sheet__grip { display: none !important; }
+html.desk .app { --top: 128px; --dh: 128px; --bottom: 0px; --dw: 1280px; --dg: max(32px, calc((100% - var(--dw)) / 2)); --dease: cubic-bezier(.2, .8, .2, 1); }
+html.desk .app button, html.desk .app [data-act], html.desk .app label { cursor: pointer; }
+html.desk .app [data-act="noop"] { cursor: default; }
+
+/* ── шапка ── */
+html.desk .tabbar {
+    top: 0; bottom: auto; height: var(--dh); padding-top: 40px !important; box-sizing: border-box; display: flex; align-items: center; gap: 8px;
+    padding: 0 var(--dg); border-top: 0; border-bottom: 1px solid var(--line); transition: none; transform: none !important; z-index: 9;
+}
+html.desk .dlogo { display: block; order: 0; flex: none; border: 0; background: none; padding: 4px 10px 4px 0; margin-right: 14px; color: var(--ink); transition: transform .3s var(--dease), opacity .2s; }
+html.desk .dlogo svg { display: block; width: 150px; height: 60px; }
+html.desk .dlogo:hover { transform: scale(1.04) rotate(-1.5deg); }
+html.desk .dlogo:active { transform: scale(.97); }
+html.desk .dh { display: flex; align-items: center; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; }
+html.desk .dh-addr { order: 1; flex: 0 1 auto; min-width: 0; max-width: 300px; height: 52px; padding: 0 14px 0 10px; gap: 10px; border-radius: 16px; transition: background .2s; }
+html.desk .dh-addr:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+html.desk .dh-addr__ic { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 7%, transparent); transition: background .2s, color .2s, transform .3s var(--dease); }
+html.desk .dh-addr:hover .dh-addr__ic { background: var(--ink); color: var(--app-bg); transform: scale(1.06); }
+html.desk .dh-addr__ic svg.i { width: 19px; height: 19px; }
+html.desk .dh-addr__t { display: grid; min-width: 0; gap: 1px; }
+html.desk .dh-addr__t small { font: 500 12.5px/1.2 var(--font); color: var(--muted); white-space: nowrap; }
+html.desk .dh-addr__t b { display: flex; align-items: center; gap: 4px; font: 700 15px/1.25 var(--font); min-width: 0; }
+html.desk .dh-addr__t b > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html.desk .dh-addr__t b svg.i { flex: none; width: 16px; height: 16px; stroke-width: 2.4; transition: transform .25s var(--dease); }
+html.desk .dh-addr:hover .dh-addr__t b svg.i { transform: translateY(2px); }
+html.desk .dh-search { order: 2; flex: 1 1 200px; min-width: 120px; max-width: 520px; height: 48px; margin: 0 auto 0 8px; padding: 0 18px; gap: 10px; border-radius: 16px;
+    background: var(--card); box-shadow: inset 0 0 0 1px var(--line); color: var(--muted); font: 500 15px/1 var(--font); transition: box-shadow .2s, color .2s, background .2s; }
+html.desk .dh-search svg.i { width: 20px; height: 20px; color: var(--ink); }
+html.desk .dh-search > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html.desk .dh-search:hover { box-shadow: inset 0 0 0 1.5px var(--ink); color: var(--ink); }
+html.desk .dh-search kbd { margin-left: auto; font: 600 12px/1 var(--font); color: var(--faint); padding: 5px 7px; border-radius: 7px; box-shadow: inset 0 0 0 1px var(--line); }
+html.desk .app[data-dpage="search"] .dh-search { box-shadow: inset 0 0 0 1.5px var(--ink); color: var(--ink); }
+html.desk .tab { order: 5; flex: none; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 14px; border-radius: 15px;
+    font: 650 14.5px/1 var(--font); color: var(--ink); transition: background .2s, color .2s, transform .2s var(--dease), box-shadow .2s; }
+html.desk .tab[data-tab="home"], html.desk .tab[data-tab="search"] { display: none; }
+html.desk .tab:hover { background: color-mix(in srgb, var(--ink) 7%, transparent); }
+html.desk .tab:active { transform: scale(.96); }
+html.desk .tab[aria-current="page"] { background: color-mix(in srgb, var(--ink) 9%, transparent); }
+html.desk .tab > span:last-child { overflow: visible; }
+html.desk .tab svg.i { width: 22px; height: 22px; }
+/* 12.11: «заполнение в корзине выглядит плоховато, что-то смещено». Пакет с заливкой нарисован под 25 px (слои заливки стоят
+   в пикселях по контуру пакета) — уменьшенный до 22 px контур уезжал от заливки. Пакет — в родном размере. Кнопка корзины
+   тёмная: цвета слоёв (смесь «чернил» и фона) берём от неё — светлые чернила на тёмном фоне, как на светлом таб-баре наоборот */
+html.desk .tab .bag > svg.i { width: 25px; height: 25px; }
+html.desk #cartTab { --ink: var(--on-cta); --app-bg: var(--cta); }
+html.desk .tab__dot { left: 14px; margin-left: 16px; top: 9px; }
+html.desk .dh-login { order: 6; flex: none; height: 46px; padding: 0 18px; border-radius: 15px; font: 650 14.5px/1 var(--font); box-shadow: inset 0 0 0 1.5px var(--line); transition: background .2s, box-shadow .2s, transform .2s var(--dease); }
+html.desk .dh-login:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+html.desk .dh-login:active { transform: scale(.96); }
+html.desk .dh-login[hidden] { display: none; }
+/* корзина в шапке — главная кнопка: тёмная, с суммой */
+html.desk #cartTab { order: 9; margin-left: 6px; padding: 0 18px 0 16px; height: 48px; border-radius: 16px; background: var(--cta); color: var(--on-cta); box-shadow: var(--cta-ring, 0 0 #0000); }
+html.desk #cartTab:hover { background: var(--cta); transform: translateY(-1px); box-shadow: var(--cta-ring, 0 0 #0000), 0 10px 22px -10px rgba(20, 12, 8, .55); }
+html.desk #cartTab:active { transform: scale(.97); }
+html.desk #cartTab .tab__badge { position: static; margin: 0 0 0 2px; order: 3; box-shadow: none; background: var(--brand); }
+/* 12.11: «когда товар ещё не прилетел в корзину, а я кликнул — странное движение шапки». Сумма на кнопке докручивается, и её
+   ширина меняется (79,91 → 102,31, цифры разной ширины, лишний разряд катится сверху) — кнопка росла, и всё, что слева от
+   неё (поиск, «Профиль», «Избранное», «Войти»), сдвигалось. Кнопка теперь постоянной ширины (до сумм вида 999,99 Б): цифры
+   одной ширины, сумма прижата влево, число позиций — на своём месте справа */
+/* 12.11, позже: «кнопка корзины стала очень большой, а цифра — очень далеко; даже пустая — несуразно большая». Кнопка снова
+   компактная: пакет и сумма; число позиций — значком на пакете (не занимает места в строке). Ширина — не меньше, чем у
+   «Мой заказ», поэтому от пустой корзины до сумм вида 999,99 Б кнопка одной ширины — шапка не сдвигается */
+html.desk #cartTab { position: relative; justify-content: flex-start; min-width: 150px; gap: 10px; padding: 0 18px 0 16px; }
+/* число позиций — у правого верхнего угла пакета, левее ручки не заходит (12.11: «при двойной цифре не видно ручки, даже
+   кусочка»); двузначное растёт вправо — в промежуток до суммы (он шире, когда есть сумма) */
+html.desk #cartTab.has-sum { gap: 20px; }
+html.desk #cartTab .tab__badge { position: absolute; left: 31px; right: auto; top: 4px; margin: 0; min-width: 18px; height: 18px; padding: 0 5px;
+    font: 750 10.5px/18px var(--font); box-shadow: 0 0 0 2px var(--cta); }
+html.desk #cartTab > span:last-child { white-space: nowrap; }
+/* окно входа на десктопе: цифры номера, кода и «Отправили на …» — обычные, без разрядки (12.11: «сделай обычные цифры без
+   разрядки на десктопе»). Маска номера — тем же шрифтом, набранная часть в ней прозрачная, поэтому совпадает с полем и так.
+   На телефоне — как было */
+html.desk :is(.auth__num input, .auth__mask, .auth__cc, .auth__code > i, .auth__sub b) { letter-spacing: normal; font-variant-numeric: proportional-nums; }   /* цифры — обычные (как везде в приложении), не одной ширины: «цифры повытягивал… так некрасиво» */
+/* ── затемнение под панелью и окнами ── */
+html.desk .dscrim { display: block; position: absolute; inset: 0; z-index: 10; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .35s; cursor: default !important; }
+html.desk .app[data-dtop="drawer"] .dscrim, html.desk .app[data-dtop="win"] .dscrim { opacity: 1; pointer-events: auto; }
+
+/* ── страницы ── */
+html.desk .screen.is-tab > .scroll, html.desk #restScroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent; }
+html.desk .app[data-back] .screen::after { display: none; }
+html.desk .screen.is-under { transform: none; }
+html.desk .screen.is-tab:not(#s-home) > .scroll { padding-left: max(32px, calc((100% - 880px) / 2)); padding-right: max(32px, calc((100% - 880px) / 2)); }
+/* главная */
+html.desk #homeScroll { padding: 0 calc(var(--dg) - 16px); }
+html.desk #s-home .hero { padding-top: calc(var(--top) + 44px); gap: 0; overflow: visible; background: none; }
+html.desk #s-home .hero__pep, html.desk #s-home .hero__top, html.desk #s-home .hero > .search { display: none; }
+html.desk #s-home .hello { font-size: 52px; margin: 0; }
+html.desk #s-home .cats { flex-wrap: wrap; overflow: visible; gap: 22px 20px; padding-top: 34px; scroll-snap-type: none; }
+html.desk #s-home .cat { width: 104px; }
+html.desk #s-home .cat__pic { width: 104px; height: 104px; transition: transform .35s var(--dease), box-shadow .3s; }
+html.desk #s-home .cat:hover .cat__pic { transform: translateY(-4px) scale(1.04); box-shadow: 0 16px 28px -16px rgba(40, 24, 12, .5); }
+html.desk #s-home .cat:hover .cat__pic img { transform: scale(1.08); }
+html.desk #s-home .cat span { font-size: 14px; transition: color .2s; }
+html.desk #s-home .sec { padding-top: 44px; gap: 20px; }
+html.desk .screen.is-tab .h, html.desk #s-rest .h { font-size: 28px; }
+html.desk #s-home .filters { flex-wrap: wrap; overflow: visible; }
+html.desk #s-home .rests { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 24px; }
+html.desk #s-home .sec--rests2 { padding-top: 36px; }
+html.desk #s-home .promo { width: 380px; height: 204px; padding: 20px 22px 22px; transition: transform .35s var(--dease), box-shadow .3s; }
+html.desk #s-home .promo:hover { transform: translateY(-4px); }
+html.desk #s-home .promo .promo__cut { transition: scale .5s var(--dease), rotate .5s var(--dease); scale: 1.16; transform-origin: 70% 50%; }
+html.desk #s-home .promo:hover .promo__cut { scale: 1.24; }
+html.desk #s-home .promo__title { font-size: 30px; }
+html.desk #s-home .promo__text { max-width: 180px; }
+html.desk #s-home .promo--2 .promo__text { max-width: 200px; }
+html.desk #s-home .promo__sub { font-size: 14.5px; }
+html.desk .hscroll { scroll-snap-type: none; }
+/* 12.11: «при ховере происходит обрезание». Лента с прокруткой по горизонтали обрезает и по вертикали: приподнятая карточка
+   и её тень упирались в край ленты. Даём ленте запас сверху и снизу (под подъём и тень) и забираем его отрицательными
+   полями — раскладка вокруг не сдвигается */
+html.desk .hscroll { padding-top: 12px; padding-bottom: 40px; margin-top: -12px; margin-bottom: -40px; }
+/* карточки: приподнимаются под курсором */
+/* карточки заведений (20.11: «в заведениях с параллаксом — перебор… сердце тоже уезжает и увеличивается, ведёт себя странно;
+   при ховере на заведение курьер должен начать идти»). Фото не поднимается — под ним проявляется мягкая тень (слой ::before
+   по форме фото: у самого фото гладкие углы обрезают свою тень), снимок внутри приближается едва заметно и медленно; сердце
+   стоит на месте и не растёт. Значок курьера в строке «время · доставка» — шагает, пока курсор на карточке */
+html.desk .rest { position: relative; }
+html.desk .rest::before { content: ''; position: absolute; left: 0; right: 0; top: 0; aspect-ratio: 16 / 8.6; border-radius: 28px; pointer-events: none;
+    box-shadow: 0 26px 44px -26px rgba(40, 24, 12, .55), 0 6px 14px -8px rgba(40, 24, 12, .18); opacity: 0; transition: opacity .35s var(--dease); }
+html.desk .rest:hover::before { opacity: 1; }
+html.desk .rest__pic { z-index: 1; }
+html.desk .rest__pic img { transition: transform 1.1s var(--dease); }
+html.desk .rest:hover .rest__pic img { transform: scale(1.025); }
+/* 21.11: «курьер должен бежать, а он дёргается — возьми бег курьера из соседней ветки»: под курсором значок меняется на
+   курьера из шторки доставки: идёт (crGame('walk')), через 0,7 с бежит (crGame('run')), 21×21 — на том же месте и того же размера */
+html.desk .rest__meta .dcr { display: none; width: 19px; height: 19px; margin: -1px 4px -1px -1px; color: var(--ink); flex: none; }
+html.desk .rest__meta .dcr > i { display: none; width: 100%; height: 100%; }
+html.desk .rest__meta .dcr svg { display: block; width: 100%; height: 100%; }
+html.desk .rest:not(.dcr-run) .dcr-w, html.desk .rest.dcr-run .dcr-r { display: block; }
+html.desk .rest:hover .rest__meta .dcr { display: block; }
+html.desk .rest:hover .rest__meta > span:first-child > svg.i, html.desk .rest:hover .rest__meta > span:first-child > .cour { display: none; }
+}
+html.desk .rest__txt b, html.desk .rest__txt > :first-child { transition: color .2s; }
+html.desk .dcard, html.desk .item, html.desk .ups { transition: transform .3s var(--dease), box-shadow .3s; }
+html.desk .dcard:hover, html.desk .item:hover { transform: translateY(-4px); box-shadow: 0 20px 34px -22px rgba(40, 24, 12, .5), 0 0 0 1px var(--line); }
+html.desk .dcard:hover img, html.desk .item:hover .item__pic img { transform: scale(1.05); }
+html.desk .dcard img, html.desk .item__pic img { transition: transform .45s var(--dease); }
+html.desk .ups:hover { transform: translateY(-3px); }
+/* кнопки, плашки, строки */
+html.desk .cta { transition: transform .2s var(--dease), box-shadow .2s, filter .2s; }
+html.desk .cta:hover:not(:disabled):not(.is-off) { transform: translateY(-1px); box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -12px rgba(20, 12, 8, .6); }
+html.desk .cta:active { transform: scale(.985); }
+html.desk .chip, html.desk .link, html.desk .lrow, html.desk .me, html.desk .tilecat, html.desk .sq__top, html.desk .ri-tk, html.desk .slot, html.desk .cday, html.desk .cpay, html.desk .opt, html.desk .citem, html.desk .fgrp__r, html.desk .fgrp__all, html.desk .bt__link, html.desk .cchg, html.desk .cother, html.desk .cwo { transition: background .2s, box-shadow .2s, color .2s, transform .2s var(--dease); }
+/* фильтры (20.11: «при ховере не выделять ни чёрным, ни коричневым — нужна красивая тень под ними; всё по центру по высоте»):
+   под курсором рамка тает, плашка чуть приподнимается, под ней — мягкая тень. Высота 40 px, строка — 1: значок и буквы
+   по середине плашки (буквы Golos сидят выше середины строки на ~0,5 px — сдвиг вниз на 1 px сверху) */
+html.desk .chip { height: 40px; padding: 1px 16px 0; line-height: 1; gap: 7px; transition: box-shadow .3s var(--dease), border-color .25s, transform .3s var(--dease), background .2s, color .2s; }
+html.desk .chip svg.i { display: block; transform: translateY(-1px); }   /* значок — вровень с буквами: по пикселям, середина плашки */
+html.desk .chip:hover { border-color: transparent; transform: translateY(-2px); box-shadow: 0 12px 22px -12px rgba(40, 24, 12, .42), 0 2px 6px -2px rgba(40, 24, 12, .12); }
+html.desk .chip:active { transform: translateY(0) scale(.97); }
+html.desk .link:hover, html.desk .fgrp__all:hover, html.desk .bt__link:hover, html.desk .cchg:hover, html.desk .sq__clr:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+html.desk .lrow:hover, html.desk .me:hover, html.desk .sq__top:hover { background: color-mix(in srgb, var(--ink) 5%, var(--card)); }
+html.desk .lrow:hover > svg.i:last-child, html.desk .me:hover > svg.i:last-child, html.desk .sq__top:hover > svg.i:last-child { transform: translateX(3px); }
+html.desk .lrow > svg.i:last-child, html.desk .me > svg.i:last-child, html.desk .sq__top > svg.i:last-child { transition: transform .25s var(--dease); }
+html.desk .tilecat { overflow: hidden; }
+html.desk .tilecat:hover { transform: translateY(-3px); box-shadow: 0 16px 28px -20px rgba(40, 24, 12, .5); }
+html.desk .ri-tk:hover { transform: translateY(-2px); box-shadow: 0 12px 22px -16px rgba(80, 56, 10, .5); }
+html.desk .slot:hover, html.desk .cday:hover, html.desk .cwo:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+html.desk .cpay:hover, html.desk .opt:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
+html.desk .ibtn { transition: transform .2s var(--dease), background-color .2s, color .2s, opacity .2s; }
+html.desk .ibtn:hover { transform: scale(1.08); }
+html.desk .ibtn:active { transform: scale(.94); }
+html.desk .plus, html.desk .adder__plus, html.desk .stepper button, html.desk .adder__minus { transition: transform .2s var(--dease), background-color .2s, color .2s; }
+html.desk .plus:hover, html.desk .adder__plus:hover { transform: scale(1.12); }
+html.desk .stepper button:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); border-radius: 50%; }
+/* окно блюда на десктопе (12.11): корзины в окне нет — она в шапке; «Добавлено» не зеленеет; у степпера при наведении и нажатии
+   — без кружка, остаётся только градиент нажатия */
+html.desk .dcar__cart { display: none !important; }
+html.desk #dishAdd.is-added { background: var(--cta); color: var(--on-cta); }
+html.desk .dfoot .stepper button:is(:hover, :active) { background: none !important; }
+/* портал, через который комета ныряет под затемнение */
+.drift { position: absolute; z-index: 96; width: 0; height: 0; pointer-events: none; }
+.drift > i { position: absolute; left: -70px; top: -70px; width: 140px; height: 140px; border-radius: 50%; opacity: 0; will-change: transform, opacity; }
+.drift__flash { background: radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(255, 120, 90, .7) 14%, rgba(255, 50, 40, .28) 34%, rgba(255, 40, 40, 0) 62%); }
+.drift__ring { box-shadow: 0 0 0 2px rgba(255, 92, 70, .95), 0 0 18px 4px rgba(255, 60, 40, .55), inset 0 0 14px 2px rgba(255, 140, 110, .5); }
+.drift__ring--2 { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85), 0 0 22px 3px rgba(255, 70, 50, .4); }
+
+html.desk .cseg button:not([aria-pressed="true"]):not(.is-on):hover { color: var(--ink); }
+html.desk .rbadge { transition: transform .2s var(--dease), filter .2s; }
+html.desk .rbadge:hover { filter: brightness(1.08); }
+html.desk .item__fav:not(.rest__fav):hover { scale: 1.15; }   /* сердце заведения — тоже .item__fav, но не растёт (20.11) */
+html.desk .item__fav { transition: scale .2s var(--dease); }
+html.desk .rtabs button:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent); }
+html.desk .sq__chip:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
+html.desk .lang:hover { background: color-mix(in srgb, var(--ink) 5%, var(--card)); }
+/* стрелки у горизонтальных лент: появляются при наведении на ленту, листают на «экран» ленты */
+html.desk .hsnav {
+    display: grid; place-items: center; position: absolute; z-index: 9; width: 44px; height: 44px; border-radius: 50%; border: 0; padding: 0;
+    background: var(--card); color: var(--ink); box-shadow: 0 8px 20px -8px rgba(20, 12, 8, .45), 0 0 0 1px var(--line);
+    opacity: 0; scale: .7; pointer-events: none; transition: opacity .2s, scale .25s var(--dease), background .2s, color .2s;
+}
+html.desk .hsnav.is-on { opacity: 1; scale: 1; pointer-events: auto; }
+html.desk .hsnav:hover { scale: 1.1; background: var(--ink); color: var(--app-bg); }
+html.desk .hsnav:active { scale: .96; }
+html.desk .hsnav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+html.desk .hsnav.is-sm { width: 36px; height: 36px; }
+html.desk .hsnav.is-sm svg { width: 17px; height: 17px; }
+
+/* ── заведение — страница под шапкой ── */
+html.desk .screen:not(.is-tab) { --top: 0px; }
+html.desk #s-rest { top: var(--dh); overflow: hidden; overflow: clip; transform: translateY(28px); opacity: 0; transition: transform .45s var(--dease), opacity .3s, visibility 0s linear .45s; }
+html.desk #s-rest.is-on, html.desk #s-rest.is-under { transform: none; opacity: 1; transition: transform .45s var(--dease), opacity .3s, visibility 0s; }
+html.desk #restScroll { padding: 0 calc(var(--dg) - 16px) 80px; }
+html.desk #s-rest .rtop { padding-left: var(--dg); padding-right: var(--dg); }
+html.desk #s-rest .rtop:not(.is-solid) { padding-top: 34px; padding-left: calc(var(--dg) + 18px); padding-right: calc(var(--dg) + 18px); }
+html.desk #s-rest .rhero { height: 340px; margin: 18px 16px 0; border-radius: 32px; overflow: hidden; }
+html.desk #s-rest .rhero img { transition: transform 1.2s var(--dease); }
+html.desk #s-rest .rhero:hover img { transform: scale(1.03); }
+html.desk #s-rest .rhero--rate .ri-hrate { left: 24px; bottom: 24px; }
+html.desk #s-rest .rinfo.rinfo--simple { padding: 28px 16px 26px; }
+html.desk #s-rest .rinfo--simple h1 { font-size: 44px; }
+html.desk #s-rest .ri-dl { font-size: 16px; margin-top: 4px; }
+html.desk #s-rest .ri-tks--3, html.desk #s-rest .ri-tks { grid-auto-flow: column; grid-auto-columns: minmax(260px, 340px); grid-template-columns: none; overflow: visible; margin: 22px 0 0; padding: 0; justify-content: start; }
+html.desk #s-rest .rtabs__row { padding: 12px 16px; gap: 8px; }
+html.desk #s-rest .rtabs button { font-size: 15.5px; padding: 10px 16px; }
+html.desk #s-rest .msec { padding-top: 34px; gap: 18px; scroll-margin-top: 130px; }
+html.desk #s-rest .grid2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+html.desk #s-rest .pop-row { padding-left: 0; padding-right: 0; }
+html.desk #s-rest .msec > .h.pad { padding-left: calc(var(--r-tile) / 2); }
+html.desk #s-rest .pop-row .item { width: 320px; grid-template-columns: 132px 1fr; }
+html.desk #s-rest .item b { font-size: 15.5px; }
+
+/* ── корзина и оформление — панель справа ── */
+html.desk #s-cart, html.desk #s-checkout {
+    left: auto; right: 0; top: 0; bottom: 0; width: 480px; border-radius: 28px 0 0 28px; overflow: hidden;
+    box-shadow: -30px 0 80px -30px rgba(20, 12, 8, .45);
+    transition: transform .5s var(--dease), visibility 0s linear .5s;
+}
+html.desk #s-cart.is-on, html.desk #s-cart.is-under, html.desk #s-checkout.is-on { transition: transform .5s var(--dease), visibility 0s; }
+/* «Добавить к заказу?» в корзине (20.11: «промокод прилип к кросс-селлу; кросс-селл в корзине выглядит не очень — надо красиво»).
+   Прилипал из-за общего запаса лент (снизу 40 px, забранных полем −40 px): в корзине карточки ниже, и блок промокода наезжал на
+   ленту. Здесь у ленты свой запас без отрицательных полей. Карточка — белая, с мягкой тенью: фото со скруглением внутри,
+   название и цена слева, круглый «+» в углу; под курсором карточка приподнимается, фото приближается, «+» краснеет */
+html.desk #s-cart .hscroll { gap: 14px; padding: 6px 16px 22px; margin: 0; scroll-padding: 16px; }
+html.desk #s-cart .sec:has(> .hscroll) { gap: 12px; padding-top: 30px; }
+html.desk #s-cart .ups { position: relative; width: 156px; padding: 8px 8px 12px; gap: 8px; border-radius: 20px; text-align: left; background: var(--card);
+    box-shadow: 0 0 0 1px var(--line), 0 12px 26px -20px rgba(40, 24, 12, .5); transition: transform .3s var(--dease), box-shadow .3s; }
+html.desk #s-cart .ups__pic { height: 116px; border-radius: 14px; background: var(--tile); }
+html.desk #s-cart .ups__pic img { transition: transform .45s var(--dease); }
+html.desk #s-cart .ups__pic img.round { width: 92px; height: 92px; }
+html.desk #s-cart .ups b { font: 600 13.5px/1.28 var(--font); padding: 0 40px 0 4px; margin: 0; min-height: 35px; text-align: left; }
+html.desk #s-cart .ups__price { margin-top: 0; padding: 0 4px; font: 700 15px/1.2 var(--font); text-align: left; }
+html.desk #s-cart .ups .is-sale { justify-items: start; }
+html.desk #s-cart .ups .is-sale .pr-old { justify-self: start; }
+html.desk #s-cart .ups::after { content: ''; position: absolute; right: 10px; bottom: 12px; width: 30px; height: 30px; border-radius: 50%;
+    background: var(--ink); -webkit-mask: none; transition: background .2s, transform .25s var(--dease); }
+html.desk #s-cart .ups::before { content: ''; position: absolute; z-index: 1; right: 10px; bottom: 12px; width: 30px; height: 30px; background: var(--app-bg);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E") center / 14px no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E") center / 14px no-repeat; transition: transform .25s var(--dease); }
+html.desk #s-cart .ups:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--line), 0 20px 34px -20px rgba(40, 24, 12, .55); }
+html.desk #s-cart .ups:hover .ups__pic img { transform: scale(1.06); }
+html.desk #s-cart .ups:hover::after { background: var(--brand); transform: scale(1.1); }
+html.desk #s-cart .ups:hover::before { transform: scale(1.1); background: #fff; }
+html.desk #s-cart .ups:active { transform: translateY(-1px) scale(.97); transition: transform .15s var(--dease); }
+html.desk #s-cart .citem:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
+/* стрелка «назад» у первой панели или окна — крестик: это закрытие, а не шаг назад (в оформлении — назад в корзину) */
+html.desk .screen.dk-first > .bar > .ibtn:first-child svg { display: none; }
+html.desk .screen.dk-first > .bar > .ibtn:first-child::before { content: ''; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; }
+html.desk .screen.dk-first > .bar > .ibtn:first-child { display: grid; place-items: center; width: 40px; height: 40px; margin-left: 10px; border-radius: 50%; }
+html.desk .screen.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); transform: rotate(90deg); }
+/* ── остальные экраны поверх — окна по центру ── */
+html.desk .screen:not(.is-tab):not(#s-rest):not(#s-cart):not(#s-checkout) {
+    left: 50%; right: auto; top: 50%; bottom: auto; width: 600px; height: min(820px, calc(100% - 64px)); translate: -50% -50%;
+    border-radius: 30px; overflow: hidden; box-shadow: 0 50px 120px -30px rgba(20, 12, 8, .6);
+    transform: translateY(26px) scale(.96); opacity: 0; transition: transform .4s var(--dease), opacity .25s, visibility 0s linear .4s;
+}
+html.desk .screen:not(.is-tab):not(#s-rest):not(#s-cart):not(#s-checkout):is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
+
+/* ── шторки — окна по центру ── */
+html.desk .scrim { z-index: 70; }
+html.desk .sheet {
+    left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; margin: auto; width: 520px; height: fit-content; max-height: calc(100% - 64px);
+    border-radius: 30px; overflow: hidden; box-shadow: 0 50px 120px -30px rgba(20, 12, 8, .6);
+    transform: translateY(30px) scale(.95); opacity: 0; visibility: hidden;
+    transition: transform .42s var(--dease), opacity .25s, visibility 0s linear .42s;
+}
+html.desk .sheet.is-on { transform: none; opacity: 1; visibility: visible; transition: transform .42s var(--dease), opacity .25s, visibility 0s; }
+html.desk .sheet.has-map { height: min(820px, calc(100% - 64px)); max-height: none; width: 600px; }
+/* блюдо — широкое окно: слева фото, справа состав и выбор, кнопка — внизу правой колонки */
+html.desk .sheet.is-dish { width: min(1000px, calc(100% - 64px)); height: min(660px, calc(100% - 64px)) !important; max-height: none; background: var(--app-bg); }
+html.desk .sheet.is-dish > .dpg { border-radius: 0; }
+html.desk .sheet.is-dish .dpg { height: 100%; }
+html.desk .sheet.is-dish .dpg > .scroll { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; height: 100%; padding-bottom: 0; }
+html.desk .sheet.is-dish .dish__stage { position: sticky; top: 0; height: min(660px, calc(100vh - 64px)); min-height: 0; margin: 0; }
+html.desk .sheet.is-dish .dish__rb--pic { left: 28px; bottom: 28px; top: auto; }
+html.desk .sheet.is-dish .dish__body { font-size: 15.5px; }
+html.desk .sheet.is-dish .dish__body h2, html.desk .sheet.is-dish .dish__body h1 { font-size: 34px; }
+html.desk .sheet.is-dish .dish__body { padding: 68px 28px 120px 8px; }
+html.desk .sheet.is-dish #dishImg { scale: 1.28; }
+html.desk .sheet.is-dish .sheet__foot { position: absolute; left: 50%; right: 0; bottom: 0; width: auto; }
+html.desk .sheet__close { transition: transform .25s var(--dease), background-color .2s; }
+html.desk .sheet__close:hover { transform: rotate(90deg) scale(1.06); }
+/* подсказка — плашкой под шапкой */
+html.desk .toast { left: 50%; right: auto; width: 440px; margin-left: -220px; border-radius: 0 0 22px 22px; --top: 0px; height: 64px; }
+@media (max-width: 1180px) {
+    html.desk #s-home .rests { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    html.desk #s-home .hello { font-size: 40px; }
+    html.desk .tab:not(#cartTab) > span:last-child { display: none; }
+    html.desk .dh-search kbd { display: none; }
+}
+
+/* ── верх как у clever.by (21.11) ── */
+html.desk .dstrip { position: absolute; left: 0; right: 0; top: 0; height: 40px; display: flex; align-items: center; justify-content: center; gap: 14px;
+    background: color-mix(in srgb, var(--ink) 5%, var(--app-bg)); font: 500 14.5px/1 var(--font); color: var(--ink); }
+html.desk .dstrip button { border: 0; background: none; padding: 6px 2px; color: inherit; font: inherit; transition: color .2s; }
+html.desk .dstrip button:hover { color: var(--brand); }
+html.desk .dstrip button[data-act="noop"]:hover { color: inherit; }
+html.desk .dstrip i { font-style: normal; color: var(--faint); }
+html.desk .dlogo { margin-right: auto; }
+html.desk .dlogo svg { width: 160px; height: 64px; }
+/* переключатель «Доставка / Навынос» */
+html.desk .dseg { order: 1; position: relative; flex: none; display: grid; grid-template-columns: 1fr 1fr; width: 340px; height: 54px; padding: 4px; box-sizing: border-box;
+    border-radius: 16px; background: color-mix(in srgb, var(--ink) 6%, var(--app-bg)); margin-right: 32px; }
+html.desk .dseg button { position: relative; z-index: 1; border: 0; background: none; font: 500 16px/1 var(--font); color: var(--muted); border-radius: 12px; transition: color .25s; }
+html.desk .dseg button[aria-selected="true"] { color: var(--ink); }
+html.desk .dseg button:not([aria-selected="true"]):hover { color: var(--ink); }
+html.desk .dseg__th { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 12px; background: var(--card);
+    box-shadow: 0 2px 10px -3px rgba(40, 24, 12, .2), 0 0 0 .5px rgba(40, 24, 12, .05); transition: transform .4s cubic-bezier(.3, 1.25, .5, 1); }
+html.desk .dseg.is-pk .dseg__th { transform: translateX(100%); }
+/* адрес — в рамке */
+html.desk .dh-addr { order: 1; flex: 0 1 auto; max-width: 360px; height: 54px; padding: 0 16px 0 14px; gap: 8px; border-radius: 16px; margin-right: auto;
+    background: var(--card); box-shadow: inset 0 0 0 1.5px var(--line); transition: box-shadow .25s, transform .2s var(--dease); }
+html.desk .dh-addr:hover { background: var(--card); box-shadow: inset 0 0 0 1.5px var(--line), 0 10px 22px -14px rgba(40, 24, 12, .4); }
+html.desk .dh-pin { flex: none; width: 22px; height: 22px; fill: none; stroke: var(--brand); stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+html.desk .dh-city { display: inline-flex; align-items: center; gap: 6px; font: 600 16px/1 var(--font); white-space: nowrap; }
+html.desk .dh-caret { width: 0; height: 0; border: 4px solid transparent; border-top: 5px solid var(--faint); border-bottom: 0; margin-top: 2px; }
+html.desk .dh-st { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 15px/1 var(--font); color: var(--muted); margin-left: 4px; }
+html.desk .dh-tag { flex: none; margin-left: 6px; padding: 6px 8px; border-radius: 8px; background: #e6f6ea; color: #16a34a; font: 600 15px/1 var(--font); white-space: nowrap; }
+/* значки справа: поиск, поддержка, профиль; избранное и «Войти» — в профиле */
+html.desk .dh-search, html.desk .dh-tel { order: 4; flex: none; width: 46px; height: 46px; min-width: 0; max-width: none; margin: 0; padding: 0; justify-content: center;
+    border-radius: 50%; background: none; box-shadow: none; color: var(--ink); }
+html.desk .dh-search svg.i, html.desk .dh-tel svg.i { width: 24px; height: 24px; color: var(--ink); }
+html.desk .dh-tel svg.i { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+html.desk .dh-search:hover, html.desk .dh-tel:hover { box-shadow: none; background: color-mix(in srgb, var(--ink) 7%, transparent); }
+html.desk .dh-search kbd, html.desk .dh-search > span { display: none; }
+html.desk .tab[data-tab="fav"], html.desk .dh-login { display: none !important; }
+html.desk .tab[data-tab="profile"] { width: 46px; height: 46px; padding: 0; justify-content: center; border-radius: 50%; }
+html.desk .tab[data-tab="profile"] > span:last-child { display: none; }
+html.desk .tab[data-tab="profile"] svg.i { width: 24px; height: 24px; }
+html.desk #cartTab { margin-left: 14px; }
+/* главная: без приветствия, сразу категории текстом */
+html.desk #s-home .hero { display: none; }
+html.desk #s-home .cats { flex-wrap: wrap; gap: 6px 4px; padding: calc(var(--top) + 36px) 16px 44px; }   /* 21.11: «от категорий акции отбивай сильнее» — 20 → 44 */
+html.desk .tabbar { border-bottom-color: transparent; box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 55%, transparent); }   /* у clever.by под шапкой линии нет — оставили едва заметную, чтобы лента не сливалась при прокрутке */
+html.desk #s-home .cat { width: auto; display: block; padding: 8px 13px; border-radius: 10px; transition: background .2s, color .2s; }
+html.desk #s-home .cat__pic { display: none; }
+html.desk #s-home .cat span { font: 500 20px/1.1 var(--font); color: var(--ink); white-space: nowrap; }
+html.desk #s-home .cat:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+html.desk #s-home .cat[aria-pressed="true"] { background: var(--brand); }
+html.desk #s-home .cat[aria-pressed="true"] span { color: #fff; }
+html.desk #s-home .cat:hover .cat__pic, html.desk #s-home .cat:active .cat__pic { transform: none; }
+@media (max-width: 1180px) {
+    html.desk .dseg { width: 260px; margin-right: 16px; }
+    html.desk .dh-addr { max-width: 260px; }
+}
+
+/* 21.11: «заголовки «Снова хочется», «Рестораны» и так далее — крупнее намного, должны быть заметнее»: на главной 28 → 44 px,
+   воздух над блоком больше, до ленты — чуть больше */
+html.desk #s-home .sec__head .h { font-size: 44px; line-height: 1.05; }
+html.desk #s-home .sec:not(:has(#promoRow)) { padding-top: 64px; gap: 26px; }
+html.desk #s-home .sec__head .link, html.desk #s-home .sec__head small { font-size: 16px !important; }
+html.desk #s-home .sec:has(#promoRow) { gap: 26px; }

@@ -1,0 +1,785 @@
+<meta charset="utf-8">
+<title>Шторка оценки · прототип v3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/*
+ * Стенд выбора вариантов шторки «Оцените блюда» v3.
+ * Сверху — телефон с живой шторкой (тапы работают), снизу — сравнение звёзд
+ * и типографика существующих шторок. Типографика самой шторки снята с
+ * glconfirm (адрес) и dish-rating v2: заголовок 700 24/26, текст 500 18/24,
+ * кнопка 17/55 r16. Акцент приложения #0085ff, звезда #ffb400, галочка #7ac142.
+ */
+:root {
+    --bg: #eef0f3;
+    --fg: #14161a;
+    --muted: #6b7280;
+    --card: #ffffff;
+    --line: #e2e5ea;
+    --accent: #0085ff;
+    --star: #ffb400;
+    --star-off: #dedede;
+    --ok: #7ac142;
+    color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #17191d;
+        --fg: #eceef1;
+        --muted: #9aa1ab;
+        --card: #202329;
+        --line: #2e3238;
+        color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --bg: #17191d;
+    --fg: #eceef1;
+    --muted: #9aa1ab;
+    --card: #202329;
+    --line: #2e3238;
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 15px/1.5 -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1060px; margin: 0 auto; padding-block: 28px 60px; }
+
+.pageHead { max-width: 640px; }
+.pageHead__eyebrow {
+    font: 600 11px/16px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 8px;
+}
+.pageHead h1 {
+    margin: 0 0 10px;
+    font: 700 26px/34px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+}
+.pageHead p { margin: 0; color: var(--muted); }
+
+.board { display: flex; gap: 28px; margin-top: 26px; align-items: flex-start; flex-wrap: wrap; }
+.board__phone { flex: 0 0 auto; }
+.board__panel { flex: 1 1 300px; min-width: 0; }
+
+/* — телефон — */
+.phone {
+    width: 375px; max-width: 100%;
+    height: 720px;
+    border-radius: 36px;
+    background: #f7f8fa;
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 60px rgba(10, 14, 30, .18);
+    position: relative;
+    overflow: hidden;
+}
+.phone__bar {
+    height: 44px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 18px;
+    font: 600 13px/18px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    color: #9aa1ab;
+    background: #fff;
+    border-bottom: 1px solid #f0f1f4;
+}
+.phone__feed { padding: 14px 16px; display: grid; gap: 10px; }
+.feedCard { height: 74px; border-radius: 14px; background: linear-gradient(120deg, #eceef2, #f6f7f9); }
+.feedCard--wide { height: 120px; background: linear-gradient(120deg, #e7eaf1, #f2f4f8); }
+
+/* — шторка — */
+.sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -12px 40px rgba(15, 20, 40, .16);
+    transform: translateY(0);
+    transition: transform .42s cubic-bezier(.32, .72, 0, 1);
+    max-height: 92%;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+}
+.sheet--closing { transform: translateY(110%); }
+
+/* Компоновки: A — как v2 (заголовок слева), B — всё по центру,
+   C — подсказка как подзаголовок, D — фото-баннер */
+.drate { padding: 14px 16px 22px; display: flex; flex-direction: column; min-height: 0; }
+
+.drate__header { display: flex; align-items: center; justify-content: space-between; margin: 0 0 10px; }
+.drate__title { color: #000; padding-right: 10px; font: 600 16px/21px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; }
+
+.drate--center .drate__header { justify-content: center; }
+.drate--center .drate__title { padding-right: 0; }
+
+.drate__hint { margin: -4px 0 12px; font: 400 13px/17px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: #85899c; text-align: left; text-wrap: balance; }
+/* B · всё по центру — подсказка остаётся центрированной */
+.drate--center .drate__hint { text-align: center; }
+/* C: подсказка переезжает в шапку под заголовок (узел переносится из JS) —
+   шапка становится колонкой, ✕ абсолютом, текст не упирается в крестик */
+.drate--subhint .drate__header { display: block; position: relative; padding-right: 42px; }
+.drate--subhint .drate__close { position: absolute; top: 0; right: 0; }
+.drate--subhint .drate__hint { margin: 3px 0 0; text-align: left; }
+
+.drate__close {
+    flex: 0 0 auto; width: 32px; height: 32px; border: 0; border-radius: 50%;
+    background: #f0f0f0; font: 400 18px/18px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: #6c6c6c;
+    transition: opacity .2s ease; cursor: pointer;
+}
+.drate__close:active { opacity: .6; }
+
+.drate__item { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 10px; border-radius: 12px; background: #f5f5f5; }
+.drate__itemPhoto {
+    flex: 0 0 56px; width: 56px; height: 56px; border-radius: 10px; object-fit: cover;
+    background: linear-gradient(135deg, #f0e6f8, #dccdec);
+}
+.drate__name { color: #000; font: 500 15px/19px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; text-wrap: balance; }
+.drate__company { margin-top: 3px; font: 400 12px/16px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: #85899c; }
+
+.drate--banner .drate__item { display: block; padding: 0; overflow: hidden; }
+.drate--banner .drate__itemPhoto { width: 100%; flex: none; height: 150px; border-radius: 0; display: block; }
+.drate--banner .drate__itemBody { padding: 10px 12px 12px; }
+
+.drate__stars { display: flex; justify-content: center; gap: 10px; }
+.drate__star {
+    padding: 0; border: 0; background: none; color: var(--star-off);
+    transition: transform .2s ease, color .2s ease; cursor: pointer;
+}
+.drate__star:active { transform: scale(1.15); }
+.drate__star--active { color: var(--star); }
+.drate__star svg { display: block; width: 42px; height: 42px; fill: currentColor; }
+.drate__star--spring { animation: starSpring .28s ease; }
+.drate__star--dance { animation: starDance .7s ease; }
+@keyframes starSpring { 40% { transform: scale(1.35); } }
+@keyframes starDance {
+    20% { transform: scale(1.25) rotate(-12deg); }
+    45% { transform: scale(1.18) rotate(10deg); }
+    70% { transform: scale(1.28) rotate(-6deg); }
+    100% { transform: none; }
+}
+
+.drate__actions { margin-top: 12px; text-align: center; }
+.drate__skip { padding: 0; border: 0; background: none; font: 400 13px/17px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: #85899c; transition: opacity .2s ease; cursor: pointer; }
+.drate__skip:active { opacity: .6; }
+
+/* «Почему?» — вырастает вниз с bounce */
+.why { overflow: hidden; max-height: 0; opacity: 0; transform: translateY(-6px); margin-top: 0; transition: max-height .65s cubic-bezier(.3, 1, .35, 1), margin-top .45s ease; }
+.why--open { max-height: 240px; opacity: 1; transform: none; margin-top: 12px; }
+/* контент блока доезжает после того, как карточка доросла */
+.why__label, .why__input, .why__buttons { opacity: 0; transform: translateY(-6px); transition: opacity .3s ease .3s, transform .35s ease .3s; }
+.why--open .why__label, .why--open .why__input, .why--open .why__buttons { opacity: 1; transform: none; }
+.why__label { text-align: center; font: 500 14px/19px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: #6b6f80; margin-bottom: 8px; }
+.why__input {
+    width: 100%; box-sizing: border-box; min-height: 84px; max-height: 140px; resize: none;
+    border: 0; border-radius: 12px; background: #f5f5f5; padding: 12px 14px;
+    font: 400 15px/21px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: #14161a; outline: none;
+}
+.why__buttons { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.why__send, .why__pass {
+    text-align: center; border: 0; border-radius: 13px; cursor: pointer;
+    font: 500 15px/44px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; transition: transform .15s ease, opacity .15s ease;
+}
+.why__send:active, .why__pass:active { transform: scale(.98); }
+.why__send { flex: 1 1 0; color: #fff; background: var(--accent); box-shadow: 0 8px 18px rgba(0, 133, 255, .28); }
+.why__pass { padding: 0 14px; color: #85899c; background: none; }
+
+/* Финал: галочка из оформления заказа (cart3/screen-success), текст вариативный */
+.thanks { padding: 24px 0 34px; text-align: center; }
+.thanksCheck {
+    width: 56px; height: 56px; margin: 0 auto 14px; display: block;
+    border-radius: 50%;
+    stroke-width: 2; stroke: #fff; stroke-miterlimit: 10;
+    box-shadow: inset 0 0 0 #7ac142;
+    animation: checkFill .4s ease-in-out .4s forwards, checkScale .3s ease-in-out .9s both;
+}
+.thanksCheck circle { stroke-dasharray: 166; stroke-dashoffset: 166; stroke: var(--ok); fill: none; stroke-width: 2; animation: checkStroke .6s cubic-bezier(.65,0,.45,1) forwards; }
+.thanksCheck path { stroke-dasharray: 48; stroke-dashoffset: 48; fill: none; stroke-width: 2; transform-origin: 50% 50%; animation: checkStroke .3s cubic-bezier(.65,0,.45,1) .8s forwards; }
+@keyframes checkStroke { 100% { stroke-dashoffset: 0; } }
+@keyframes checkScale { 0%, 100% { transform: none; } 50% { transform: scale3d(1.1, 1.1, 1); } }
+@keyframes checkFill { 100% { box-shadow: inset 0 0 0 30px var(--ok); } }
+.thanksTitle { color: #000; font: 700 20px/25px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; }
+.thanksText { margin-top: 6px; font: 400 14px/18px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: #85899c; }
+
+/* canvas — replaced-элемент: inset:0 его не растягивает, поэтому явно 100%,
+   иначе он стоит 300×150 у левого края и мишура съезжает влево */
+.confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* — тост лестницы при закрытии — */
+.toast {
+    position: absolute; left: 16px; right: 16px; bottom: 18px;
+    background: #14161a; color: #fff; border-radius: 14px;
+    padding: 12px 14px; font: 400 13px/18px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    transition: opacity .25s ease, transform .25s ease;
+    /* тост информационный и не кликается; без этого скрытый
+       (opacity:0) перехватывает тапы у «Не оценивать» под ним */
+    pointer-events: none;
+}
+.toast--hidden { opacity: 0; transform: translateY(8px); }
+.toast b { color: #ffd76e; font-weight: 600; }
+
+/* — панель управления стендом — */
+.panel { display: grid; gap: 14px; }
+.group { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.group__label { font: 600 11px/16px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill {
+    border: 1px solid var(--line); background: none; color: var(--fg);
+    border-radius: 999px; padding: 7px 13px; font: 500 13px/17px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
+    cursor: pointer; transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+.pill:hover { border-color: var(--accent); }
+.pill--on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.group p { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+
+/* — сравнение звёзд — */
+.compare { margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; }
+.compare__cell { flex: 1 1 300px; min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 18px; }
+.compare__cell h3 { margin: 0 0 4px; font: 600 16px/22px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; }
+.compare__cell > p { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.bigStars { display: flex; gap: 8px; color: #dedede; }
+.bigStars svg { width: 44px; height: 44px; fill: currentColor; }
+
+/* — типографика — */
+.typeSpec { margin-top: 14px; display: grid; gap: 10px; }
+.typeSpec__row { display: flex; align-items: baseline; gap: 12px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.typeSpec__meta { flex: 0 0 170px; font: 500 12px/16px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; color: var(--muted); }
+.typeSpec__sample { min-width: 0; color: var(--fg); }
+
+.note { margin: 26px 0 0; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 460px) {
+    .phone { height: 640px; }
+    .typeSpec__row { flex-direction: column; gap: 2px; }
+    .board { gap: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .sheet, .why, .why__send, .why__pass, .pill, .drate__star { transition: none; }
+    .thanksCheck, .thanksCheck circle, .thanksCheck path, .drate__star--spring, .drate__star--dance { animation-duration: .01ms; }
+}
+</style>
+
+<div class="wrap">
+    <div class="pageHead">
+        <p class="pageHead__eyebrow">app4 · шторка «Оцените блюда» · v3</p>
+        <h1>Прототип: компоновка, тексты, звёзды, анимации</h1>
+        <p>Шторка в телефоне живая: тапайте звёзды, закрывайте крестиком. Варианты переключаются справа. Типографика снята со шторки «Доставляем сюда?», галочка — из оформления заказа.</p>
+    </div>
+
+    <div class="board">
+        <div class="board__phone">
+            <div class="phone">
+                <div class="phone__bar"><span>9:41</span><span>clever</span></div>
+                <div class="phone__feed">
+                    <div class="feedCard feedCard--wide"></div>
+                    <div class="feedCard"></div>
+                    <div class="feedCard"></div>
+                    <div class="feedCard"></div>
+                </div>
+
+                <div class="sheet sheet--closing" id="sheet">
+                    <canvas class="confetti" id="confetti"></canvas>
+                    <div class="drate" id="drate">
+                        <div id="stage">
+                            <div class="drate__header" id="header">
+                                <div class="drate__title">Оцените блюдо</div>
+                                <button type="button" class="drate__close" aria-label="Закрыть" id="closeBtn">✕</button>
+                            </div>
+                            <div class="drate__hint" id="hint"></div>
+                            <div class="drate__item" id="item">
+                                <div class="drate__itemPhoto" id="photo"></div>
+                                <div class="drate__itemBody">
+                                    <div class="drate__name" id="dname">Ролл «Филадельфия»</div>
+                                    <div class="drate__company" id="dcompany">Ракета</div>
+                                </div>
+                            </div>
+                            <div class="drate__stars" id="stars"></div>
+                            <div class="why" id="why">
+                                <div class="why__label">Хотите рассказать подробнее?</div>
+                                <textarea class="why__input" id="whyText" rows="1" placeholder="По желанию — пара слов о блюде"></textarea>
+                                <div class="why__buttons">
+                                    <button type="button" class="why__send" id="whySend">Отправить</button>
+                                    <button type="button" class="why__pass" id="whyPass">Пропустить</button>
+                                </div>
+                            </div>
+                            <div class="drate__actions" id="actions">
+                                <button type="button" class="drate__skip" id="skipBtn">Не оценивать</button>
+                            </div>
+                        </div>
+                        <div class="thanks" id="thanks" hidden>
+                            <svg class="thanksCheck" viewBox="0 0 52 52" aria-hidden="true">
+                                <circle cx="26" cy="26" r="25"/>
+                                <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                            </svg>
+                            <div class="thanksTitle" id="thanksTitle">Спасибо!</div>
+                            <div class="thanksText" id="thanksText">Ваши оценки учтены</div>
+                            <div class="drate__actions" style="margin-top:18px">
+                                <button type="button" class="drate__skip" id="replayBtn">Сыграть заново</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toast toast--hidden" id="toast"></div>
+            </div>
+        </div>
+
+        <div class="board__panel panel">
+            <div class="group">
+                <p class="group__label">Компоновка</p>
+                <div class="pills" id="layoutPills">
+                    <button type="button" class="pill pill--on" data-layout="">A · как сейчас</button>
+                    <button type="button" class="pill" data-layout="drate--center">B · по центру</button>
+                    <button type="button" class="pill" data-layout="drate--subhint">C · подсказка в шапке</button>
+                    <button type="button" class="pill" data-layout="drate--banner">D · фото-баннер</button>
+                </div>
+                <p id="layoutNote">Заголовок слева, ✕ справа, блюдо на серой карточке — текущая вёрстка v2.</p>
+            </div>
+
+            <div class="group">
+                <p class="group__label">Подсказка «зачем оценивать»</p>
+                <div class="pills" id="hintPills">
+                    <button type="button" class="pill pill--on" data-hint="none">без подсказки</button>
+                    <button type="button" class="pill" data-hint="0">В1</button>
+                    <button type="button" class="pill" data-hint="1">В2</button>
+                    <button type="button" class="pill" data-hint="2">В3</button>
+                    <button type="button" class="pill" data-hint="3">В4</button>
+                </div>
+                <p id="hintNote"></p>
+            </div>
+
+            <div class="group">
+                <p class="group__label">Финальный текст</p>
+                <div class="pills" id="finalPills">
+                    <button type="button" class="pill pill--on" data-final="0">Ф1</button>
+                    <button type="button" class="pill" data-final="1">Ф2</button>
+                    <button type="button" class="pill" data-final="2">Ф3</button>
+                    <button type="button" class="pill" data-final="3">Ф4</button>
+                </div>
+                <p id="finalNote"></p>
+            </div>
+
+            <div class="group">
+                <p class="group__label">Звёзды</p>
+                <div class="pills" id="starPills">
+                    <button type="button" class="pill" data-stars="old">старые (косые)</button>
+                    <button type="button" class="pill pill--on" data-stars="new">новые (ровноплечие)</button>
+                </div>
+                <p>Тап по 1–2 звёздам открывает «Почему?», по пятёрке — «танец» и мишура. Закрытие крестиком показывает, что сервер запишет по лестнице.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="compare">
+        <div class="compare__cell">
+            <h3>Было</h3>
+            <p>Звезда из v2 (Material Design): левое плечо ниже правого, вершина смещена — на глаз «косая».</p>
+            <div class="bigStars" id="oldStars"></div>
+        </div>
+        <div class="compare__cell">
+            <h3>Стало</h3>
+            <p>Ровноплечая звезда: вершина по центру, плечи симметричны, та же сетка 24×24 и цвет.</p>
+            <div class="bigStars" id="newStars"></div>
+        </div>
+    </div>
+
+    <div class="compare">
+        <div class="compare__cell">
+            <h3>Типографика — как в шторке «Доставляем сюда?»</h3>
+            <p>Размеры и веса взяты из glconfirm (адрес) и push-шторки; своя шкала не вводится.</p>
+            <div class="typeSpec">
+                <div class="typeSpec__row">
+                    <span class="typeSpec__meta">заголовок · 700 24/26</span>
+                    <span class="typeSpec__sample" style="font:700 24px/26px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">Оцените блюдо</span>
+                </div>
+                <div class="typeSpec__row">
+                    <span class="typeSpec__meta">текст · 500 18/24</span>
+                    <span class="typeSpec__sample" style="font:500 18px/24px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif">Ролл «Филадельфия»</span>
+                </div>
+                <div class="typeSpec__row">
+                    <span class="typeSpec__meta">кнопка · 500 17/55 r16</span>
+                    <span class="typeSpec__sample" style="display:inline-block;text-align:center;border-radius:16px;background:var(--accent);color:#fff;font:500 17px/55px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;padding:0 22px">Отправить</span>
+                </div>
+                <div class="typeSpec__row">
+                    <span class="typeSpec__meta">второстепенная · 400 17/55</span>
+                    <span class="typeSpec__sample" style="display:inline-block;text-align:center;border-radius:16px;background:#f4f3f3;color:#0f0f0f;font:400 17px/55px -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;padding:0 22px">Не оценивать</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="note">Мишура пускается только на пятёрке — на финале её нет: галочка из оформления заказа (зелёная, анимированная) даёт финалу достаточно движения. «Пропустить» в блоке «Почему?» отправляет оценку без текста — оценка не теряется.</p>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    var HINTS = [
+        'Ваша оценка поможет другим выбрать',
+        'Помогите найти единомышленников по вкусу',
+        'Так мы поймём, что вам действительно нравится',
+        'Найдём для вас блюда по вкусу'
+    ];
+    var HINT_NOTES = [
+        'В1 · польза другим: короткое и понятное, читается за секунду.',
+        'В2 · «единомышленники по вкусу» — формулировка из фидбэка.',
+        'В3 · личная польза: намекает, что оценки влияют на подбор.',
+        'В4 · осторожная персонализация: обещает подбор, который ещё не готов.'
+    ];
+    var FINALS = [
+        ['Спасибо!', 'Вы помогли тем, кто ещё выбирает'],
+        ['Спасибо, что делитесь вкусом', 'Нам важно ваше мнение'],
+        ['Готово!', 'Ваше мнение очень ценно для нас'],
+        ['Спасибо!', 'Ваши вкусы записаны']
+    ];
+    var LADDER = [
+        '1-е смахивание — считаем случайным: <b>покажем снова при следующем заходе</b>.',
+        '2-е смахивание — пишем в лог: <b>следующий показ через 3 дня</b>.',
+        '3-е смахивание — <b>следующий показ через месяц</b>.',
+        '4-е смахивание — <b>больше не показываем никогда</b>.'
+    ];
+
+    var DISHES = [
+        { name: 'Ролл «Филадельфия»', company: 'Ракета', hue: '135deg, #f0e6f8, #dccdec' },
+        { name: 'Свиные рёбра BBQ', company: 'Ракета', hue: '135deg, #fdeeda, #f7d9ae' }
+    ];
+
+    var OLD_STAR = 'M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z';
+    var NEW_STAR = 'M12 2 L14.97 8.01 21.61 8.98 16.8 13.66 17.94 20.27 12 17.15 6.06 20.27 7.2 13.66 2.39 8.98 9.03 8.01 Z';
+    // скругление вершин — только на новой звезде, старую показываем как есть
+    var NEW_STAR_ATTRS = ' fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"';
+
+    var starPath = NEW_STAR;
+    var layout = '';
+    var hintMode = 'none';
+    var finalIdx = 0;
+    var dishIdx = 0;
+    var rated = 0;
+    var dismissCount = 0;
+    var pendingLow = 0;
+    var whyOpen = false;
+
+    var el = function (id) { return document.getElementById(id); };
+    var sheet = el('sheet'), stage = el('stage'), thanks = el('thanks');
+    var starsBox = el('stars'), why = el('why'), whyText = el('whyText');
+    var hint = el('hint'), photo = el('photo'), dname = el('dname'), dcompany = el('dcompany');
+    var toast = el('toast');
+    var confetti = el('confetti');
+    var confettiCtx = confetti.getContext('2d');
+    var confettiBits = [];
+
+    function renderStars() {
+        starsBox.innerHTML = '';
+        for (var i = 1; i <= 5; i++) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'drate__star';
+            b.setAttribute('aria-label', i + ' из 5');
+            b.dataset.value = i;
+            b.innerHTML = '<svg viewBox="0 0 24 24"><path d="' + starPath + '"' +
+                (starPath === NEW_STAR ? NEW_STAR_ATTRS : ' fill="currentColor"') + '/></svg>';
+            b.addEventListener('click', function () { tapStar(parseInt(this.dataset.value, 10), this); });
+            starsBox.appendChild(b);
+        }
+        paint(0);
+    }
+
+    function paint(value) {
+        var buttons = starsBox.querySelectorAll('.drate__star');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].classList.toggle('drate__star--active', (i + 1) <= value);
+        }
+    }
+
+    function showDish() {
+        var dish = DISHES[dishIdx];
+        dname.textContent = dish.name;
+        dcompany.textContent = dish.company;
+        photo.style.background = 'linear-gradient(' + dish.hue + ')';
+        whyText.value = '';
+        closeWhy();
+        paint(0);
+    }
+
+    function openWhy() {
+        whyOpen = true;
+        el('actions').hidden = true;
+        why.classList.add('why--open');
+        setTimeout(function () { whyText.focus(); }, 950);
+    }
+
+    function closeWhy() {
+        whyOpen = false;
+        el('actions').hidden = false;
+        why.classList.remove('why--open');
+    }
+
+    function retrigger(node, cls) {
+        node.classList.remove(cls);
+        void node.offsetWidth;
+        node.classList.add(cls);
+    }
+
+    function tapStar(value, node) {
+        retrigger(node, 'drate__star--spring');
+        paint(value);
+        if (value <= 2) {
+            pendingLow = value;
+            // сначала играет пружинка звезды (~280мс), потом растёт карточка,
+            // контент «Почему?» доезжает уже поверх раскрытой карточки
+            setTimeout(openWhy, 300);
+            return;
+        }
+        if (value === 5) {
+            danceAndConfetti();
+            setTimeout(function () { advance(); }, 950);
+            return;
+        }
+        setTimeout(advance, 380);
+    }
+
+    function danceAndConfetti() {
+        var buttons = starsBox.querySelectorAll('.drate__star');
+        for (var i = 0; i < buttons.length; i++) retrigger(buttons[i], 'drate__star--dance');
+        burst();
+    }
+
+    function submitWhy(withText) {
+        if (!whyOpen) return;
+        closeWhy();
+        advance();
+    }
+
+    function advance() {
+        rated++;
+        dishIdx++;
+        if (dishIdx < DISHES.length) {
+            showDish();
+        } else {
+            finish();
+        }
+    }
+
+    function finish() {
+        stage.hidden = true;
+        thanks.hidden = false;
+        var f = FINALS[finalIdx];
+        el('thanksTitle').textContent = f[0];
+        el('thanksText').textContent = f[1];
+        var check = thanks.querySelector('.thanksCheck');
+        check.style.animation = 'none';
+        void check.offsetWidth;
+        check.style.animation = '';
+    }
+
+    function restart() {
+        dishIdx = 0;
+        rated = 0;
+        stage.hidden = false;
+        thanks.hidden = true;
+        showDish();
+    }
+
+    function showToast(html) {
+        toast.innerHTML = html;
+        toast.classList.remove('toast--hidden');
+        setTimeout(function () { toast.classList.add('toast--hidden'); }, 5200);
+    }
+
+    /* — мишура: маленький разлетающийся прямоугольники на canvas — */
+    function sizeCanvas() {
+        var r = confetti.getBoundingClientRect();
+        confetti.width = r.width;
+        confetti.height = r.height;
+    }
+
+    /* две «пушки» из нижних углов, летят вверх к центру;
+       частицы — ленточки (вытянутые прямоугольники) и кружки */
+    var confettiRunning = false;
+
+    function burst() {
+        sizeCanvas();
+        var colors = ['#ffb400', '#ffd76e', '#7ac142', '#0085ff', '#f473b9'];
+        var w = confetti.width, h = confetti.height;
+        gun(w * 0.06, h * 0.95, 1, colors);
+        gun(w * 0.94, h * 0.95, -1, colors);
+        if (!confettiRunning) {
+            confettiRunning = true;
+            requestAnimationFrame(tickConfetti);
+        }
+    }
+
+    function gun(x0, y0, dir, colors) {
+        for (var i = 0; i < 35; i++) {
+            var angle = (35 + Math.random() * 35) * Math.PI / 180; /* 35–70° над горизонтом */
+            var speed = 8 + Math.random() * 6;
+            confettiBits.push({
+                x: x0,
+                y: y0,
+                vx: dir * speed * Math.cos(angle),
+                vy: -speed * Math.sin(angle),
+                s: 4 + Math.random() * 5,
+                rot: Math.random() * Math.PI,
+                vr: (Math.random() - 0.5) * 0.3,
+                color: colors[i % colors.length],
+                shape: Math.random() < 0.75 ? 'ribbon' : 'dot',
+                /* покачивание при падении: своя фаза, скорость и размах */
+                phase: Math.random() * Math.PI * 2,
+                phaseV: 0.08 + Math.random() * 0.06,
+                swayAmp: 0.4 + Math.random() * 0.5,
+                life: 70 + Math.random() * 30
+            });
+        }
+    }
+
+    function tickConfetti() {
+        confettiCtx.clearRect(0, 0, confetti.width, confetti.height);
+        confettiBits = confettiBits.filter(function (p) { return p.life > 0; });
+        for (var i = 0; i < confettiBits.length; i++) {
+            var p = confettiBits[i];
+            p.vy += 0.22; p.y += p.vy; p.life--;
+            if (p.vy < 0) {
+                /* летит вверх — обычная баллистика с вращением */
+                p.x += p.vx; p.rot += p.vr;
+            } else {
+                /* падает — тормозим горизонталь и машем из стороны в сторону,
+                   лента разворачивается по синусу, как бумажка в воздухе */
+                p.vx *= 0.985;
+                p.x += p.vx + Math.sin(p.phase) * p.swayAmp;
+                p.phase += p.phaseV;
+                p.rot += Math.sin(p.phase) * 0.12;
+            }
+            confettiCtx.save();
+            confettiCtx.translate(p.x, p.y);
+            confettiCtx.rotate(p.rot);
+            confettiCtx.globalAlpha = Math.min(1, p.life / 30);
+            confettiCtx.fillStyle = p.color;
+            if (p.shape === 'ribbon') {
+                confettiCtx.fillRect(-p.s * 1.3, -p.s * 0.28, p.s * 2.6, p.s * 0.55);
+            } else {
+                confettiCtx.beginPath();
+                confettiCtx.arc(0, 0, p.s * 0.45, 0, Math.PI * 2);
+                confettiCtx.fill();
+            }
+            confettiCtx.restore();
+        }
+        if (confettiBits.length) requestAnimationFrame(tickConfetti);
+        else {
+            confettiCtx.clearRect(0, 0, confetti.width, confetti.height);
+            confettiRunning = false;
+        }
+    }
+
+    /* — панель вариантов — */
+    function bindPills(boxId, onPick) {
+        var box = el(boxId);
+        box.addEventListener('click', function (e) {
+            var pill = e.target.closest('.pill');
+            if (!pill) return;
+            var all = box.querySelectorAll('.pill');
+            for (var i = 0; i < all.length; i++) all[i].classList.remove('pill--on');
+            pill.classList.add('pill--on');
+            onPick(pill);
+        });
+    }
+
+    bindPills('layoutPills', function (pill) {
+        layout = pill.dataset.layout;
+        var box = el('drate');
+        box.classList.remove('drate--center', 'drate--subhint', 'drate--banner');
+        if (layout) box.classList.add(layout);
+        // C · подсказка живёт в шапке под заголовком: переносим узел туда
+        // и возвращаем на место (сразу после шапки) в остальных компоновках
+        if (layout === 'drate--subhint') {
+            el('header').appendChild(hint);
+        } else {
+            el('header').after(hint);
+        }
+        el('layoutNote').textContent = {
+            '': 'A · заголовок слева, ✕ справа, блюдо на серой карточке — текущая вёрстка v2.',
+            'drate--center': 'B · заголовок по центру: спокойнее, ✕ остаётся справа абсолютом?',
+            'drate--subhint': 'C · подсказка живёт в шапке под заголовком — экономит вертикаль.',
+            'drate--banner': 'D · блюдо широким фото-баннером (как 528x260 в ленте) — крупно, но шторка выше.'
+        }[layout];
+    });
+    // у B крестик остаётся справа: поднимем его над центрированным заголовком
+    el('layoutPills').addEventListener('click', function () {
+        var h = el('header');
+        if (el('drate').classList.contains('drate--center')) {
+            h.style.position = 'relative';
+        } else {
+            h.style.position = '';
+        }
+    });
+
+    bindPills('hintPills', function (pill) {
+        hintMode = pill.dataset.hint;
+        if (hintMode === 'none') {
+            hint.textContent = '';
+            hint.hidden = true;
+            el('hintNote').textContent = 'Без подсказки — как в v2.';
+        } else {
+            hint.hidden = false;
+            hint.textContent = HINTS[+hintMode];
+            el('hintNote').textContent = HINT_NOTES[+hintMode];
+        }
+    });
+
+    bindPills('finalPills', function (pill) {
+        finalIdx = +pill.dataset.final;
+        var f = FINALS[finalIdx];
+        el('finalNote').textContent = 'Ф' + (finalIdx + 1) + ' · «' + f[0] + ' ' + f[1] + '»';
+        if (!thanks.hidden) finish();
+    });
+
+    function renderCompare() {
+        el('oldStars').innerHTML = new Array(6).join(
+            '<svg viewBox="0 0 24 24"><path fill="currentColor" d="' + OLD_STAR + '"/></svg>'
+        );
+        el('newStars').innerHTML = new Array(6).join(
+            '<svg viewBox="0 0 24 24"><path d="' + NEW_STAR + '"' + NEW_STAR_ATTRS + '/></svg>'
+        );
+    }
+
+    bindPills('starPills', function (pill) {
+        starPath = pill.dataset.stars === 'old' ? OLD_STAR : NEW_STAR;
+        renderStars();
+        paint(0);
+    });
+
+    el('closeBtn').addEventListener('click', function () {
+        dismissCount = Math.min(dismissCount + 1, 4);
+        sheet.classList.add('sheet--closing');
+        showToast('<b>Закрыли шторку (' + dismissCount + '-е смахивание).</b> ' + LADDER[dismissCount - 1] +
+            '<br>Через 3 секунды откроем снова.');
+        setTimeout(function () {
+            sheet.classList.remove('sheet--closing');
+            restart();
+        }, 3200);
+    });
+
+    el('skipBtn').addEventListener('click', function () { advance(); });
+    el('whySend').addEventListener('click', function () { submitWhy(true); });
+    el('whyPass').addEventListener('click', function () { submitWhy(false); });
+    el('replayBtn').addEventListener('click', restart);
+
+    renderStars();
+    showDish();
+    renderCompare();
+    hint.hidden = true;
+
+    // въезд шторки снизу: класс снимаем после первого кадра, чтобыtransition сработал
+    requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+            sheet.classList.remove('sheet--closing');
+        });
+    });
+})();
+</script>
