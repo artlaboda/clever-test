@@ -56,9 +56,32 @@ window.cleverDesk = function (A) {
         if (!pr) { pr = document.createElement('button'); pr.type = 'button'; pr.className = 'cat dcat-promo'; pr.dataset.act = 'filter'; pr.dataset.id = 'promo'; pr.innerHTML = '<span>🔥 Акции</span>'; row.insertBefore(pr, all.nextSibling); }
         all.setAttribute('aria-pressed', String(!S.cat && !S.filters.promo));
         // 21.11: «и так их и называй — акции»: заголовок над лентой акций, как у остальных блоков
-        var pr0 = document.getElementById('promoRow'), sec = pr0 && pr0.closest('.sec');
-        if (sec && !sec.querySelector('.dpromo-h')) { var hd = document.createElement('div'); hd.className = 'sec__head pad dpromo-h'; hd.innerHTML = '<h2 class="h">Акции</h2>'; sec.insertBefore(hd, sec.firstChild); }
+        deskPromo();
         pr.setAttribute('aria-pressed', String(!!S.filters.promo));
+    }
+    function deskPromo() {
+        var row = document.getElementById('promoRow'), sec = row && row.closest('.sec');
+        if (!sec || sec.querySelector('.dpromo-h')) return;
+        var hd = document.createElement('div'); hd.className = 'sec__head pad dpromo-h';
+        hd.innerHTML = '<h2 class="h">Акции</h2><span class="dpromo-nav">' +
+            '<button type="button" aria-label="Назад" aria-controls="promoRow">' + ic('i-right') + '</button>' +
+            '<button type="button" aria-label="Вперёд" aria-controls="promoRow">' + ic('i-right') + '</button></span>';
+        sec.insertBefore(hd, row);
+        var buttons = hd.querySelectorAll('button');
+        function sync() {
+            buttons[0].disabled = row.scrollLeft < 1;
+            buttons[1].disabled = row.scrollLeft >= row.scrollWidth - row.clientWidth - 1;
+        }
+        [-1, 1].forEach(function (direction, i) {
+            buttons[i].addEventListener('click', function () {
+                if (row.children.length < 2) return;
+                var pitch = row.children[1].getBoundingClientRect().left - row.children[0].getBoundingClientRect().left;
+                var next = (Math.round(row.scrollLeft / pitch) + direction) * pitch;
+                row.scrollTo({ left: next, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+            });
+        });
+        row.addEventListener('scroll', sync, { passive: true });
+        sync();
     }
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
     // курьер в карточке заведения (21.11: «возьми бег курьера и ходьбу»): навели — идёт (crGame('walk')), через 0,7 с переходит на
@@ -187,7 +210,7 @@ window.cleverDesk = function (A) {
         }
         app.addEventListener('mouseover', function (e) {
             if (!deskOn() || e.target.closest('.hsnav')) return;
-            var h = e.target.closest('.hscroll, .filters, .rtabs__row, .ri-tks, .cdays, .slots');
+            var h = e.target.closest('.hscroll:not(#promoRow), .filters, .rtabs__row, .ri-tks, .cdays, .slots');
             if (h && h.scrollWidth - h.clientWidth < 8) h = null;
             if (h !== cur) { cur = h; put(); }
         });

@@ -112,12 +112,30 @@ html.desk .screen.is-tab .h, html.desk #s-rest .h { font-size: 28px; }
 html.desk #s-home .filters { flex-wrap: wrap; overflow: visible; }
 html.desk #s-home .rests { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 24px; }
 html.desk #s-home .sec--rests2 { padding-top: 36px; }
-html.desk #s-home .promo {
-    --promo-inset: 22px; --promo-height: 204px;
-    position: relative; width: 380px; gap: 12px;
+html.desk #promoRow {
+    --promo-gap: 12px; gap: var(--promo-gap); margin-inline: 16px; padding-inline: 0;
+    scroll-padding-inline: 0; scroll-snap-type: x mandatory;
 }
-html.desk #s-home .promo__banner { padding-block: 20px 22px; }
+html.desk #promoPager i:nth-last-child(-n+3) { display: none; }
+html.desk #s-home .dpromo-h { align-items: center; padding-right: 16px; }
+html.desk .dpromo-nav { display: flex; gap: 8px; }
+html.desk .dpromo-nav button {
+    display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--line);
+    border-radius: 50%; background: var(--card); color: var(--ink);
+    transition: background .2s, color .2s, transform .25s var(--dease);
+}
+html.desk .dpromo-nav button:disabled { opacity: .4; cursor: default; }
+html.desk .dpromo-nav button:enabled:hover { background: var(--ink); color: var(--app-bg); }
+html.desk .dpromo-nav button:enabled:active { transform: scale(.94); }
+html.desk .dpromo-nav svg.i { width: 18px; height: 18px; }
+html.desk .dpromo-nav button:first-child svg { rotate: 180deg; }
+html.desk #s-home .promo {
+    --promo-inset: clamp(12px, 1.35vw, 20px); --promo-height: 204px;
+    position: relative; width: calc((100% - 3 * var(--promo-gap)) / 4); gap: 12px;
+}
+html.desk #s-home .promo__banner { padding-block: 20px 22px; container-type: inline-size; }
 html.desk #s-home .promo > .rest__row { position: relative; }
+html.desk #s-home .promo .rest__name { min-width: 0; overflow-wrap: anywhere; }
 @media (hover: hover) {
     html.desk #s-home .promo__banner { transition: transform .35s var(--dease); }
     /* Тень под плашкой рисуется отдельно, чтобы её не срезал контур плашки. */
@@ -133,10 +151,18 @@ html.desk #s-home .promo > .rest__row { position: relative; }
 }
 html.desk #s-home .promo .promo__cut { transition: scale .5s var(--dease), rotate .5s var(--dease); scale: 1.16; transform-origin: 70% 50%; }
 html.desk #s-home .promo:hover .promo__cut { scale: 1.24; }
-html.desk #s-home .promo__title { font-size: 30px; }
-html.desk #s-home .promo__text { max-width: 180px; }
-html.desk #s-home .promo--2 .promo__text { max-width: 200px; }
-html.desk #s-home .promo__sub { font-size: 14.5px; }
+html.desk #s-home .promo__title { font-size: clamp(17px, 11cqi, 28px); }
+html.desk #s-home .promo__text { width: 61%; max-width: none; overflow-wrap: anywhere; }
+html.desk #s-home .promo__sub { font-size: clamp(12px, 5.5cqi, 14px); text-wrap: pretty; }
+html.desk #s-home .promo__media {
+    display: block; position: absolute; inset: 0 0 0 auto; width: 38%; overflow: hidden; pointer-events: none;
+}
+html.desk #s-home :is(.promo__pz, .promo__photo, .promo__cut) {
+    width: 86%; height: auto; right: 7%;
+    top: 50%; bottom: auto; margin: 0; translate: 0 -50%;
+}
+html.desk #s-home .promo__photo { aspect-ratio: 1; }
+html.desk #s-home .promo__pep { width: min(104px, 88%); right: 5%; }
 html.desk .hscroll { scroll-snap-type: none; }
 /* 12.11: «при ховере происходит обрезание». Лента с прокруткой по горизонтали обрезает и по вертикали: приподнятая карточка
    и её тень упирались в край ленты. Даём ленте запас сверху и снизу (под подъём и тень) и забираем его отрицательными
