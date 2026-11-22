@@ -5707,7 +5707,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
    показывает их под html.desk. Прячет их здесь, а не в desktop.css: телефон тот файл не скачивает (12.11: правило уехало
    в desktop.css — над таб-баром на телефоне вылезли четыре пустые серые кнопки и сдвинули «Главную») */
 .dlogo, .hsnav, .dh, .dscrim { display: none; }
-html:not(.desk) .dpromo-h { display: none; }
+html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
 
 @media (max-width: 860px) {
     .sbar, .home-ind { display: none; }
@@ -6281,7 +6281,7 @@ html:not(.desk) .dpromo-h { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '22.11 · 18:33';
+    var BUILD = '22.11 · 20:31';
 
     /* ── состояние ── */
     var S = {

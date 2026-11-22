@@ -112,9 +112,10 @@ html.desk .screen.is-tab .h, html.desk #s-rest .h { font-size: 28px; }
 html.desk #s-home .filters { flex-wrap: wrap; overflow: visible; }
 html.desk #s-home .rests { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 36px 24px; }
 html.desk #s-home .sec--rests2 { padding-top: 36px; }
+html.desk #s-home .sec:has(> #promoRow) { position: relative; isolation: isolate; }
 html.desk #promoRow {
     --promo-gap: 12px; gap: var(--promo-gap); margin-inline: 16px; padding-inline: 0;
-    scroll-padding-inline: 0; scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0; scroll-snap-type: x mandatory; position: relative; z-index: 1;
 }
 html.desk #promoPager i:nth-last-child(-n+3) { display: none; }
 html.desk #s-home .dpromo-h { align-items: center; padding-right: 16px; }
@@ -131,23 +132,22 @@ html.desk .dpromo-nav svg.i { width: 18px; height: 18px; }
 html.desk .dpromo-nav button:first-child svg { rotate: 180deg; }
 html.desk #s-home .promo {
     --promo-inset: clamp(12px, 1.35vw, 20px); --promo-height: 204px;
-    position: relative; width: calc((100% - 3 * var(--promo-gap)) / 4); gap: 12px;
+    width: calc((100% - 3 * var(--promo-gap)) / 4); gap: 12px;
 }
 html.desk #s-home .promo__banner { padding-block: 20px 22px; container-type: inline-size; }
-html.desk #s-home .promo > .rest__row { position: relative; }
 html.desk #s-home .promo .rest__name { min-width: 0; overflow-wrap: anywhere; }
 @media (hover: hover) {
     html.desk #s-home .promo__banner { transition: transform .35s var(--dease); }
-    /* Тень под плашкой рисуется отдельно, чтобы её не срезал контур плашки. */
-    html.desk #s-home .promo::before {
-        content: ""; position: absolute; inset: 0 0 auto; height: var(--promo-height);
+    /* Слой тени стоит рядом с лентой, где её не обрезают края прокрутки. */
+    html.desk #s-home .dpromo-shadow {
+        position: absolute; z-index: 0;
         border-radius: var(--r-card); pointer-events: none; opacity: 0;
         box-shadow: 0 22px 38px -22px rgba(36, 23, 17, .52), 0 8px 18px -12px rgba(36, 23, 17, .32);
         transition: transform .35s var(--dease), opacity .35s var(--dease);
     }
     html.desk #s-home .promo:hover .promo__banner,
-    html.desk #s-home .promo:hover::before { transform: translateY(-5px); }
-    html.desk #s-home .promo:hover::before { opacity: 1; }
+    html.desk #s-home .dpromo-shadow.is-on { transform: translateY(-5px); }
+    html.desk #s-home .dpromo-shadow.is-on { opacity: 1; }
 }
 html.desk #s-home .promo .promo__cut { transition: scale .5s var(--dease), rotate .5s var(--dease); scale: 1.16; transform-origin: 70% 50%; }
 html.desk #s-home .promo:hover .promo__cut { scale: 1.24; }

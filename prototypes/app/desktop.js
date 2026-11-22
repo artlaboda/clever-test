@@ -67,10 +67,15 @@ window.cleverDesk = function (A) {
             '<button type="button" aria-label="Назад" aria-controls="promoRow">' + ic('i-right') + '</button>' +
             '<button type="button" aria-label="Вперёд" aria-controls="promoRow">' + ic('i-right') + '</button></span>';
         sec.insertBefore(hd, row);
+        var shadow = document.createElement('div');
+        shadow.className = 'dpromo-shadow';
+        shadow.setAttribute('aria-hidden', 'true');
+        sec.insertBefore(shadow, row);
         var buttons = hd.querySelectorAll('button');
         function sync() {
             buttons[0].disabled = row.scrollLeft < 1;
             buttons[1].disabled = row.scrollLeft >= row.scrollWidth - row.clientWidth - 1;
+            placePromoShadow(row);
         }
         [-1, 1].forEach(function (direction, i) {
             buttons[i].addEventListener('click', function () {
@@ -81,8 +86,28 @@ window.cleverDesk = function (A) {
             });
         });
         row.addEventListener('scroll', sync, { passive: true });
+        row.addEventListener('mouseover', function () { placePromoShadow(row); });
+        row.addEventListener('mouseleave', function () { shadow.classList.remove('is-on'); });
         sync();
     }
+    function placePromoShadow(row) {
+        var card = row.querySelector('.promo:hover'), sec = row.parentElement;
+        var shadow = sec.querySelector('.dpromo-shadow');
+        if (!shadow) return;
+        if (!card) { shadow.classList.remove('is-on'); return; }
+        var box = card.getBoundingClientRect(), track = row.getBoundingClientRect();
+        if (box.left < track.left - 1 || box.right > track.right + 1) { shadow.classList.remove('is-on'); return; }
+        var host = sec.getBoundingClientRect();
+        shadow.style.left = (box.left - host.left) + 'px';
+        shadow.style.top = (box.top - host.top) + 'px';
+        shadow.style.width = box.width + 'px';
+        shadow.style.height = card.querySelector('.promo__banner').offsetHeight + 'px';
+        shadow.classList.add('is-on');
+    }
+    window.addEventListener('resize', function () {
+        var row = document.getElementById('promoRow');
+        if (deskOn() && row) placePromoShadow(row);
+    });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
     // курьер в карточке заведения (21.11: «возьми бег курьера и ходьбу»): навели — идёт (crGame('walk')), через 0,7 с переходит на
     // бег (crGame('run')); увели — снова значок. Спрайты вставляем при первом наведении (SMIL-анимация идёт, только пока видна)
