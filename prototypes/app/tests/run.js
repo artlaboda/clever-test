@@ -4773,56 +4773,33 @@ test('телефон: десктопного не видно — в таб-ба�
     const a = await one(false), b = await one(true), all = a.out.concat(b.out), errs = a.errs.concat(b.errs);
     return { pass: all.every(x => x.ok) && !errs.length, detail: all.map(x => x.t).join(' | ') + (errs.length ? '; ошибки: ' + errs.join('; ') : '') };
 });
-test('заглушка: белый лист при каждом открытии и возвращении, пока не провели пальцем слева направо посередине экрана — лист уезжает вправо', '13.11: «я дал этот домен посмотреть человеку… продолжает подглядывать за моей работой» → «белую заглушку, и надо сделать свайп слева направо посередине экрана». Телефон 402×874, первый заход (стенд проверок обычно без заглушки — здесь navigator.webdriver = false): белый лист во весь экран, в любой точке под пальцем — он; заголовок вкладки пустой, панели Safari белые; касание «Профиля» до приложения не доходит. Не открывают: свайп вправо у самого верха экрана, свайп справа налево посередине, короткий свайп (80 px), косой свайп; 13.11, ещё позже: «только в центре эту область, слишком широкая» — и свайп ниже середины (большим пальцем), выше середины, ушедший из середины вниз. Открывает (13.11, позже: «не каждый раз работает») свайп посередине дугой, 200 px — лист уходит ещё до отпускания пальца, уезжает вправо (анимация идёт), потом его нет; заголовок и цвет панелей вернулись, «Профиль» нажимается, в памяти ничего. 13.11, позже: «открываю снова — заглушки нет» — после перезагрузки снова лист; смахнули — ушли в другое приложение: сразу лист (и в переключателе приложений белое); вернулись через 0,3 с — без листа; вернулись через 20 с — лист. Стенд проверок (navigator.webdriver) — без заглушки. Ошибок нет', async () => {
-    const ctx = await browser.newContext({ viewport: { width: 402, height: 874 }, isMobile: true, hasTouch: true, locale: 'ru-RU' }), m = await ctx.newPage(), errs = [];
+test('белый лист: главная доступна без свайпа при открытии, обновлении и возвращении', 'Проверяем как вне стенда: navigator.webdriver = false', async () => {
+    const ctx = await browser.newContext({ viewport: { width: 402, height: 874 }, isMobile: true, hasTouch: true, locale: 'ru-RU' });
+    const m = await ctx.newPage(), errs = [];
     m.on('pageerror', e => errs.push(e.message));
-    await m.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => false }); try { localStorage.setItem('clever2-city', 'minsk'); localStorage.setItem('clever2-auth', '1'); } catch (e) {} });
-    await m.route(/unpkg\.com|openfreemap|nominatim/, r => r.abort());
-    await m.goto(URL); await m.waitForTimeout(1800);
-    const cdp = await ctx.newCDPSession(m), touch = (type, x, y) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y, id: 1 }] });
-    const swipe = async (x0, y0, x1, y1) => { await touch('touchStart', x0, y0); for (let i = 1; i <= 12; i++) { await touch('touchMove', x0 + (x1 - x0) * i / 12, y0 + (y1 - y0) * i / 12); await m.waitForTimeout(20); } await touch('touchEnd'); await m.waitForTimeout(250); };
-    const st = () => m.evaluate(() => {
-        const g = document.getElementById('gate'), H = document.documentElement, pts = [[10, 10], [201, 437], [390, 860], [60, 820], [380, 40]];
-        return { gate: H.classList.contains('gate'), out: H.classList.contains('gate-out'), el: !!g, top: g ? pts.every(([x, y]) => document.elementFromPoint(x, y) === g) : false,
-            bg: g ? getComputedStyle(g).backgroundColor : '', title: document.title, theme: document.querySelector('meta[name="theme-color"]').getAttribute('content'),
-            prof: document.querySelector('.tab[data-tab="profile"]').getAttribute('aria-current') === 'page', key: localStorage.getItem('clever2-gate') };
+    await m.addInitScript(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => false });
+        localStorage.setItem('clever2-city', 'minsk');
     });
-    const out = [], ok = [];
-    let s = await st();
-    ok.push(s.gate && s.top && s.bg === 'rgb(255, 255, 255)' && s.title === '' && s.theme === '#ffffff');
-    out.push('первый заход: ' + (s.gate ? 'лист' : 'листа нет') + (s.top ? ', везде под пальцем' : ', не везде') + ', фон ' + s.bg + ', заголовок «' + s.title + '», панели ' + s.theme);
-    const pr = await m.evaluate(() => { const r = document.querySelector('.tab[data-tab="profile"]').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
-    await m.touchscreen.tap(pr[0], pr[1]); await m.waitForTimeout(700); s = await st();
-    ok.push(s.gate && !s.prof); out.push('касание «Профиля»: ' + (s.prof ? 'открылся профиль' : 'не дошло'));
-    for (const [n, a] of [['вправо у верха', [60, 90, 330, 90]], ['справа налево', [330, 437, 60, 437]], ['короткий', [60, 437, 140, 437]], ['косой', [60, 437, 330, 720]], ['ниже середины (большим пальцем)', [110, 650, 300, 590]], ['выше середины', [60, 280, 330, 280]], ['ушёл из середины вниз', [60, 500, 330, 640]]]) {
-        await swipe(...a); s = await st(); ok.push(s.gate && s.el); out.push(n + ': ' + (s.gate ? 'закрыто' : 'ОТКРЫЛОСЬ'));
-    }
-    // 13.11, позже: «не каждый раз работает» — короче и дугой; ещё позже: «только в центре эту область» — полоса 37–63 % высоты.
-    // От (90, 430) к (290, 445), 200 px, с горбом 20 px. Лист должен уйти ещё до того, как палец оторвался
-    await touch('touchStart', 90, 430);
-    for (let i = 1; i <= 12; i++) { const k = i / 12; await touch('touchMove', 90 + 200 * k, 430 + 15 * k - 20 * Math.sin(Math.PI * k)); await m.waitForTimeout(20); }
-    const [early, mid, anim] = await m.evaluate(() => { const g = document.getElementById('gate'); return [!document.documentElement.classList.contains('gate'), g ? Math.round(g.getBoundingClientRect().left) : -1, !!g && g.getAnimations().some(a => a.playState === 'running')]; });
-    await touch('touchEnd'); await m.waitForTimeout(40);
-    await m.waitForTimeout(900); s = await st();
-    ok.push(early && anim && !s.gate && !s.out && !s.top && mid > 5 && mid < 450 && s.title.length > 3 && s.theme !== '#ffffff' && s.key == null);
-    out.push('свайп посередине (дугой, 200 px): ' + (early ? 'открылось до отпускания' : 'до отпускания не открылось') + ', лист в этот миг уезжает (' + (anim ? 'анимация идёт' : 'без анимации') + ', сдвинут на ' + mid + ' px), потом ' + (s.top ? 'лист остался' : 'листа нет') + ', заголовок «' + s.title + '», панели ' + s.theme + ', в памяти ' + (s.key == null ? 'ничего' : s.key));
-    await m.touchscreen.tap(pr[0], pr[1]); await m.waitForTimeout(900); s = await st();
-    ok.push(s.prof); out.push('касание «Профиля» после: ' + (s.prof ? 'открылся' : 'не открылся'));
-    // 13.11, позже: «открываю снова — заглушки нет» — устройство не запоминается: лист при каждой загрузке и каждом возвращении
-    await m.reload(); await m.waitForTimeout(1500); s = await st();
-    ok.push(s.gate && s.top); out.push('перезагрузка: ' + (s.gate ? 'снова лист' : 'без заглушки'));
-    await swipe(90, 437, 300, 437); s = await st(); ok.push(!s.gate); out.push('смахнули снова: ' + (s.gate ? 'не открылось' : 'открыто'));
-    const vis = h => m.evaluate(h => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => h }); Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => h ? 'hidden' : 'visible' }); document.dispatchEvent(new Event('visibilitychange')); }, h);
-    await m.waitForTimeout(800); await vis(true); s = await st(); const hid = s.gate && s.title === '';
-    await m.waitForTimeout(300); await vis(false); await m.waitForTimeout(50); s = await st();
-    ok.push(hid && !s.gate && !s.out && !s.top && s.title.length > 3); out.push('ушли в другое приложение: ' + (hid ? 'сразу лист' : 'листа нет') + ', вернулись через 0,3 с: ' + (s.gate ? 'лист' : 'без листа'));
-    await vis(true); await m.evaluate(() => { const r = Date.now; Date.now = () => r() + 20000; }); await vis(false); await m.waitForTimeout(50); s = await st();
-    ok.push(s.gate && s.top && s.title === ''); out.push('вернулись через 20 с: ' + (s.gate ? 'лист' : 'без листа'));
-    await ctx.close();
-    const t = await open(); const tg = await t.evaluate(() => document.documentElement.classList.contains('gate') || !navigator.webdriver);
-    errs.push(...t._errs); await t._close();
-    ok.push(!tg); out.push('стенд проверок: ' + (tg ? 'заглушка' : 'без заглушки'));
-    return { pass: ok.every(Boolean) && !errs.length, detail: out.join('; ') + ' [' + ok.map(b => b ? 1 : 0).join('') + ']' + (errs.length ? '; ошибки: ' + errs.join('; ') : '') };
+    await m.route(/unpkg\.com|openfreemap|nominatim/, r => r.abort());
+    const visible = async () => await m.locator('#s-home').isVisible() && await m.title() &&
+        !(await m.locator('html.gate, html.gate-out, #gate').count());
+    try {
+        await m.goto(URL);
+        const opening = await visible();
+        await m.reload();
+        const reloading = await visible();
+        await m.evaluate(() => {
+            window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }));
+            window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+        });
+        const returning = await visible();
+        const profile = m.locator('.tab[data-tab="profile"]');
+        if (returning) await profile.tap({ timeout: 4000 });
+        const interactive = await profile.getAttribute('aria-current') === 'page';
+        return { pass: opening && reloading && returning && interactive && !errs.length,
+            detail: 'открытие ' + !!opening + ', обновление ' + !!reloading + ', возвращение ' + !!returning + ', профиль ' + interactive + (errs.length ? ' · ' + errs.join(', ') : '') };
+    } finally { await ctx.close(); }
 });
 test('витрина: плашки акций «Живые значки» (по умолчанию) — одной строкой листаются вбок, цвет по смыслу, значки живут (только сдвиг, поворот, масштаб, прозрачность), въезжают при открытии, в тёмной теме тёмные; «С засечками» — как было', '13.11: «Что-то надо делать с акциями. Смотри, как у Яндекса, например, сделано. Интересно. С эффектами» (видео Яндекс Еды)', async () => {
     const bad = [], out = [], OK = ['transform', 'opacity', 'translate', 'scale', 'rotate'], META = ['offset', 'computedOffset', 'easing', 'composite'];

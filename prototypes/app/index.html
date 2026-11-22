@@ -2,115 +2,6 @@
 <title>Новый clever.by</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#faf7f2">
-<!-- Заглушка (13.11: «я дал этот домен посмотреть человеку… теперь продолжает подглядывать за моей работой, а мне не хочется —
-     это же черновик» → «белую заглушку, и надо сделать свайп слева направо посередине экрана»). Пока это устройство не открыто,
-     поверх всего — белый лист (#gate): касания, мышь и клавиши до приложения не доходят, заголовок вкладки пустой, панели
-     Safari белые. Открыть: провести пальцем (или мышью) слева направо по середине экрана — подробности у распознавания
-     жеста ниже (hit). Лист уезжает вправо. Лист — при каждом открытии и возвращении (см. lock / leave / back). Это ширма, а не защита: код страницы
-     открыт. Стенд проверок и превью (navigator.webdriver) — без заглушки -->
-<style>
-#gate { display: none; }
-html.gate, html.gate body { background: #fff !important; }
-html.gate #gate, html.gate-out #gate {
-    display: block; position: fixed; top: -120px; bottom: -120px; left: 0; right: 0; z-index: 2147483647; background: #fff;
-    touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; box-shadow: -24px 0 48px rgba(0, 0, 0, .14);
-}
-html.gate-out #gate { pointer-events: none; }
-</style>
-<script>
-(function () {
-    var H = document.documentElement;
-    if (navigator.webdriver) return;
-    /* 13.11, позже: «я открываю сайт — заглушка сразу была, я её смахнул… теперь открываю снова — заглушки нет». Устройство
-       больше не запоминается: лист — при каждой загрузке страницы и при каждом возвращении к ней (другое приложение,
-       другая вкладка, восстановление из кэша Safari). Уходя, страница сразу закрывается листом — в переключателе приложений
-       тоже белое. Вернулись быстрее чем через 15 с — лист снимается сразу, без жеста (иначе мешает работать) */
-    try { localStorage.removeItem('clever2-gate'); } catch (e) {}
-    var AWAY = 15000, meta = document.querySelector('meta[name="theme-color"]'), title = '', color = '', mo = null, g = null, away = 0, wasOpen = false;
-    function locked() { return H.classList.contains('gate'); }
-    function lock() {
-        if (locked()) return;
-        var el = document.getElementById('gate');
-        if (el && el.getAnimations) el.getAnimations().forEach(function (a) { a.cancel(); });
-        H.classList.remove('gate-out'); H.classList.add('gate');
-        g = null; eat = false;
-        title = document.title; document.title = '';
-        if (meta) {   // приложение красит панели Safari под свой фон — пока лист на месте, они белые; свой цвет вернём при открытии
-            color = meta.getAttribute('content'); meta.setAttribute('content', '#ffffff');
-            if (!mo) mo = new MutationObserver(function () { var c = meta.getAttribute('content'); if (c !== '#ffffff') { color = c; meta.setAttribute('content', '#ffffff'); } });
-            mo.observe(meta, { attributes: true });
-        }
-    }
-    function restore() {
-        if (mo) mo.disconnect();
-        if (meta && color) meta.setAttribute('content', color);
-        if (title) document.title = title;
-    }
-    function unlock() {
-        restore();
-        var el = document.getElementById('gate'), end = function () { H.classList.remove('gate-out'); if (el && el.getAnimations) el.getAnimations().forEach(function (a) { a.cancel(); }); };
-        H.classList.remove('gate'); H.classList.add('gate-out');
-        if (!el || !el.animate) { end(); return; }
-        el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(112%)' }], { duration: 640, easing: 'cubic-bezier(.32, .72, 0, 1)', fill: 'forwards' }).onfinish = end;
-    }
-    function leave() { if (away) return; away = Date.now(); wasOpen = !locked(); lock(); }
-    function back() {
-        if (!away) return;
-        var quick = wasOpen && Date.now() - away < AWAY; away = 0;
-        if (quick) { H.classList.remove('gate'); restore(); }   // быстро вернулись — как было, без листа и без анимации
-    }
-    var eat = false;
-    lock();
-    document.addEventListener('visibilitychange', function () { if (document.hidden) leave(); else back(); });
-    addEventListener('pagehide', leave);
-    addEventListener('pageshow', function (e) { if (e.persisted) { if (away) back(); else lock(); } });   // из кэша Safari: как возвращение
-    // слушаем раньше приложения (окно, фаза захвата): пока лист на месте, событие дальше не идёт. Открыли посреди жеста —
-    // остаток этого касания (отпускание, щелчок мышью) тоже съедаем, чтобы он не нажал что-нибудь в приложении
-    function on(t, f) {
-        addEventListener(t, function (e) {
-            if (!H.classList.contains('gate') && !eat) return;
-            if (f) f(e);
-            e.stopImmediatePropagation();
-            if (e.cancelable && !/^key/.test(t)) e.preventDefault();
-        }, { capture: true, passive: false });
-    }
-    /* 13.11, позже: «не каждый раз работает». Было строго: старт — левая половина и средняя треть по высоте, пройти 38 %
-       ширины почти по прямой за 1,5 с, и решали только при отпускании. Большой палец ведёт ниже середины и дугой, короче;
-       а если Safari отменял касание (pointercancel) — жест терялся. Теперь: старт — левые 60 % ширины, по высоте от 18 % до
-       85 %; пройти 28 % ширины (не меньше 90 px), отклонение по высоте — до 0,75 пройденного, за 3 с; открывается сразу,
-       как только палец прошёл нужное, — не дожидаясь отпускания; отмена касания тоже засчитывает пройденное.
-       13.11, ещё позже: «давай только в центре эту область, слишком широкая получилась». Полоса по высоте — от 37 % до 63 %
-       экрана (на телефоне 402×874 — около 230 px вокруг середины): в ней начать и в ней же пройти весь путь; отклонение по
-       высоте — до половины пройденного. Остальное — как было */
-    var BAND = [.37, .63];
-    function inBand(y) { var Hh = innerHeight; return y > Hh * BAND[0] && y < Hh * BAND[1]; }
-    function hit(s, x, y) {
-        var dx = x - s.x; s.dy = Math.max(s.dy, Math.abs(y - s.y));
-        if (!inBand(y)) s.out = true;
-        return !s.out && dx >= Math.max(90, innerWidth * .28) && s.dy <= dx * .5 && Date.now() - s.t < 3000;
-    }
-    function done(e) { if (eat) setTimeout(function () { eat = false; }, 80); }
-    on('pointerdown', function (e) {
-        var W = innerWidth, Hh = innerHeight;
-        g = e.isPrimary && e.clientX < W * .6 && inBand(e.clientY) ? { x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId, dy: 0, out: false } : null;
-    });
-    on('pointermove', function (e) {
-        if (!g || e.pointerId !== g.id || !H.classList.contains('gate')) return;
-        if (!inBand(e.clientY)) g.out = true;   // вышел из полосы — этот жест уже не засчитается
-        if (hit(g, e.clientX, e.clientY)) { g = null; eat = true; unlock(); }
-    });
-    on('pointerup', function (e) {
-        var s = g; g = null; done();
-        if (s && e.pointerId === s.id && H.classList.contains('gate') && hit(s, e.clientX, e.clientY)) unlock();
-    });
-    on('pointercancel', function (e) {
-        var s = g; g = null; done();
-        if (s && e.pointerId === s.id && H.classList.contains('gate') && e.clientX && hit(s, e.clientX, e.clientY)) unlock();
-    });
-    ['touchstart', 'touchmove', 'touchend', 'touchcancel', 'mousedown', 'mousemove', 'mouseup', 'click', 'dblclick', 'contextmenu', 'wheel',
-        'keydown', 'keyup', 'gesturestart', 'gesturechange', 'gestureend'].forEach(function (t) { on(t); });
-})();
-</script>
 <link rel="preload" as="image" href="img/ec-bag-back.webp" type="image/webp">
 <link rel="preload" as="image" href="img/ec-bag-front.webp" type="image/webp">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -5825,7 +5716,6 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
     if (!st && window.innerWidth > 860 && window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches)
         document.write('<link rel="stylesheet" href="desktop.css"><script src="desktop.js"><\/script>'); } catch (e) {} })();</script>
 
-<div id="gate" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="i-pizza" viewBox="0 0 24 24"><path d="M12 21.4 3.1 7.2a1 1 0 0 1 .3-1.4 16.9 16.9 0 0 1 17.2 0 1 1 0 0 1 .3 1.4z"/><circle cx="9.6" cy="10.4" r="1.5" fill="currentColor" stroke="none"/><circle cx="14.6" cy="11" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="15.4" r="1.35" fill="currentColor" stroke="none"/></symbol>
     <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.8l8.5 6.7V19a1.5 1.5 0 0 1-1.5 1.5h-4v-6h-6v6H5A1.5 1.5 0 0 1 3.5 19z"/></symbol>
@@ -6291,7 +6181,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
         { id: 'vitebsk', label: 'Дача', street: '4-й Сенненский пер., 1', city: 'Витебск', flat: '', entr: '', floor: '', icon: 'i-pin', note: 'Частный дом, чёрная кровля' }
     ];
     function addr(id) { for (var i = 0; i < ADDRS.length; i++) if (ADDRS[i].id === id) return ADDRS[i]; }
-    /* Города. При первом запуске открывается Минск, сменить город можно в шторке адреса. Адрес всегда в выбранном городе;
+    /* Города. Город выбирают при первом запуске и меняют в шторке адреса. Адрес всегда в выбранном городе;
        если сохранённых адресов в городе нет, адрес пустой — «Укажите адрес».
        Список — города с clever.by (подвал сайта и страницы городов), сверить с актуальным. big — областные центры, идут первыми */
     var CITIES = [
@@ -6383,7 +6273,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '22.11 · 14:56';
+    var BUILD = '22.11 · 15:00';
 
     /* ── состояние ── */
     var S = {
@@ -14548,11 +14438,11 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
             });
         });
     }
-    // На стенде начальный экран выбора города (first) с пояснением; в приложении выбор открывается из шторки адреса.
+    // город: при первом запуске (first) — с пояснением, потом — из шторки адреса.
     // Городов больше сорока, поэтому сверху поиск, дальше областные центры, потом остальные по алфавиту с буквами
     /* Выбор города (стенд → «Выбор города»): «Список» — областные центры плашками и все города по алфавиту,
        «Плитки» — областные центры крупными плитками, «Полёт» — карта отлетает к стране, города точками, список ниже.
-       Из адреса на «Одном экране» — отдельной шторкой поверх карты; на стенде — обычной шторкой */
+       Из адреса на «Одном экране» — отдельной шторкой поверх карты; при первом запуске — обычной шторкой */
     function cityPickHTML(first, overlay) {
         var v = app.dataset.citydz || 'list'; if (v === 'fly' && !overlay) v = 'list';
         var own = function (c) { return ADDRS.filter(function (a) { return cityOf(a) === c.id; }); };
@@ -14816,10 +14706,12 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
             { duration: ms, easing: 'cubic-bezier(.45, 0, .3, 1)', fill: 'forwards' });
         setTimeout(function () { if (done) done(); box.remove(); }, ms + 10);   // сначала новый текст под ластиком, потом убираем ластик
     }
+    // первый запуск: после заставки спрашиваем город
     function afterSplash() {
         // библиотеку карты грузим заранее, чтобы шторка адреса открывалась уже с картой
         setTimeout(function () { loadMapLib().catch(function () {}); }, 1500);
-        openFromHash();
+        if (openFromHash()) return;
+        if (!S.city) setTimeout(function () { openSheet('city', { first: true }); }, 250);
     }
     /* пришли по ссылке «Поделиться» (r/<id>.html → #rest=<id>) — сразу на страницу заведения: при запуске и если метка
        появилась в уже открытом приложении. Город — его (Минск); метку из адреса убираем, чтобы «назад» и обновление вели как обычно */
@@ -22329,8 +22221,8 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
     }
 
     /* ── старт ── */
-    // При первом открытии используем город по умолчанию; сохранённый город важнее адреса по умолчанию.
-    setCity(S.city || city().id);
+    // сохранённый город главнее адреса по умолчанию: если адрес из другого города — берём адрес этого города или «Укажите адрес»
+    if (S.city) setCity(S.city);
     try { var savedFont = localStorage.getItem('clever2-font'); if (savedFont === 'golos' || savedFont === 'onest') setFont(savedFont); } catch (e) {}
     try { var savedMe = JSON.parse(localStorage.getItem('clever2-me') || 'null'); if (savedMe && savedMe.phone) { S.me = savedMe; S.me.avoid = S.me.avoid || {}; } } catch (e) {}
     var savedTheme = 'light';
