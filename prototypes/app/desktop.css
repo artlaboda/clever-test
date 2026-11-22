@@ -114,19 +114,21 @@ html.desk #s-home .rests { grid-template-columns: repeat(3, minmax(0, 1fr)); gap
 html.desk #s-home .sec--rests2 { padding-top: 36px; }
 html.desk #s-home .promo {
     --promo-inset: 22px; --promo-height: 204px;
-    position: relative; width: 380px; gap: 12px; transition: transform .35s var(--dease);
+    position: relative; width: 380px; gap: 12px;
 }
 html.desk #s-home .promo__banner { padding-block: 20px 22px; }
 html.desk #s-home .promo > .rest__row { position: relative; }
 @media (hover: hover) {
+    html.desk #s-home .promo__banner { transition: transform .35s var(--dease); }
     /* Тень под плашкой рисуется отдельно, чтобы её не срезал контур плашки. */
     html.desk #s-home .promo::before {
         content: ""; position: absolute; inset: 0 0 auto; height: var(--promo-height);
         border-radius: var(--r-card); pointer-events: none; opacity: 0;
         box-shadow: 0 22px 38px -22px rgba(36, 23, 17, .52), 0 8px 18px -12px rgba(36, 23, 17, .32);
-        transition: opacity .35s var(--dease);
+        transition: transform .35s var(--dease), opacity .35s var(--dease);
     }
-    html.desk #s-home .promo:hover { transform: translateY(-5px); }
+    html.desk #s-home .promo:hover .promo__banner,
+    html.desk #s-home .promo:hover::before { transform: translateY(-5px); }
     html.desk #s-home .promo:hover::before { opacity: 1; }
 }
 html.desk #s-home .promo .promo__cut { transition: scale .5s var(--dease), rotate .5s var(--dease); scale: 1.16; transform-origin: 70% 50%; }
