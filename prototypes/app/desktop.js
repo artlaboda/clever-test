@@ -22,8 +22,9 @@ window.cleverDesk = function (A) {
         tb._dk = key;
         document.getElementById('dAddr').innerHTML =
             '<button type="button" class="dh-city" data-act="open-city" aria-label="Город: ' + esc(c.name) + '. Сменить">' +
-                PIN + '<span>' + esc(c.name) + '</span><i class="dh-caret" aria-hidden="true"></i>' +
+                PIN + '<span>' + esc(c.name) + '</span>' +
             '</button>' +
+            '<span class="dh-sep" aria-hidden="true">·</span>' +
             '<button type="button" class="dh-place" data-act="open-addr" aria-label="Адрес доставки">' +
                 (a ? '<span class="dh-st">' + esc(a.street) + '</span>' : '<span class="dh-tag">Укажите адрес</span>') +
             '</button>';
@@ -80,15 +81,15 @@ window.cleverDesk = function (A) {
                 : esc(c.name) + ' — адрес не\u00a0указан';
             el.innerHTML =
                 '<i class="daddr-ask__tip" aria-hidden="true"></i>' +
+                '<button type="button" class="daddr-ask__x" data-ask="close" aria-label="Закрыть">' +
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
+                '</button>' +
                 '<div class="daddr-ask__head">' +
                     '<span class="daddr-ask__ic" aria-hidden="true">' + PIN + '</span>' +
                     '<div class="daddr-ask__txt">' +
-                        '<span class="daddr-ask__eyebrow">' + (a ? 'Правильно указан адрес?' : 'Уточните адрес доставки') + '</span>' +
+                        '<span class="daddr-ask__eyebrow">' + (a ? 'Адрес указан правильно?' : 'Уточните адрес доставки') + '</span>' +
                         '<b class="daddr-ask__val">' + line + '</b>' +
                     '</div>' +
-                    '<button type="button" class="daddr-ask__x" data-ask="close" aria-label="Закрыть">' +
-                        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
-                    '</button>' +
                 '</div>' +
                 '<div class="daddr-ask__acts">' +
                     (a
