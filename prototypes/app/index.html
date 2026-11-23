@@ -6078,19 +6078,81 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         tulips: { name: 'Тюльпаны, 25 шт', pic: 'u/f-tulips', price: 64.00, w: 25, unit: 'шт', pop: true, desc: 'Махровые розово-белые тюльпаны в крафтовой упаковке' },
         peony: { name: 'Пионовидные розы', pic: 'u/f-peony', price: 115.00, w: 11, unit: 'шт', desc: 'Розы Дэвида Остина: персиковые, пудровые и малиновые' },
         bouquet: { name: 'Букет «Нежность»', pic: 'u/f-bouquet', price: 72.00, w: 35, unit: 'см', desc: 'Кустовые розы, эустома и эвкалипт в бумаге' },
-        rainbow: { name: 'Радужные розы, 9 шт', pic: 'u/f-rainbow', price: 99.00, w: 9, unit: 'шт', desc: 'Окрашенные розы — каждый лепесток своего цвета' }
+        rainbow: { name: 'Радужные розы, 9 шт', pic: 'u/f-rainbow', price: 99.00, w: 9, unit: 'шт', desc: 'Окрашенные розы — каждый лепесток своего цвета' },
+        whopper: { name: 'Воппер на огне', pic: 'u/dish-whopper', price: 16.90, w: 330, pop: true, desc: 'Две котлеты из 100% говядины на огне, плавленый чеддер, томаты, салат, соус гриль' },
+        cheeseburger: { name: 'Двойной чизбургер с беконом', pic: 'u/dish-cheeseburger', price: 18.50, w: 340, pop: true, desc: 'Булочка бриошь, двойная котлета, хрустящий бекон, двойной чеддер и солёный огурчик' },
+        fries: { name: 'Картофель фри с соусами', pic: 'u/dish-fries', price: 7.90, w: 180, desc: 'Хрустящий золотистый картофель фри с тремя соусами на выбор' },
+        nuggets: { name: 'Хрустящие стрипсы', pic: 'u/dish-nuggets', price: 13.90, w: 240, pop: true, desc: 'Сочное куриное филе в золотистой панировке со сливочно-чесночным соусом' },
+        crispywings: { name: 'Крылышки в медово-кунжутной глазури', pic: 'u/dish-crispywings', price: 16.50, w: 360, hot: true, pop: true, desc: 'Запечённые куриные крылья в карамельно-острой глазури с кунжутом' },
+        doner: { name: 'Атомный донер на углях', pic: 'u/dish-doner', price: 13.50, w: 420, pop: true, desc: 'Хрустящий лаваш с гриля, сочная курица, свежие овощи и фирменный чесночный соус' },
+        shawarma: { name: 'Шаурма с сыром чеддер', pic: 'u/dish-shawarma', price: 14.50, w: 430, desc: 'Курица на вертеле, тягучий чеддер, салат, морковь по-корейски и томатный соус' },
+        ribs: { name: 'Свиные рёбрышки BBQ', pic: 'u/dish-ribs', price: 29.90, w: 480, pop: true, desc: 'Томлёные свиные рёбра в дымной глазури барбекю с картофельными дольками' },
+        sausages: { name: 'Баварские колбаски гриль', pic: 'u/dish-sausages', price: 22.90, w: 380, pop: true, desc: 'Ассорти сочных колбасок с мангала, тушёная капуста и зернистая горчица' },
+        philadelphia: { name: 'Филадельфия с лососем и икрой', pic: 'u/dish-philadelphia', price: 24.90, w: 280, pop: true, desc: 'Свежий атлантический лосось, сливочный сыр, огурец, авокадо и икра тобико' },
+        dragon: { name: 'Сет «Сакура», 16 шт', pic: 'u/dish-dragon', price: 36.90, w: 480, pop: true, desc: 'Филадельфия классик, ролл с лососем и лаймом, нигири с лососем' },
+        tempura: { name: 'Тёплый ролл темпура с лососем', pic: 'u/dish-tempura', price: 22.50, w: 290, pop: true, desc: 'Лосось, крем-чиз, авокадо под нежной спайси-шапочкой и соусом унаги' },
+        sushiset: { name: 'Сет «Императорский», 32 шт', pic: 'u/dish-sushiset', price: 54.90, w: 940, pop: true, desc: 'Четыре хитовых ролла, нигири с лососем и тунцом, гунканы с икрой тобико' },
+        artroll: { name: 'Арт-ролл с лососем и трюфелем', pic: 'u/dish-artroll', price: 26.90, w: 270, pop: true, desc: 'Опалённый лосось, авокадо, сливочный сыр, соус терияки и трюфельное масло' },
+        gyoza: { name: 'Гёдза с креветкой и свининой', pic: 'u/dish-gyoza', price: 15.90, w: 230, desc: 'Обжаренные японские пельмени с хрустящей корочкой и пряным соевым соусом' },
+        tomyum: { name: 'Том Ям с тигровыми креветками', pic: 'u/dish-tomyum', price: 21.90, w: 450, hot: true, pop: true, desc: 'Пряный кокосовый бульон, тигровые креветки, шампиньоны, черри, лайм и кинза' },
+        phobo: { name: 'Фо Бо с мраморной говядиной', pic: 'u/dish-phobo', price: 18.90, w: 500, pop: true, desc: 'Ароматный 12-часовой бульон, рисовая лапша, тонкие слайсы говядины, мята и лайм' },
+        ramen: { name: 'Рамен тонкоцу с яйцом', pic: 'u/dish-ramen', price: 19.50, w: 480, pop: true, desc: 'Наваристый бульон, пшеничная лапша, томлёная говядина, зелёный лук и пряное масло' },
+        wok: { name: 'Вок удон с курицей терияки', pic: 'u/dish-wok', price: 17.50, w: 360, pop: true, desc: 'Лапша удон, нежная курица, грибы шиитаке, сладкий перец, кунжут и соус терияки' },
+        peking: { name: 'Утка по-пекински с блинчиками', pic: 'u/dish-peking', price: 34.90, w: 420, pop: true, desc: 'Глазированная утка с хрустящей корочкой, тонкие блинчики, огурец, лук и соус хойсин' },
+        dimsum: { name: 'Димсамы ассорти в корзине', pic: 'u/dish-dimsum', price: 18.90, w: 260, pop: true, desc: 'Цветные паровые димсамы с тигровой креветкой, крабом и курицей с двумя соусами' },
+        sweetpork: { name: 'Свинина в кисло-сладком соусе', pic: 'u/dish-sweetpork', price: 21.50, w: 340, desc: 'Хрустящие кусочки свинины в глянцевом соусе со сладким перцем и ананасом' },
+        margherita: { name: 'Неаполитанская Маргарита', pic: 'u/dish-margherita', price: 22.90, w: 460, pop: true, desc: 'Пышный бортик из печи, томаты Сан-Марцано, моцарелла фиор ди латте и базилик' },
+        pepperoni_hq: { name: 'Пепперони на хрустящем тесте', pic: 'u/dish-pepperoni_hq', price: 25.90, w: 490, pop: true, desc: 'Двойная порция пикантной пепперони, тягучая моцарелла, маслины и руккола' },
+        truffle_pizza: { name: 'Пицца с белыми грибами и трюфелем', pic: 'u/dish-truffle_pizza', price: 28.90, w: 470, pop: true, desc: 'Сливочная основа, лесные грибы, пармезан, руккола и ароматное трюфельное масло' },
+        carbonara: { name: 'Спагетти Карбонара', pic: 'u/dish-carbonara', price: 19.90, w: 330, pop: true, desc: 'Паста аль денте, обжаренный бекон, сливочно-желтковый соус, пармезан и чёрный перец' },
+        lasagna: { name: 'Лазанья Болоньезе из печи', pic: 'u/dish-lasagna', price: 22.50, w: 370, pop: true, desc: 'Слои свежей пасты, томлёный говяжий рагу, нежный бешамель и румяная сырная корочка' },
+        ravioli: { name: 'Равиоли с рикоттой и соусом песто', pic: 'u/dish-ravioli', price: 20.90, w: 300, pop: true, desc: 'Домашние равиоли со шпинатом и рикоттой, базиликовый песто и томаты черри' },
+        focaccia: { name: 'Фокачча с розмарином и чесноком', pic: 'u/dish-focaccia', price: 9.90, w: 220, desc: 'Воздушная итальянская лепёшка на оливковом масле с розмарином и морской солью' },
+        draniki: { name: 'Драники домашние со сметаной', pic: 'u/dish-draniki', price: 14.90, w: 320, pop: true, desc: 'Румяные картофельные драники с хрустящим краем, густая сметана и свежий укроп' },
+        solyanka: { name: 'Борщ с салом и ржаным хлебом', pic: 'u/dish-solyanka', price: 12.90, w: 400, pop: true, desc: 'Наваристый красный борщ на говядине со сметаной, зеленью, салом и бородинским хлебом' },
+        kiev: { name: 'Шницель куриный с пюре', pic: 'u/dish-kiev', price: 18.90, w: 380, pop: true, desc: 'Хрустящий золотистый шницель с нежным картофельным пюре, грибами и сливочным соусом' },
+        potroast: { name: 'Жаркое по-домашнему с говядиной', pic: 'u/dish-potroast', price: 19.90, w: 420, pop: true, desc: 'Томлёная говядина с картофелем, ароматными специями и зелёным луком' },
+        khachapuri: { name: 'Хачапури по-аджарски', pic: 'u/dish-khachapuri', price: 19.50, w: 380, pop: true, desc: 'Румяная лодочка из печи, тягучий сыр сулугуни, сливочное масло и свежий желток' },
+        khinkali: { name: 'Хинкали с бараниной и зеленью, 5 шт', pic: 'u/dish-khinkali', price: 17.90, w: 400, pop: true, desc: 'Сочные грузинские хинкали ручной лепки с пряным бульоном, бараниной и кинзой' },
+        plov: { name: 'Ферганский плов с бараниной', pic: 'u/dish-plov', price: 21.90, w: 450, pop: true, desc: 'Рассыпчатый рис девзира, нежная томлёная баранина, сладкая морковь, зира и салат' },
+        samsa: { name: 'Тандырная самса с говядиной, 2 шт', pic: 'u/dish-samsa', price: 13.50, w: 280, pop: true, desc: 'Слоёная золотистая самса из тандыра с рубленной говядиной, луком и кунжутом' },
+        lula: { name: 'Люля-кебаб на лаваше с луком', pic: 'u/dish-lula', price: 21.50, w: 340, pop: true, desc: 'Сочный кебаб из баранины и говядины на углях, тонкий лаваш, маринованный лук и соус' },
+        lagman: { name: 'Лагман с говядиной и зеленью', pic: 'u/dish-lagman', price: 17.90, w: 460, desc: 'Тянутая лапша, томлёная говядина, ароматный бульон с травами и пряностями' },
+        benedict: { name: 'Яйца Бенедикт на круассане', pic: 'u/dish-benedict', price: 17.90, w: 280, pop: true, desc: 'Хрустящий масляный круассан, два яйца пашот, нежный соус голландез и зелень' },
+        shakshuka: { name: 'Шакшука с сыром и травами', pic: 'u/dish-shakshuka', price: 15.90, w: 340, pop: true, desc: 'Томлёные томаты со сладким перцем и специями, яйца, мягкий сыр и зелень в сковороде' },
+        croissant: { name: 'Круассан с фисташковым кремом', pic: 'u/dish-croissant', price: 11.90, w: 150, pop: true, desc: 'Свежий слоёный круассан, щедрая начинка из фисташкового крема и дроблёная фисташка' },
+        tiramisu: { name: 'Тирамису классический', pic: 'u/dish-tiramisu', price: 12.90, w: 170, pop: true, desc: 'Воздушный крем маскарпоне, савоярди в эспрессо, тёмное какао и карамель' },
+        sansebastian: { name: 'Чизкейк Сан-Себастьян', pic: 'u/dish-sansebastian', price: 13.90, w: 180, pop: true, desc: 'Нежный баскский чизкейк с карамелизованной корочкой и фисташковой крошкой' },
+        berrychoc: { name: 'Клубника в бельгийском шоколаде', pic: 'u/dish-berrychoc', price: 34.00, w: 280, pop: true, desc: 'Отборная спелая клубника в розовом и тёмном бельгийском шоколаде ручной работы' },
+        bento: { name: 'Бенто-торт с ягодами и макаронс', pic: 'u/dish-bento', price: 42.00, w: 450, pop: true, desc: 'Нежный сливочно-ягодный мини-торт со свежей малиной, ежевикой и макаронс' },
+        baklava: { name: 'Бакинская пахлава с фисташкой', pic: 'u/dish-baklava', price: 14.50, w: 200, pop: true, desc: 'Тончайшее слоёное тесто, цветочно-медовый сироп и отборная зелёная фисташка' },
+        raf: { name: 'Капучино спешелти', pic: 'u/dish-raf', price: 7.90, w: 300, ml: true, pop: true, desc: 'Свежеобжаренная арабика, шелковистая молочная пена и нежный сливочный вкус' },
+        matcha: { name: 'Айс-матча с клубникой', pic: 'u/dish-matcha', price: 10.50, w: 350, ml: true, pop: true, desc: 'Церемониальный японский чай матча, холодное молоко, лёд и спелая клубника' },
+        berrycake: { name: 'Ягодный чизкейк с клубникой', pic: 'u/dish-berrycake', price: 14.90, w: 190, pop: true, desc: 'Сливочный чизкейк на песочной основе со свежей клубникой, голубикой и ягодным кули' }
     };
     Object.keys(DISHES).forEach(function (k) { DISHES[k].id = k; });
     /* метки на фото блюда (itemTags) — исключительные свойства, по которым выбирают: новинка, хит, от шефа, вегги, постное,
        без глютена; «острое» — у блюд с hot. Скидка, % (sale) — своя метка «−10%», цена со скидкой везде: в меню, в заказе, на
        странице блюда; на карточке под ней — старая зачёркнутая. Раскиданы для проверки: где-то по 2–3 метки */
     var DISH_TAGS = { steak: 'hit chef', pasta: 'new veg', dumplings: 'hit', fried: 'new', bowl: 'new gf', caesar: 'chef', sticks: 'veg', cake: 'new', bliny: 'hit',
-        poke: 'veg lean gf', vegsoup: 'veg lean', mushsoup: 'veg lean', wings: 'hit', beefxl: 'hit', syrniki: 'new', shashlik: 'hit chef', sushi: 'chef', toast: 'veg new', borsch: 'hit' };
-    var DISH_SALE = { bowl: 10, beefxl: 15, syrniki: 10 };
+        poke: 'veg lean gf', vegsoup: 'veg lean', mushsoup: 'veg lean', wings: 'hit', beefxl: 'hit', syrniki: 'new', shashlik: 'hit chef', sushi: 'chef', toast: 'veg new', borsch: 'hit',
+        whopper: 'hit', cheeseburger: 'hit chef', nuggets: 'hit', crispywings: 'hit', doner: 'hit', ribs: 'hit chef', sausages: 'chef',
+        philadelphia: 'hit', dragon: 'chef', tempura: 'new', sushiset: 'hit', artroll: 'chef new', gyoza: 'new', tomyum: 'hit chef', phobo: 'hit', ramen: 'chef',
+        wok: 'hit', peking: 'chef', dimsum: 'new', margherita: 'hit veg', pepperoni_hq: 'hit', truffle_pizza: 'chef veg',
+        carbonara: 'hit', lasagna: 'chef', ravioli: 'veg new', focaccia: 'veg lean', draniki: 'hit veg', solyanka: 'hit', kiev: 'hit', potroast: 'chef',
+        khachapuri: 'hit veg', khinkali: 'hit chef', plov: 'hit chef', samsa: 'hit', lula: 'hit chef',
+        benedict: 'hit chef', shakshuka: 'veg new', croissant: 'hit new', tiramisu: 'hit', sansebastian: 'chef', berrychoc: 'hit new', bento: 'new chef', baklava: 'hit', raf: 'hit', matcha: 'new veg', berrycake: 'new' };
+    var DISH_SALE = { bowl: 10, beefxl: 15, syrniki: 10, whopper: 15, sushiset: 15, ribs: 10, truffle_pizza: 10, peking: 10, berrychoc: 10, khachapuri: 10 };
     Object.keys(DISH_TAGS).forEach(function (k) { if (DISHES[k]) DISHES[k].tags = DISH_TAGS[k].split(' '); });
     Object.keys(DISH_SALE).forEach(function (k) { if (DISHES[k]) DISHES[k].sale = DISH_SALE[k]; });
     // рейтинг блюда: оценка и сколько раз оценили — у каждого свой. В карточках меню, «Популярном», избранном и шторке блюда
-    var DISH_RATE = { country: [4.7, 198], manhattan: [4.8, 366], ranch: [4.8, 166], chicken: [4.8, 233], seasons: [4.7, 88], cheese: [4.6, 119], bavarian: [4.8, 241], bbq: [4.8, 205], beefxl: [4.5, 139], teisty: [4.8, 171], box: [4.7, 538], bliny: [4.8, 32], wings: [4.8, 157], bouillon: [4.4, 191], pie: [4.8, 124], cinnabon: [2.7, 18], syrniki: [4.8, 135], americano: [4.3, 144], bubble: [3.3, 15], steak: [4.9, 372], pasta: [4.8, 242], dumplings: [4.9, 188], bowl: [4.7, 194], caesar: [4.8, 167], cake: [4.9, 157], fried: [4.8, 135], sushi: [4.8, 364], pancakes: [4.9, 422], toast: [4.2, 90], vegsoup: [4.9, 162], sticks: [4.8, 239], borsch: [4.9, 85], mushsoup: [4.8, 137], poke: [4.8, 159], shashlik: [4.9, 261], roman: [4.7, 190], roses: [4.5, 601], tulips: [4.6, 477], peony: [4.7, 125], bouquet: [4.9, 117], rainbow: [4.7, 119] };
+    var DISH_RATE = { country: [4.7, 198], manhattan: [4.8, 366], ranch: [4.8, 166], chicken: [4.8, 233], seasons: [4.7, 88], cheese: [4.6, 119], bavarian: [4.8, 241], bbq: [4.8, 205], beefxl: [4.5, 139], teisty: [4.8, 171], box: [4.7, 538], bliny: [4.8, 32], wings: [4.8, 157], bouillon: [4.4, 191], pie: [4.8, 124], cinnabon: [2.7, 18], syrniki: [4.8, 135], americano: [4.3, 144], bubble: [3.3, 15], steak: [4.9, 372], pasta: [4.8, 242], dumplings: [4.9, 188], bowl: [4.7, 194], caesar: [4.8, 167], cake: [4.9, 157], fried: [4.8, 135], sushi: [4.8, 364], pancakes: [4.9, 422], toast: [4.2, 90], vegsoup: [4.9, 162], sticks: [4.8, 239], borsch: [4.9, 85], mushsoup: [4.8, 137], poke: [4.8, 159], shashlik: [4.9, 261], roman: [4.7, 190], roses: [4.5, 601], tulips: [4.6, 477], peony: [4.7, 125], bouquet: [4.9, 117], rainbow: [4.7, 119],
+        whopper: [4.8, 612], cheeseburger: [4.8, 428], fries: [4.7, 514], nuggets: [4.8, 349], crispywings: [4.9, 287], doner: [4.9, 391], shawarma: [4.7, 264], ribs: [4.9, 318], sausages: [4.8, 194],
+        philadelphia: [4.9, 534], dragon: [4.8, 276], tempura: [4.8, 312], sushiset: [4.9, 445], artroll: [4.9, 168], gyoza: [4.8, 142], tomyum: [4.9, 389], phobo: [4.8, 256], ramen: [4.8, 298],
+        wok: [4.8, 334], peking: [4.9, 187], dimsum: [4.8, 153], sweetpork: [4.7, 176], margherita: [4.8, 321], pepperoni_hq: [4.9, 412], truffle_pizza: [4.9, 215],
+        carbonara: [4.9, 364], lasagna: [4.9, 278], ravioli: [4.8, 165], focaccia: [4.8, 192], draniki: [4.9, 521], solyanka: [4.9, 294], kiev: [4.8, 241], potroast: [4.8, 188],
+        khachapuri: [4.9, 463], khinkali: [4.9, 419], plov: [4.9, 384], samsa: [4.8, 247], lula: [4.9, 309], lagman: [4.8, 198],
+        benedict: [4.9, 286], shakshuka: [4.8, 214], croissant: [4.9, 342], tiramisu: [4.9, 295], sansebastian: [4.9, 311], berrychoc: [5.0, 274], bento: [4.9, 183], baklava: [4.9, 226], raf: [4.8, 318], matcha: [4.8, 209], berrycake: [4.9, 244] };
     Object.keys(DISH_RATE).forEach(function (k) { if (DISHES[k]) { DISHES[k].rating = DISH_RATE[k][0]; DISHES[k].votes = DISH_RATE[k][1]; } });
 
     var MENUS = {
@@ -6138,6 +6200,124 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         flora: [
             { id: 'roses', name: 'Розы', items: ['roses', 'peony', 'rainbow'] },
             { id: 'bouquets', name: 'Букеты', items: ['tulips', 'bouquet'] }
+        ],
+        burgerking: [
+            { id: 'burgers', name: 'Бургеры на огне', items: ['whopper', 'cheeseburger', 'beefxl', 'teisty', 'box'] },
+            { id: 'snacks', name: 'Закуски и крылья', items: ['fries', 'nuggets', 'crispywings', 'sticks'] },
+            { id: 'desserts', name: 'Десерты', items: ['pie', 'cinnabon'] },
+            { id: 'drinks', name: 'Напитки', items: ['bubble', 'americano', 'raf'] }
+        ],
+        sushihouse: [
+            { id: 'rolls', name: 'Роллы и сеты', items: ['philadelphia', 'sushiset', 'dragon', 'tempura', 'sushi'] },
+            { id: 'soups', name: 'Супы и вок', items: ['tomyum', 'ramen', 'wok'] },
+            { id: 'snacks', name: 'Закуски', items: ['gyoza', 'bowl'] },
+            { id: 'drinks', name: 'Напитки', items: ['matcha', 'bubble'] }
+        ],
+        vasilki: [
+            { id: 'draniki', name: 'Драники и горячее', items: ['draniki', 'kiev', 'potroast', 'dumplings'] },
+            { id: 'soups', name: 'Супы', items: ['solyanka', 'borsch', 'mushsoup'] },
+            { id: 'breakfast', name: 'Блинчики и выпечка', items: ['bliny', 'syrniki', 'pie'] },
+            { id: 'drinks', name: 'Напитки', items: ['americano', 'raf'] }
+        ],
+        garage: [
+            { id: 'pizza', name: 'Пиццы', items: ['margherita', 'pepperoni_hq', 'truffle_pizza', 'roman'] },
+            { id: 'burgers', name: 'Бургеры и горячее', items: ['cheeseburger', 'carbonara', 'steak', 'fries'] },
+            { id: 'breakfast', name: 'Завтраки и салаты', items: ['benedict', 'caesar', 'toast'] },
+            { id: 'desserts', name: 'Десерты и кофе', items: ['sansebastian', 'raf', 'matcha'] }
+        ],
+        tsaritsa: [
+            { id: 'pizza', name: 'Хитовые пиццы', items: ['pepperoni_hq', 'margherita', 'truffle_pizza', 'seasons', 'cheese', 'bbq'] },
+            { id: 'snacks', name: 'Закуски', items: ['focaccia', 'sticks', 'nuggets', 'fries'] },
+            { id: 'drinks', name: 'Напитки', items: ['bubble', 'americano'] }
+        ],
+        koisushi: [
+            { id: 'rolls', name: 'Авторские роллы', items: ['tempura', 'artroll', 'philadelphia', 'dragon', 'sushiset'] },
+            { id: 'hot', name: 'Горячее и закуски', items: ['gyoza', 'wok', 'ramen', 'tomyum'] },
+            { id: 'poke', name: 'Поке и боулы', items: ['bowl', 'poke'] },
+            { id: 'drinks', name: 'Напитки', items: ['matcha', 'bubble'] }
+        ],
+        pastadeli: [
+            { id: 'pasta', name: 'Паста и лазанья', items: ['carbonara', 'lasagna', 'ravioli', 'pasta'] },
+            { id: 'bakery', name: 'Фокачча и закуски', items: ['focaccia', 'caesar', 'margherita'] },
+            { id: 'desserts', name: 'Десерты', items: ['tiramisu', 'sansebastian'] },
+            { id: 'drinks', name: 'Кофе и напитки', items: ['raf', 'americano'] }
+        ],
+        lichi: [
+            { id: 'main', name: 'Китайская классика', items: ['peking', 'sweetpork', 'wok'] },
+            { id: 'dimsum', name: 'Димсамы и гёдза', items: ['dimsum', 'gyoza'] },
+            { id: 'soups', name: 'Азиатские супы', items: ['tomyum', 'phobo', 'ramen'] },
+            { id: 'drinks', name: 'Напитки', items: ['matcha', 'bubble'] }
+        ],
+        etevi: [
+            { id: 'grill', name: 'Мангал и кебабы', items: ['lula', 'shashlik', 'ribs'] },
+            { id: 'hot', name: 'Горячее и плов', items: ['plov', 'lagman', 'samsa', 'khachapuri'] },
+            { id: 'desserts', name: 'Восточные сладости', items: ['baklava', 'pie'] },
+            { id: 'drinks', name: 'Напитки', items: ['bubble', 'americano'] }
+        ],
+        kavkaz: [
+            { id: 'bakery', name: 'Хачапури и хинкали', items: ['khachapuri', 'khinkali', 'samsa'] },
+            { id: 'grill', name: 'Блюда на углях', items: ['lula', 'shashlik', 'ribs', 'fried'] },
+            { id: 'soups', name: 'Супы и салаты', items: ['lagman', 'solyanka'] },
+            { id: 'desserts', name: 'Десерты', items: ['baklava'] }
+        ],
+        plovpav: [
+            { id: 'plov', name: 'Плов и горячее', items: ['plov', 'lagman', 'potroast'] },
+            { id: 'tandoor', name: 'Из тандыра и мангала', items: ['samsa', 'lula', 'shashlik'] },
+            { id: 'soups', name: 'Супы и пельмени', items: ['khinkali', 'dumplings'] },
+            { id: 'desserts', name: 'Сладости', items: ['baklava'] }
+        ],
+        benedikt: [
+            { id: 'breakfast', name: 'Завтраки весь день', items: ['benedict', 'shakshuka', 'pancakes', 'toast', 'syrniki'] },
+            { id: 'bakery', name: 'Круассаны и десерты', items: ['croissant', 'sansebastian', 'berrycake', 'tiramisu'] },
+            { id: 'drinks', name: 'Кофе и матча', items: ['raf', 'matcha', 'americano'] }
+        ],
+        atomdoner: [
+            { id: 'doner', name: 'Донеры и шаурма', items: ['doner', 'shawarma', 'box'] },
+            { id: 'snacks', name: 'Закуски и фри', items: ['fries', 'nuggets', 'crispywings', 'sticks'] },
+            { id: 'drinks', name: 'Напитки', items: ['bubble', 'americano'] }
+        ],
+        tsypa: [
+            { id: 'chicken', name: 'Хрустящая курочка', items: ['crispywings', 'nuggets', 'wings', 'fried'] },
+            { id: 'burgers', name: 'Бургеры и гарниры', items: ['box', 'fries', 'sticks'] },
+            { id: 'drinks', name: 'Напитки', items: ['bubble', 'matcha'] }
+        ],
+        artsushi: [
+            { id: 'art', name: 'Гастро-роллы', items: ['artroll', 'philadelphia', 'dragon', 'tempura', 'sushiset'] },
+            { id: 'bowls', name: 'Поке и закуски', items: ['bowl', 'poke', 'gyoza', 'dimsum'] },
+            { id: 'soups', name: 'Супы', items: ['tomyum', 'ramen'] },
+            { id: 'drinks', name: 'Напитки', items: ['matcha', 'bubble'] }
+        ],
+        freezysoup: [
+            { id: 'soups', name: 'Супы мира', items: ['tomyum', 'phobo', 'ramen', 'solyanka', 'borsch', 'mushsoup', 'vegsoup'] },
+            { id: 'hot', name: 'Вторые блюда', items: ['potroast', 'kiev', 'draniki', 'dumplings'] },
+            { id: 'bakery', name: 'Хлеб и выпечка', items: ['focaccia', 'samsa'] }
+        ],
+        pizzatruck: [
+            { id: 'pizza', name: 'Пицца из печи', items: ['pepperoni_hq', 'margherita', 'truffle_pizza', 'roman', 'bavarian', 'cheese'] },
+            { id: 'snacks', name: 'Фокачча и закуски', items: ['focaccia', 'sticks', 'crispywings', 'fries'] },
+            { id: 'desserts', name: 'Десерты и напитки', items: ['tiramisu', 'bubble', 'raf'] }
+        ],
+        myloverberry: [
+            { id: 'berries', name: 'Клубника в шоколаде', items: ['berrychoc', 'bento', 'berrycake'] },
+            { id: 'desserts', name: 'Десерты и выпечка', items: ['sansebastian', 'tiramisu', 'croissant', 'cake'] },
+            { id: 'gifts', name: 'Букеты к десерту', items: ['bouquet', 'peony'] },
+            { id: 'drinks', name: 'Напитки', items: ['matcha', 'raf'] }
+        ],
+        pivovar: [
+            { id: 'grill', name: 'Гриль и рёбра', items: ['ribs', 'sausages', 'steak', 'shashlik'] },
+            { id: 'snacks', name: 'К пенному и бургеры', items: ['crispywings', 'cheeseburger', 'fries', 'sticks'] },
+            { id: 'hot', name: 'Сытное горячее', items: ['kiev', 'draniki', 'potroast'] }
+        ],
+        zerna: [
+            { id: 'coffee', name: 'Спешелти кофе и матча', items: ['raf', 'matcha', 'americano', 'bubble'] },
+            { id: 'bakery', name: 'Свежая выпечка', items: ['croissant', 'sansebastian', 'berrycake', 'tiramisu'] },
+            { id: 'breakfast', name: 'Лёгкие завтраки', items: ['benedict', 'toast', 'syrniki', 'pancakes'] }
+        ],
+        podvorie: [
+            { id: 'hot', name: 'Домашнее горячее', items: ['potroast', 'kiev', 'draniki', 'dumplings', 'fried'] },
+            { id: 'soups', name: 'Первые блюда', items: ['solyanka', 'borsch', 'mushsoup'] },
+            { id: 'grill', name: 'С мангала', items: ['shashlik', 'sausages'] },
+            { id: 'desserts', name: 'Домашняя выпечка', items: ['bliny', 'pie', 'syrniki'] }
         ]
     };
 
@@ -6150,7 +6330,28 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         { id: 'fusion', name: 'Fusion sushi', cover: 'u/r-fusion', rating: 4.7, reviews: 20, time: '60–80', fee: 7, freeFrom: 40, courier: 'clever', min: 25, cats: ['sushi', 'poke', 'snacks', 'drinks'], promo: '−25% на сеты', zones: ['home'] },
         { id: 'mangal', name: 'Мангал', cover: 'u/r-mangal', rating: 4.8, reviews: 31, time: '40–55', fee: 4, freeFrom: 60, courier: 'clever', min: 25, cats: ['grill', 'snacks'], promo: '−20% на шашлык', zones: ['home', 'work'] },
         { id: 'mirpizza', name: 'Мир пиццы', cover: 'u/r-mirpizza', rating: 4.8, reviews: 37, time: '60–90', fee: 0, min: 20, cats: ['pizza', 'snacks'], promo: '3-я пицца в подарок', zones: ['work'] },
-        { id: 'flora', name: 'Флора. Цветы и подарки', cover: 'u/r-flora', rating: 4.9, reviews: 64, time: '60–90', fee: 0, min: 40, cats: ['flowers'], promo: 'Открытка в подарок', zones: ['home', 'work'] }
+        { id: 'flora', name: 'Флора. Цветы и подарки', cover: 'u/r-flora', rating: 4.9, reviews: 64, time: '60–90', fee: 0, min: 40, cats: ['flowers'], promo: 'Открытка в подарок', zones: ['home', 'work'] },
+        { id: 'burgerking', name: 'Burger King', cover: 'u/r-burgerking', rating: 4.7, reviews: 412, time: '25–40', fee: 0, min: 15, cats: ['snacks', 'grill', 'drinks', 'desserts'], promo: '−20% на бургеры', zones: ['home', 'work'] },
+        { id: 'sushihouse', name: 'Sushi House', cover: 'u/r-sushihouse', rating: 4.8, reviews: 307, time: '40–55', fee: 5, freeFrom: 55, courier: 'clever', min: 25, cats: ['sushi', 'soups', 'snacks', 'drinks'], promo: '−20% на сеты', zones: ['home', 'work'] },
+        { id: 'vasilki', name: 'Васильки', cover: 'u/r-vasilki', rating: 4.8, reviews: 540, time: '35–50', fee: 0, min: 20, cats: ['home', 'soups', 'breakfast', 'desserts'], gift: true, zones: ['home', 'work'] },
+        { id: 'garage', name: 'Garage', cover: 'u/r-garage', rating: 4.6, reviews: 268, time: '35–50', fee: 4, freeFrom: 45, courier: 'clever', min: 20, cats: ['pizza', 'snacks', 'home', 'breakfast', 'desserts'], promo: '−15% на пиццу', zones: ['home', 'work'] },
+        { id: 'tsaritsa', name: 'Пицца Царица', cover: 'u/r-tsaritsa', rating: 4.8, reviews: 94, time: '30–45', fee: 0, min: 18, cats: ['pizza', 'snacks', 'drinks'], promo: '−20% на комбо', zones: ['home', 'work'] },
+        { id: 'koisushi', name: 'Koi Sushi', cover: 'u/r-koisushi', rating: 4.9, reviews: 61, time: '40–55', fee: 5, freeFrom: 50, courier: 'clever', min: 25, cats: ['sushi', 'soups', 'snacks', 'drinks'], isNew: true, gift: true, zones: ['home', 'work'] },
+        { id: 'pastadeli', name: 'Pasta Deli', cover: 'u/r-pastadeli', rating: 4.8, reviews: 79, time: '35–50', fee: 4, freeFrom: 40, courier: 'clever', min: 20, cats: ['home', 'pizza', 'desserts', 'drinks'], promo: '−15% на пасту', zones: ['home', 'work'] },
+        { id: 'lichi', name: 'Личи', cover: 'u/r-lichi', rating: 4.9, reviews: 148, time: '45–60', fee: 6, freeFrom: 65, courier: 'clever', min: 30, cats: ['home', 'soups', 'snacks', 'drinks'], promo: '−15% на обед', zones: ['home', 'work'] },
+        { id: 'etevi', name: 'Et Evi', cover: 'u/r-etevi', rating: 4.8, reviews: 112, time: '45–65', fee: 5, freeFrom: 60, courier: 'clever', min: 25, cats: ['grill', 'home', 'desserts', 'drinks'], gift: true, zones: ['home', 'work'] },
+        { id: 'kavkaz', name: 'Kavkaz Grill House', cover: 'u/r-kavkaz', rating: 4.9, reviews: 164, time: '40–55', fee: 0, min: 25, cats: ['grill', 'home', 'soups', 'desserts'], promo: '−15% на гриль', zones: ['home', 'work'] },
+        { id: 'plovpav', name: 'ПловПав', cover: 'u/r-plovpav', rating: 4.8, reviews: 93, time: '35–50', fee: 0, min: 20, cats: ['home', 'soups', 'grill', 'desserts'], isNew: true, promo: '−15% на плов', zones: ['home', 'work'] },
+        { id: 'benedikt', name: 'Бенедикт', cover: 'u/r-benedikt', rating: 4.9, reviews: 87, time: '25–40', fee: 4, freeFrom: 35, courier: 'clever', min: 18, cats: ['breakfast', 'desserts', 'drinks'], isNew: true, promo: '−20% на завтраки', zones: ['home', 'work'] },
+        { id: 'atomdoner', name: 'Атом Донер', cover: 'u/r-atomdoner', rating: 4.7, reviews: 156, time: '20–35', fee: 0, min: 14, cats: ['snacks', 'grill', 'drinks'], isNew: true, promo: '−15% на донеры', zones: ['home', 'work'] },
+        { id: 'tsypa', name: 'Цыпа', cover: 'u/r-tsypa', rating: 4.8, reviews: 109, time: '25–40', fee: 0, min: 16, cats: ['grill', 'snacks', 'drinks'], gift: true, zones: ['home', 'work'] },
+        { id: 'artsushi', name: 'Art Sushi', cover: 'u/r-artsushi', rating: 4.9, reviews: 74, time: '45–60', fee: 6, freeFrom: 60, courier: 'clever', min: 30, cats: ['sushi', 'soups', 'snacks', 'drinks'], isNew: true, promo: '−20% на гастро-роллы', zones: ['home', 'work'] },
+        { id: 'freezysoup', name: 'FreezySoup', cover: 'u/r-freezysoup', rating: 4.8, reviews: 68, time: '30–45', fee: 0, min: 18, cats: ['soups', 'home'], isNew: true, promo: '−20% на супы', zones: ['home', 'work'] },
+        { id: 'pizzatruck', name: 'PizzaTruck', cover: 'u/r-pizzatruck', rating: 4.8, reviews: 132, time: '30–45', fee: 0, min: 20, cats: ['pizza', 'snacks', 'desserts', 'drinks'], isNew: true, promo: '2-я пицца −30%', zones: ['home', 'work'] },
+        { id: 'myloverberry', name: 'Myloverberry', cover: 'u/r-myloverberry', rating: 5.0, reviews: 196, time: '40–60', fee: 5, freeFrom: 70, courier: 'clever', min: 30, cats: ['desserts', 'flowers', 'drinks'], isNew: true, promo: 'Открытка в подарок', zones: ['home', 'work'] },
+        { id: 'pivovar', name: 'Староместный пивовар', cover: 'u/r-pivovar', rating: 4.8, reviews: 245, time: '45–60', fee: 5, freeFrom: 65, courier: 'clever', min: 25, cats: ['grill', 'snacks', 'home'], gift: true, zones: ['home', 'work'] },
+        { id: 'zerna', name: 'Zerna.by', cover: 'u/r-zerna', rating: 4.9, reviews: 121, time: '20–35', fee: 0, min: 12, cats: ['drinks', 'breakfast', 'desserts'], isNew: true, promo: '−20% кофе + выпечка', zones: ['home', 'work'] },
+        { id: 'podvorie', name: 'Подворье', cover: 'u/r-podvorie', rating: 4.8, reviews: 173, time: '40–55', fee: 0, min: 20, cats: ['home', 'soups', 'grill', 'desserts'], promo: '−20% на обеды', zones: ['home', 'work'] }
     ];
     function rest(id) { for (var i = 0; i < RESTS.length; i++) if (RESTS[i].id === id) return RESTS[i]; }
     /* «О заведении» (10.11). Часы — по дням с понедельника; оплата: cash — наличными курьеру, term — картой курьеру, online — картой
@@ -6165,7 +6366,28 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         fusion: { d: 'Роллы, сеты и поке. Соевый соус в подарок к каждому заказу; имбирь и васаби — по желанию, добавьте в заказ.', hrs: H_DAY('12:00–22:00', '12:00–23:00'), pay: ['term', 'online'], lg: ['ООО «Вилкой не есть»', '391842397', 'г. Витебск, пр-т Фрунзе, 77Л-2, комн. 200В'] },
         mangal: { d: 'Шашлык и люля на углях, овощи гриль и лаваш из тандыра. Мясо маринуют сутки.', hrs: H_DAY('12:00–23:00', '12:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Мангал Групп»', '192255610', 'г. Минск, ул. Кальварийская, 24'] },
         mirpizza: { d: 'Пицца, закуски и наборы для вечеринок. Третья пицца — в подарок.', hrs: H_DAY('10:00–23:00', '10:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Мир Вкуса»', '190870233', 'г. Минск, пр-т Победителей, 84'] },
-        flora: { d: 'Букеты, цветы в коробках и подарки. Соберём к нужному времени и приложим открытку с вашим текстом.', hrs: H_DAY('08:00–21:00'), pay: ['cash', 'term', 'online'], lg: ['ИП Ковалёва Е. С.', '193900514', 'г. Минск, ул. Петра Мстиславца, 11'] }
+        flora: { d: 'Букеты, цветы в коробках и подарки. Соберём к нужному времени и приложим открытку с вашим текстом.', hrs: H_DAY('08:00–21:00'), pay: ['cash', 'term', 'online'], lg: ['ИП Ковалёва Е. С.', '193900514', 'г. Минск, ул. Петра Мстиславца, 11'] },
+        burgerking: { d: 'Легендарные бургеры на открытом огне, хрустящий картофель фри, крылышки и комбо для компании.', hrs: H_DAY('10:00–23:00', '10:00–01:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Бургер БК»', '192415615', 'г. Минск, пр-т Независимости, 58'] },
+        sushihouse: { d: 'Свежие роллы, большие сеты, тёплая темпура, том ям и лапша вок. Доставляем охлаждёнными и горячими в отдельных боксах.', hrs: H_DAY('11:00–23:00', '11:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Суши Хаус»', '191764208', 'г. Минск, ул. Кульман, 9'] },
+        vasilki: { d: 'Ресторан народной белорусской кухни: хрустящие драники, мачанка, наваристый борщ и домашняя выпечка.', hrs: H_DAY('09:00–23:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Васильки Фуд»', '191134890', 'г. Минск, пр-т Независимости, 89'] },
+        garage: { d: 'Городское кафе на каждый день: пицца из печи, сочные бургеры, паста, завтраки и спешелти-кофе.', hrs: H_DAY('09:00–23:00', '09:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Гараж Групп»', '191309412', 'г. Минск, ул. Могилёвская, 12а'] },
+        tsaritsa: { d: 'Щедрая пицца с хрустящим бортиком, комбо для компании и горячие закуски прямо из печи.', hrs: H_DAY('11:00–23:00', '11:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Царица Пицца»', '193640119', 'г. Минск, ул. Жореса Алфёрова, 7'] },
+        koisushi: { d: 'Японская классика и яркие авторские роллы с лососем, темпурой, гёдза и насыщенным раменом.', hrs: H_DAY('11:00–23:00', '11:00–00:00'), pay: ['term', 'online'], lg: ['ООО «Кои Фуд»', '193711284', 'г. Минск, ул. Зыбицкая, 6'] },
+        pastadeli: { d: 'Свежая итальянская паста ручной работы, лазанья из печи, хрустящая фокачча и классический тирамису.', hrs: H_DAY('11:00–22:30', '11:00–23:30'), pay: ['term', 'online'], lg: ['ООО «Паста Дели»', '193588401', 'г. Минск, ул. Революционная, 13'] },
+        lichi: { d: 'Уютный ресторан китайской и паназиатской кухни: утка по-пекински, димсамы на пару, вок и том ям.', hrs: H_DAY('12:00–23:00', '12:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Личи Азия»', '193221905', 'г. Минск, ул. Интернациональная, 25'] },
+        etevi: { d: 'Ресторан азербайджанской кухни: люля-кебаб на углях, ароматный плов, тандырная выпечка и бакинская пахлава.', hrs: H_DAY('11:00–23:00', '11:00–01:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Эт Эви»', '193490122', 'г. Минск, ул. Франциска Скорины, 2'] },
+        kavkaz: { d: 'Грузинские хачапури с тягучим сулугуни, сочные хинкали ручной лепки и мясо с живого мангала.', hrs: H_DAY('11:00–23:00', '11:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Кавказ Гриль»', '193104877', 'г. Минск, ул. Немига, 12'] },
+        plovpav: { d: 'Настоящий ферганский плов из казана, хрустящая тандырная самса, наваристый лагман и кебабы.', hrs: H_DAY('11:00–22:00', '11:00–23:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «ПловПав»', '193602450', 'г. Минск, ул. Веры Хоружей, 8'] },
+        benedikt: { d: 'Завтраки, которые хочется заказывать весь день: яйца Бенедикт, шакшука, фисташковые круассаны и кофе.', hrs: H_DAY('08:00–21:00', '08:00–22:00'), pay: ['term', 'online'], lg: ['ООО «Бенедикт Бранч»', '193782310', 'г. Минск, ул. Комсомольская, 18'] },
+        atomdoner: { d: 'Сочный донер на углях в хрустящем лаваше, авторские соусы, сырная шаурма и горячий картофель фри.', hrs: H_DAY('10:00–23:30', '10:00–02:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Атом Стритфуд»', '193814902', 'г. Минск, ул. Октябрьская, 16'] },
+        tsypa: { d: 'Хрустящая курочка в панировке, крылышки в медовой и острой глазури, стрипсы и фирменные соусы.', hrs: H_DAY('11:00–23:00', '11:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Цыпа Гриль»', '193691044', 'г. Минск, пр-т Дзержинского, 104'] },
+        artsushi: { d: 'Гастрономические роллы с опалённым лососем, трюфельным соусом, свежей икрой, поке и димсамами.', hrs: H_DAY('11:30–23:00', '11:30–00:00'), pay: ['term', 'online'], lg: ['ООО «Арт Суши»', '193745180', 'г. Минск, ул. Ленина, 9'] },
+        freezysoup: { d: 'Насыщенные супы со всего мира — от тайского том яма и фо бо до домашнего борща — и сытные вторые блюда.', hrs: H_DAY('10:00–22:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Фризи Суп»', '193654321', 'г. Минск, ул. Тимирязева, 65'] },
+        pizzatruck: { d: 'Римская и неаполитанская пицца с пузырчатым бортиком, трюфельные начинки и воздушная фокачча.', hrs: H_DAY('11:00–23:00', '11:00–00:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «ПиццаТрак»', '193701552', 'г. Минск, ул. Сурганова, 50'] },
+        myloverberry: { d: 'Отборная клубника в бельгийском шоколаде, нарядные бенто-торты, чизкейки и подарочные букеты.', hrs: H_DAY('09:00–21:30'), pay: ['term', 'online'], lg: ['ИП Савицкая М. О.', '193899210', 'г. Минск, ул. Мстиславца, 20'] },
+        pivovar: { d: 'Ресторан-пивоварня: томлёные рёбрышки BBQ, баварские колбаски на гриле, стейки и сытные закуски.', hrs: H_DAY('12:00–23:30', '12:00–01:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Староместный»', '191452880', 'г. Минск, ул. Революционная, 32'] },
+        zerna: { d: 'Спешелти-кофейня: свежеобжаренный кофе, айс-матча, тёплые круассаны с фисташкой и чизкейк сан-себастьян.', hrs: H_DAY('08:00–21:00', '09:00–22:00'), pay: ['term', 'online'], lg: ['ООО «Зёрна Кофе»', '193830117', 'г. Минск, пр-т Независимости, 44'] },
+        podvorie: { d: 'По-домашнему щедрая кухня: томлёное жаркое, куриный шницель с пюре, драники и наваристый борщ.', hrs: H_DAY('10:00–22:00', '10:00–23:00'), pay: ['cash', 'term', 'online'], lg: ['ООО «Подворье Минск»', '192908744', 'г. Минск, ул. Притыцкого, 29'] }
     };
 
     // категории — фото с Unsplash (img/u, свободная лицензия), все строго сверху, блюдо по центру
@@ -6339,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '23.11 · 23:58';
+    var BUILD = '24.11 · 00:26';
 
     /* ── состояние ── */
     var S = {
@@ -6593,7 +6815,28 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         mirpizza: [{ id: 'pizza3', k: 'nth', cat: 'pizza', n: 3, pct: 100, t: '3-я пицца в подарок' }],
         flora: [{ id: 'card', k: 'gift', name: 'Открытка', from: 0 }],
         terra: [{ id: 'cake', k: 'gift', dish: 'cake', from: 40 }],
-        tempo: [{ id: 'ranch', k: 'gift', dish: 'ranch', name: 'Пицца Ранч', from: 40 }]
+        tempo: [{ id: 'ranch', k: 'gift', dish: 'ranch', name: 'Пицца Ранч', from: 40 }],
+        burgerking: [{ id: 'bkr', k: 'cat', cat: 'burgers', pct: 20, t: 'Бургеры −20%' }],
+        sushihouse: [{ id: 'shset', k: 'items', items: ['sushiset', 'dragon'], pct: 20, t: 'Сеты −20%' }],
+        vasilki: [{ id: 'dran', k: 'gift', dish: 'draniki', from: 40 }],
+        garage: [{ id: 'gpz', k: 'cat', cat: 'pizza', pct: 15, t: 'Пицца −15%' }],
+        tsaritsa: [{ id: 'tcombo', k: 'pair', a: 'pizza', b: 'drinks', pct: 20, t: 'Комбо −20%', hint: 'Пицца + напиток — комбо −20%' }],
+        koisushi: [{ id: 'kgz', k: 'gift', dish: 'gyoza', from: 40 }],
+        pastadeli: [{ id: 'pdl', k: 'cat', cat: 'pasta', pct: 15, t: 'Паста −15%' }],
+        lichi: [{ id: 'llunch', k: 'pair', a: 'soups', b: 'main', pct: 15, t: 'Обед −15%', hint: 'Суп + горячее — обед −15%' }],
+        etevi: [{ id: 'ebak', k: 'gift', dish: 'baklava', from: 40 }],
+        kavkaz: [{ id: 'kgr', k: 'cat', cat: 'grill', pct: 15, t: 'Гриль −15%' }],
+        plovpav: [{ id: 'ppl', k: 'items', items: ['plov'], pct: 15, t: 'Плов −15%' }],
+        benedikt: [{ id: 'bbrk', k: 'cat', cat: 'breakfast', pct: 20, t: 'Завтраки −20%' }],
+        atomdoner: [{ id: 'adon', k: 'cat', cat: 'doner', pct: 15, t: 'Донеры −15%' }],
+        tsypa: [{ id: 'tfr', k: 'gift', dish: 'fries', from: 35 }],
+        artsushi: [{ id: 'artr', k: 'cat', cat: 'art', pct: 20, t: 'Гастро-роллы −20%' }],
+        freezysoup: [{ id: 'fsup', k: 'cat', cat: 'soups', pct: 20, t: 'Супы −20%' }],
+        pizzatruck: [{ id: 'pt2', k: 'nth', cat: 'pizza', n: 2, pct: 30, t: '2-я пицца −30%' }],
+        myloverberry: [{ id: 'mbcard', k: 'gift', name: 'Открытка', from: 0 }],
+        pivovar: [{ id: 'pfr', k: 'gift', dish: 'fries', from: 45 }],
+        zerna: [{ id: 'zpair', k: 'pair', a: 'coffee', b: 'bakery', pct: 20, t: 'Кофе + выпечка −20%', hint: 'Кофе + выпечка — скидка −20%' }],
+        podvorie: [{ id: 'podl', k: 'pair', a: 'soups', b: 'hot', pct: 20, t: 'Обед −20%', hint: 'Суп + горячее — обед −20%' }]
     };
     function dealWhen(w) { if (w !== 'wd16') return true; var d = new Date(), wd = d.getDay(); return wd >= 1 && wd <= 5 && d.getHours() < 16; }
     function cartDeals(goods) {
@@ -9335,7 +9578,10 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     };
     /* «Блюдо в подарок» — какое именно (13.11, вечер: «А ещё лучше — блюдо, которое в подарок в кружке. И от какой суммы»): блюдо
        из меню заведения с фото — в кружке слева, название — в заголовке. В меню Темпо нет ни десертов, ни напитков — дарят пиццу */
-    var GIFT_DISH = { tempo: { g: 'ranch', t: 'Пицца Ранч в подарок' }, terra: { g: 'cake', t: 'Торт «Радуга» в подарок' } };
+    var GIFT_DISH = { tempo: { g: 'ranch', t: 'Пицца Ранч в подарок' }, terra: { g: 'cake', t: 'Торт «Радуга» в подарок' },
+        vasilki: { g: 'draniki', t: 'Драники в подарок' }, koisushi: { g: 'gyoza', t: 'Гёдза в подарок' },
+        etevi: { g: 'baklava', t: 'Пахлава в подарок' }, tsypa: { g: 'fries', t: 'Картофель фри в подарок' },
+        pivovar: { g: 'fries', t: 'Картофель фри в подарок' } };
     function restDeals(r) {
         var L = [], gd = GIFT_DISH[r.id];
         // 15.11, ночью: «Открытка в подарок — да, это подарок, а не акция со скидкой. Всё, что идёт целиком — это всегда подарок»:
@@ -17618,7 +17864,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     /* AB_GEO:конец */
     var AB_Z = [{ c: '#2e9e52', t: 'Зелёная зона', fee: 0, min: 0, dt: 0 }, { c: '#2f7fe0', t: 'Синяя зона', fee: 3, min: 25, dt: 10 }, { c: '#f08a24', t: 'Оранжевая зона', fee: 5, min: 30, dt: 15 },
         { c: '#8b5cf6', t: 'Фиолетовая зона', fee: 7, min: 35, dt: 25 }, { c: '#e5484d', t: 'Красная зона', fee: 9, min: 40, dt: 35 }];
-    var AB_ZN = { dominos: 5, papochka: 3, letitbe: 4, tempo: 4, mirpizza: 3, flora: 5 };
+    var AB_ZN = { dominos: 5, papochka: 3, letitbe: 4, tempo: 4, mirpizza: 3, flora: 5, burgerking: 5, sushihouse: 5, vasilki: 5, garage: 5, tsaritsa: 4, kavkaz: 4, pizzatruck: 4, podvorie: 4 };
     function abZones(r) { return AB_Z.slice(0, AB_ZN[r.id] || 3); }
     function abPts(r) { return restPicks(r).map(function (k) { return PICKS[k].ll; }); }
     var AB_PAY = { cash: ['i-cash', 'Наличными курьеру'], term: ['i-card', 'Картой курьеру'], online: ['i-phone', 'Картой онлайн'] };
