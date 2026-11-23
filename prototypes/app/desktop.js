@@ -17,14 +17,115 @@ window.cleverDesk = function (A) {
     var TEL = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 3.6h3l1.6 4-2 1.3a10.6 10.6 0 0 0 5.3 5.3l1.3-2 4 1.6v3a1.6 1.6 0 0 1-1.7 1.6A15.6 15.6 0 0 1 3.6 5.3 1.6 1.6 0 0 1 5.2 3.6z"/></svg>';
     function deskHead() {
         var a = addr(S.addr), c = city(), tb = document.getElementById('tabbar');
-        var key = [a ? a.street : '', c.name, S.auth ? 1 : 0].join('|');
+        var key = [a ? a.street : '', a ? a.flat : '', c.name, S.auth ? 1 : 0].join('|');
         if (tb._dk === key) return;
         tb._dk = key;
-        document.getElementById('dAddr').innerHTML = PIN + '<b class="dh-city">' + esc(c.name) + '<i class="dh-caret"></i></b>' +
-            (a ? '<span class="dh-st">' + esc(a.street) + '</span>' : '<span class="dh-tag">Укажите адрес</span>');
+        document.getElementById('dAddr').innerHTML =
+            '<button type="button" class="dh-city" data-act="open-city" aria-label="Город: ' + esc(c.name) + '. Сменить">' +
+                PIN + '<span>' + esc(c.name) + '</span><i class="dh-caret" aria-hidden="true"></i>' +
+            '</button>' +
+            '<button type="button" class="dh-place" data-act="open-addr" aria-label="Адрес доставки">' +
+                (a ? '<span class="dh-st">' + esc(a.street) + '</span>' : '<span class="dh-tag">Укажите адрес</span>') +
+            '</button>';
         var s = document.getElementById('dSearch');
         if (!s.firstChild) { s.innerHTML = ic('i-search'); s.setAttribute('aria-label', 'Поиск блюд и ресторанов'); }
         var lg = document.getElementById('dLogin'); lg.hidden = true;
+        if (askEl) placeAskAddr();
+    }
+    /* 23.11: красивое тёмное окошко с уточнением адреса при первом запуске главной на десктопе.
+       Показывает последний адрес (из cookie или по умолчанию) прямо под верхним контролом города и адреса.
+       «Да, верно» — подтверждает и сохраняет в cookie; «Изменить» — открывает окно адреса */
+    var askEl = null, askShown = false, askTimer = 0, askOutDoc = null;
+    function placeAskAddr() {
+        if (!askEl || !askEl.isConnected) return;
+        if (!deskOn()) { hideAskAddr(true); return; }
+        var anchor = document.getElementById('dAddr');
+        if (!anchor) return;
+        var r = anchor.getBoundingClientRect(), a = app.getBoundingClientRect();
+        if (!r.width || !r.height) return;
+        var pw = askEl.offsetWidth || 372;
+        var anchorCenter = r.left - a.left + r.width / 2;
+        var left = Math.max(16, Math.min(a.width - pw - 16, anchorCenter - pw / 2));
+        var top = r.bottom - a.top + 12;
+        var tipX = Math.max(28, Math.min(pw - 28, anchorCenter - left));
+        askEl.style.left = Math.round(left) + 'px';
+        askEl.style.top = Math.round(top) + 'px';
+        askEl.style.setProperty('--tip-x', Math.round(tipX) + 'px');
+    }
+    function hideAskAddr(instant) {
+        clearTimeout(askTimer); askTimer = 0;
+        if (askOutDoc) { document.removeEventListener('pointerdown', askOutDoc, true); askOutDoc = null; }
+        if (!askEl) return;
+        var el = askEl; askEl = null;
+        el.classList.remove('is-on');
+        if (instant || fxOff()) { el.remove(); return; }
+        el.classList.add('is-out');
+        setTimeout(function () { if (el.isConnected) el.remove(); }, 260);
+    }
+    function askAddr() {
+        if (askShown || !deskOn()) return;
+        askShown = true;
+        clearTimeout(askTimer);
+        askTimer = setTimeout(function () {
+            askTimer = 0;
+            if (!deskOn() || S.tab !== 'home' || S.stack.length || A.sheetKind() || askEl) return;
+            var a = addr(S.addr), c = city();
+            var el = document.createElement('aside');
+            el.className = 'daddr-ask';
+            el.id = 'dAddrAsk';
+            el.setAttribute('role', 'dialog');
+            el.setAttribute('aria-label', 'Уточнение адреса доставки');
+            var line = a
+                ? esc(c.name) + ', ' + esc(a.street) + (a.flat ? ', кв.\u00a0' + esc(a.flat) : '')
+                : esc(c.name) + ' — адрес не\u00a0указан';
+            el.innerHTML =
+                '<i class="daddr-ask__tip" aria-hidden="true"></i>' +
+                '<div class="daddr-ask__head">' +
+                    '<span class="daddr-ask__ic" aria-hidden="true">' + PIN + '</span>' +
+                    '<div class="daddr-ask__txt">' +
+                        '<span class="daddr-ask__eyebrow">' + (a ? 'Правильно указан адрес?' : 'Уточните адрес доставки') + '</span>' +
+                        '<b class="daddr-ask__val">' + line + '</b>' +
+                    '</div>' +
+                    '<button type="button" class="daddr-ask__x" data-ask="close" aria-label="Закрыть">' +
+                        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>' +
+                    '</button>' +
+                '</div>' +
+                '<div class="daddr-ask__acts">' +
+                    (a
+                        ? '<button type="button" class="daddr-ask__btn daddr-ask__ok" data-ask="ok">Да, верно</button>' +
+                          '<button type="button" class="daddr-ask__btn daddr-ask__edit" data-ask="edit">Изменить</button>'
+                        : '<button type="button" class="daddr-ask__btn daddr-ask__ok" data-ask="edit">Указать адрес</button>' +
+                          '<button type="button" class="daddr-ask__btn daddr-ask__edit" data-ask="city">Сменить город</button>') +
+                '</div>';
+            el.addEventListener('click', function (e) {
+                var b = e.target.closest('[data-ask]'); if (!b) return;
+                e.stopPropagation();
+                var act = b.dataset.ask;
+                if (act === 'ok') {
+                    if (A.confirmAddr) A.confirmAddr();
+                    hideAskAddr();
+                } else if (act === 'edit') {
+                    hideAskAddr();
+                    if (A.openSheet) A.openSheet('addr');
+                } else if (act === 'city') {
+                    hideAskAddr();
+                    if (A.openSheet) A.openSheet('city');
+                } else {
+                    hideAskAddr();
+                }
+            });
+            askEl = el;
+            app.appendChild(el);
+            placeAskAddr();
+            requestAnimationFrame(function () {
+                if (askEl === el) { placeAskAddr(); el.classList.add('is-on'); }
+            });
+            askOutDoc = function (e) {
+                if (!askEl || askEl.contains(e.target)) return;
+                hideAskAddr();
+            };
+            document.addEventListener('pointerdown', askOutDoc, true);
+        }, fxOff() ? 0 : 380);
     }
     // полоса со ссылками, переключатель, значок поддержки — один раз, при первом включении десктопа
     (function () {
@@ -107,6 +208,7 @@ window.cleverDesk = function (A) {
     window.addEventListener('resize', function () {
         var row = document.getElementById('promoRow');
         if (deskOn() && row) placePromoShadow(row);
+        if (askEl) placeAskAddr();
     });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
     // курьер в карточке заведения (21.11: «возьми бег курьера и ходьбу»): навели — идёт (crGame('walk')), через 0,7 с переходит на
@@ -124,7 +226,8 @@ window.cleverDesk = function (A) {
         r._dcr = 0; clearTimeout(r._dcrT); r.classList.remove('dcr-run');
     });
     function deskChrome() {
-        if (!deskOn()) { if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
+        if (!deskOn()) { if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
+        if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
         var top = S.stack[S.stack.length - 1];
         app.dataset.dtop = deskKind(top);
         app.dataset.dpage = S.stack.indexOf('rest') >= 0 ? 'rest' : S.tab;
@@ -146,7 +249,8 @@ window.cleverDesk = function (A) {
         if (!deskOn() || e.isComposing) return;
         var ed = /^(INPUT|TEXTAREA)$/.test((e.target && e.target.tagName) || '');
         if (e.key === 'Escape') {
-            if (A.sheetKind()) { closeSheetNice(); e.preventDefault(); }
+            if (askEl) { hideAskAddr(); e.preventDefault(); }
+            else if (A.sheetKind()) { closeSheetNice(); e.preventDefault(); }
             else if (/drawer|win/.test(deskKind(S.stack[S.stack.length - 1]))) { popScreen(); e.preventDefault(); }
             else if (S.stack.length) { popScreen(); e.preventDefault(); }
         } else if (e.key === '/' && !ed && !A.sheetKind() && !e.ctrlKey && !e.metaKey) { e.preventDefault(); document.getElementById('dSearch').click(); }
@@ -243,5 +347,5 @@ window.cleverDesk = function (A) {
         app.addEventListener('scroll', function () { if (cur) put(); }, true);
     })();
 
-    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded };
+    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded, askAddr: askAddr };
 };

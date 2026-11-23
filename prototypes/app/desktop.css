@@ -188,7 +188,6 @@ html.desk .rest__meta .dcr svg { display: block; width: 100%; height: 100%; }
 html.desk .rest:not(.dcr-run) .dcr-w, html.desk .rest.dcr-run .dcr-r { display: block; }
 html.desk .rest:hover .rest__meta .dcr { display: block; }
 html.desk .rest:hover .rest__meta > span:first-child > svg.i, html.desk .rest:hover .rest__meta > span:first-child > .cour { display: none; }
-}
 html.desk .rest__txt b, html.desk .rest__txt > :first-child { transition: color .2s; }
 html.desk .dcard, html.desk .item, html.desk .ups { transition: transform .3s var(--dease), box-shadow .3s; }
 html.desk .dcard:hover, html.desk .item:hover { transform: translateY(-4px); box-shadow: 0 20px 34px -22px rgba(40, 24, 12, .5), 0 0 0 1px var(--line); }
@@ -375,15 +374,26 @@ html.desk .dseg button:not([aria-selected="true"]):hover { color: var(--ink); }
 html.desk .dseg__th { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 12px; background: var(--card);
     box-shadow: 0 2px 10px -3px rgba(40, 24, 12, .2), 0 0 0 .5px rgba(40, 24, 12, .05); transition: transform .4s cubic-bezier(.3, 1.25, .5, 1); }
 html.desk .dseg.is-pk .dseg__th { transform: translateX(100%); }
-/* адрес — в рамке */
-html.desk .dh-addr { order: 1; flex: 0 1 auto; max-width: 360px; height: 54px; padding: 0 16px 0 14px; gap: 8px; border-radius: 16px; margin-right: auto;
+/* адрес — в рамке: слева кнопка города, справа кнопка адреса */
+html.desk .dh-addr { order: 1; flex: 0 1 auto; max-width: 390px; height: 54px; padding: 4px; gap: 2px; border-radius: 16px; margin-right: auto;
     background: var(--card); box-shadow: inset 0 0 0 1.5px var(--line); transition: box-shadow .25s, transform .2s var(--dease); }
 html.desk .dh-addr:hover { background: var(--card); box-shadow: inset 0 0 0 1.5px var(--line), 0 10px 22px -14px rgba(40, 24, 12, .4); }
-html.desk .dh-pin { flex: none; width: 22px; height: 22px; fill: none; stroke: var(--brand); stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
-html.desk .dh-city { display: inline-flex; align-items: center; gap: 6px; font: 600 16px/1 var(--font); white-space: nowrap; }
-html.desk .dh-caret { width: 0; height: 0; border: 4px solid transparent; border-top: 5px solid var(--faint); border-bottom: 0; margin-top: 2px; }
-html.desk .dh-st { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 15px/1 var(--font); color: var(--muted); margin-left: 4px; }
-html.desk .dh-tag { flex: none; margin-left: 6px; padding: 6px 8px; border-radius: 8px; background: #e6f6ea; color: #16a34a; font: 600 15px/1 var(--font); white-space: nowrap; }
+html.desk .dh-city, html.desk .dh-place { display: inline-flex; align-items: center; height: 100%; border: 0; border-radius: 12px; background: none; font: inherit; color: var(--ink);
+    transition: background .2s, color .2s, transform .18s var(--dease); }
+html.desk .dh-city { flex: none; gap: 7px; padding: 0 10px; font: 600 16px/1 var(--font); white-space: nowrap; }
+html.desk .dh-city:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+html.desk .dh-city:active { transform: scale(.97); }
+html.desk .dh-pin { flex: none; width: 22px; height: 22px; fill: none; stroke: var(--brand); stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s var(--dease); }
+html.desk .dh-city:hover .dh-pin { transform: scale(1.07); }
+html.desk .dh-caret { width: 0; height: 0; border: 4px solid transparent; border-top: 5px solid var(--faint); border-bottom: 0; margin-top: 2px; transition: transform .22s var(--dease), border-top-color .2s; }
+html.desk .dh-city:hover .dh-caret { transform: translateY(1.5px); border-top-color: var(--ink); }
+html.desk .dh-place { flex: 0 1 auto; min-width: 0; padding: 0 12px 0 8px; text-align: left; }
+html.desk .dh-place:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+html.desk .dh-place:active { transform: scale(.985); }
+html.desk .dh-st { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 15px/1 var(--font); color: var(--muted); transition: color .2s; }
+html.desk .dh-place:hover .dh-st { color: var(--ink); }
+html.desk .dh-tag { flex: none; padding: 6px 9px; border-radius: 8px; background: #e6f6ea; color: #16a34a; font: 600 14.5px/1 var(--font); white-space: nowrap; transition: background .2s; }
+html.desk .dh-place:hover .dh-tag { background: #d6f1de; }
 /* значки справа: поиск, поддержка, профиль; избранное и «Войти» — в профиле */
 html.desk .dh-search, html.desk .dh-tel { order: 4; flex: none; width: 46px; height: 46px; min-width: 0; max-width: none; margin: 0; padding: 0; justify-content: center;
     border-radius: 50%; background: none; box-shadow: none; color: var(--ink); }
@@ -409,7 +419,7 @@ html.desk #s-home .cat[aria-pressed="true"] span { color: #fff; }
 html.desk #s-home .cat:hover .cat__pic, html.desk #s-home .cat:active .cat__pic { transform: none; }
 @media (max-width: 1180px) {
     html.desk .dseg { width: 260px; margin-right: 16px; }
-    html.desk .dh-addr { max-width: 260px; }
+    html.desk .dh-addr { max-width: 280px; }
 }
 
 /* 21.11: «заголовки «Снова хочется», «Рестораны» и так далее — крупнее намного, должны быть заметнее»: на главной 28 → 44 px,
@@ -418,3 +428,69 @@ html.desk #s-home .sec__head .h { font-size: 44px; line-height: 1.05; }
 html.desk #s-home .sec:not(:has(#promoRow)) { padding-top: 64px; gap: 26px; }
 html.desk #s-home .sec__head .link, html.desk #s-home .sec__head small { font-size: 16px !important; }
 html.desk #s-home .sec:has(#promoRow) { gap: 26px; }
+
+/* ── тёмное окошко уточнения адреса при первом запуске главной (23.11) ── */
+html.desk .daddr-ask {
+    --tip-x: 186px;
+    display: block; position: absolute; z-index: 65; width: 372px; max-width: calc(100% - 32px); padding: 18px 18px 16px; box-sizing: border-box;
+    border-radius: 22px; color: #fff;
+    background: radial-gradient(220px 140px at 18% 0%, rgba(227, 20, 28, .20), transparent 72%), linear-gradient(168deg, #292421 0%, #191614 100%);
+    border: 1px solid rgba(255, 255, 255, .10);
+    box-shadow: 0 28px 64px -18px rgba(15, 10, 6, .58), 0 10px 26px -10px rgba(15, 10, 6, .38), inset 0 1px 0 rgba(255, 255, 255, .10);
+    transform-origin: var(--tip-x) -10px;
+    opacity: 0; transform: translateY(-10px) scale(.93); pointer-events: none;
+    transition: opacity .26s ease, transform .44s cubic-bezier(.22, 1.18, .36, 1);
+}
+html.desk .daddr-ask.is-on { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+html.desk .daddr-ask.is-out { opacity: 0; transform: translateY(-6px) scale(.96); pointer-events: none; transition: opacity .2s ease, transform .22s ease; }
+html.desk .daddr-ask__tip {
+    position: absolute; top: -7px; left: var(--tip-x); width: 14px; height: 14px; margin-left: -7px;
+    background: #27221f; border-top: 1px solid rgba(255, 255, 255, .11); border-left: 1px solid rgba(255, 255, 255, .11);
+    border-radius: 3px 0 0 0; transform: rotate(45deg); pointer-events: none;
+}
+html.desk .daddr-ask__head { display: flex; align-items: flex-start; gap: 12px; position: relative; z-index: 1; }
+html.desk .daddr-ask__ic {
+    flex: none; width: 38px; height: 38px; border-radius: 13px; display: grid; place-items: center;
+    background: rgba(227, 20, 28, .18); box-shadow: inset 0 0 0 1px rgba(255, 76, 76, .24);
+}
+html.desk .daddr-ask__ic .dh-pin { width: 20px; height: 20px; stroke: #ff4a4a; }
+html.desk .daddr-ask.is-on .daddr-ask__ic { animation: daddrPinIn .65s .12s cubic-bezier(.22, 1.25, .36, 1) both; }
+@keyframes daddrPinIn {
+    0% { transform: scale(.78) translateY(3px); }
+    55% { transform: scale(1.08) translateY(-2px); }
+    100% { transform: scale(1) translateY(0); }
+}
+html.desk .daddr-ask__txt { flex: 1 1 auto; min-width: 0; display: grid; gap: 3px; padding-top: 1px; }
+html.desk .daddr-ask__eyebrow { font: 500 13px/1.25 var(--font); color: rgba(255, 255, 255, .64); }
+html.desk .daddr-ask__val { font: 650 16px/1.3 var(--font); color: #ffffff; letter-spacing: -.01em; text-wrap: balance; }
+html.desk .daddr-ask__x {
+    flex: none; width: 28px; height: 28px; padding: 0; margin: -2px -2px 0 0; border: 0; border-radius: 50%;
+    display: grid; place-items: center; background: rgba(255, 255, 255, .09); color: rgba(255, 255, 255, .72);
+    transition: background .2s, color .2s, transform .25s var(--dease);
+}
+html.desk .daddr-ask__x svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+html.desk .daddr-ask__x:hover { background: rgba(255, 255, 255, .18); color: #fff; transform: rotate(90deg); }
+html.desk .daddr-ask__x:active { transform: rotate(90deg) scale(.92); }
+html.desk .daddr-ask__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; position: relative; z-index: 1; }
+html.desk .daddr-ask__btn {
+    height: 40px; padding: 0 14px; border: 0; border-radius: 12px; font: 600 14.5px/1 var(--font);
+    transition: background .2s, color .2s, transform .2s var(--dease), box-shadow .2s;
+}
+html.desk .daddr-ask__btn:active { transform: scale(.97); }
+html.desk .daddr-ask__ok { background: #ffffff; color: #191614; font-weight: 650; box-shadow: 0 6px 16px -8px rgba(0, 0, 0, .55); }
+html.desk .daddr-ask__ok:hover { background: #fff9f2; transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(0, 0, 0, .65); }
+html.desk .daddr-ask__edit { background: rgba(255, 255, 255, .10); color: rgba(255, 255, 255, .92); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .11); }
+html.desk .daddr-ask__edit:hover { background: rgba(255, 255, 255, .17); color: #ffffff; transform: translateY(-1px); }
+html.desk[data-theme="dark"] .daddr-ask {
+    border-color: rgba(255, 255, 255, .15);
+    box-shadow: 0 32px 72px -16px rgba(0, 0, 0, .82), 0 0 0 1px rgba(255, 255, 255, .06), inset 0 1px 0 rgba(255, 255, 255, .12);
+}
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) .daddr-ask {
+        border-color: rgba(255, 255, 255, .15);
+        box-shadow: 0 32px 72px -16px rgba(0, 0, 0, .82), 0 0 0 1px rgba(255, 255, 255, .06), inset 0 1px 0 rgba(255, 255, 255, .12);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    html.desk .daddr-ask, html.desk .daddr-ask__ic { transition: opacity .15s; animation: none !important; transform: none; }
+}
