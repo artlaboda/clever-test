@@ -386,12 +386,13 @@ html.desk .dh-city:active { transform: scale(.98); }
 html.desk .dh-pin { flex: none; width: 22px; height: 22px; fill: none; stroke: var(--brand); stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; transition: stroke .2s, transform .25s var(--dease); }
 html.desk .dh-city:hover .dh-pin { stroke: var(--brand-ink); transform: scale(1.06); }
 html.desk .dh-sep { flex: none; margin: 0 8px; font: 600 16px/1 var(--font); color: var(--faint); user-select: none; pointer-events: none; }
-html.desk .dh-place { flex: 0 1 auto; min-width: 0; text-align: left; }
+html.desk .dh-place { flex: 0 1 auto; min-width: 0; overflow: hidden; text-align: left; }
 html.desk .dh-place:active { transform: scale(.99); }
-html.desk .dh-st { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 15px/1 var(--font); color: var(--muted); transition: color .2s; }
+html.desk .dh-st { display: block; min-width: 0; max-width: 100%; overflow: hidden; white-space: nowrap; font: 500 15px/1.25 var(--font); color: var(--muted); transition: color .2s; }
+html.desk .dh-st__run { display: inline-block; will-change: transform; }
 html.desk .dh-place:hover .dh-st { color: color-mix(in srgb, var(--ink) 62%, var(--muted)); }
-html.desk .dh-tag { flex: none; padding: 6px 9px; border-radius: 8px; background: #e6f6ea; color: #16a34a; font: 600 14.5px/1 var(--font); white-space: nowrap; transition: color .2s; }
-html.desk .dh-place:hover .dh-tag { color: #117a37; }
+html.desk .dh-tag { flex: none; padding: 6px 9px; border-radius: 8px; background: var(--ok-soft); color: var(--ok); font: 600 14.5px/1 var(--font); white-space: nowrap; transition: color .2s; }
+html.desk .dh-place:hover .dh-tag { color: color-mix(in srgb, var(--ok) 82%, var(--ink)); }
 /* значки справа: поиск, поддержка, профиль; избранное и «Войти» — в профиле */
 html.desk .dh-search, html.desk .dh-tel { order: 4; flex: none; width: 46px; height: 46px; min-width: 0; max-width: none; margin: 0; padding: 0; justify-content: center;
     border-radius: 50%; background: none; box-shadow: none; color: var(--ink); }
@@ -465,13 +466,13 @@ html.desk .daddr-ask__x {
     position: absolute; top: 10px; right: 10px; z-index: 2;
     width: 22px; height: 22px; padding: 0; margin: 0; border: 0; border-radius: 50%;
     display: grid; place-items: center; background: rgba(255, 255, 255, .09); color: rgba(255, 255, 255, .72);
-    transition: background .2s, color .2s, transform .25s var(--dease);
+    transition: background .2s, color .2s, transform .2s var(--dease);
 }
 html.desk .daddr-ask__x::before { content: ''; position: absolute; inset: -5px; }
 html.desk .daddr-ask__x svg { width: 22px; height: 22px; display: block; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; }
 html.desk .daddr-ask__x svg > path { transform-box: view-box; transform-origin: 50% 50%; transform: scale(.54); }
-html.desk .daddr-ask__x:hover { background: rgba(255, 255, 255, .18); color: #fff; transform: rotate(90deg); }
-html.desk .daddr-ask__x:active { transform: rotate(90deg) scale(.92); }
+html.desk .daddr-ask__x:hover { background: rgba(255, 255, 255, .18); color: #fff; }
+html.desk .daddr-ask__x:active { transform: scale(.92); }
 html.desk .daddr-ask__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; position: relative; z-index: 1; }
 html.desk .daddr-ask__btn {
     height: 40px; padding: 0 14px; border: 0; border-radius: 12px; font: 600 14.5px/1 var(--font);
@@ -482,15 +483,21 @@ html.desk .daddr-ask__ok { background: #ffffff; color: #191614; font-weight: 650
 html.desk .daddr-ask__ok:hover { background: #fff9f2; transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(0, 0, 0, .65); }
 html.desk .daddr-ask__edit { background: rgba(255, 255, 255, .10); color: rgba(255, 255, 255, .92); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .11); }
 html.desk .daddr-ask__edit:hover { background: rgba(255, 255, 255, .17); color: #ffffff; transform: translateY(-1px); }
+html.desk[data-theme="dark"] .dh-addr:hover { box-shadow: inset 0 0 0 1.5px var(--line), 0 10px 24px -12px rgba(0, 0, 0, .72); }
 html.desk[data-theme="dark"] .daddr-ask {
+    background: radial-gradient(220px 140px at 18% 0%, rgba(255, 74, 74, .22), transparent 72%), linear-gradient(168deg, #302a26 0%, #211d1a 100%);
     border-color: rgba(255, 255, 255, .15);
     box-shadow: 0 32px 72px -16px rgba(0, 0, 0, .82), 0 0 0 1px rgba(255, 255, 255, .06), inset 0 1px 0 rgba(255, 255, 255, .12);
 }
+html.desk[data-theme="dark"] .daddr-ask__tip { background: #2e2824; border-color: rgba(255, 255, 255, .15); }
 @media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) .dh-addr:hover { box-shadow: inset 0 0 0 1.5px var(--line), 0 10px 24px -12px rgba(0, 0, 0, .72); }
     html.desk:not([data-theme="light"]) .daddr-ask {
+        background: radial-gradient(220px 140px at 18% 0%, rgba(255, 74, 74, .22), transparent 72%), linear-gradient(168deg, #302a26 0%, #211d1a 100%);
         border-color: rgba(255, 255, 255, .15);
         box-shadow: 0 32px 72px -16px rgba(0, 0, 0, .82), 0 0 0 1px rgba(255, 255, 255, .06), inset 0 1px 0 rgba(255, 255, 255, .12);
     }
+    html.desk:not([data-theme="light"]) .daddr-ask__tip { background: #2e2824; border-color: rgba(255, 255, 255, .15); }
 }
 @media (prefers-reduced-motion: reduce) {
     html.desk .daddr-ask, html.desk .daddr-ask__ic { transition: opacity .15s; animation: none !important; transform: none; }

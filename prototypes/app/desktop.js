@@ -15,22 +15,73 @@ window.cleverDesk = function (A) {
        текстом в строку («Все» на красной плашке). Профиль без входа — значок открывает вход (кнопки «Войти» в шапке больше нет) */
     var PIN = '<svg class="dh-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2s-6.8-5.9-6.8-11.4a6.8 6.8 0 0 1 13.6 0c0 5.5-6.8 11.4-6.8 11.4z"/><circle cx="12" cy="9.9" r="2.4"/></svg>';
     var TEL = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 3.6h3l1.6 4-2 1.3a10.6 10.6 0 0 0 5.3 5.3l1.3-2 4 1.6v3a1.6 1.6 0 0 1-1.7 1.6A15.6 15.6 0 0 1 3.6 5.3 1.6 1.6 0 0 1 5.2 3.6z"/></svg>';
+    /* 23.11: бегущая строка длинного адреса в десктопной шапке — по образцу мобильной headRun/headEdge:
+       края мягко тают маской (mask-image), работает одинаково чисто и в светлой, и в тёмной теме */
+    function deskAddrEdge(t, l, r, now) {
+        var from = t._edge || { l: 0, r: 0 }, t0 = performance.now();
+        cancelAnimationFrame(t._edgeRaf);
+        var put = function (a, b) {
+            t._edge = { l: a, r: b };
+            var g = a < .1 && b < .1 ? '' : 'linear-gradient(90deg, transparent, #000 ' + a.toFixed(1) + 'px, #000 calc(100% - ' + b.toFixed(1) + 'px), transparent)';
+            t.style.webkitMaskImage = g; t.style.maskImage = g;
+        };
+        if (now) { put(l, r); return; }
+        (function step(ts) {
+            var k = Math.min(1, ((ts || performance.now()) - t0) / 500), e = k < .5 ? 2 * k * k : 1 - Math.pow(2 - 2 * k, 2) / 2;
+            put(from.l + (l - from.l) * e, from.r + (r - from.r) * e);
+            if (k < 1 && document.body.contains(t)) t._edgeRaf = requestAnimationFrame(step);
+        })(t0);
+    }
+    function deskAddrStop(t) {
+        t = t || document.querySelector('#dAddr .dh-st'); if (!t) return;
+        clearTimeout(t._run); t._run = 0;
+        cancelAnimationFrame(t._edgeRaf);
+        if (t._anim) { t._anim.onfinish = null; t._anim.cancel(); t._anim = null; }
+    }
+    function deskAddrRun() {
+        var t = document.querySelector('#dAddr .dh-st'), run = t && t.querySelector('.dh-st__run');
+        if (!t || !run) return;
+        deskAddrStop(t);
+        if (!deskOn()) { deskAddrEdge(t, 0, 0, true); return; }
+        var over = Math.ceil(run.offsetWidth - t.clientWidth);
+        if (over <= 1) { deskAddrEdge(t, 0, 0, true); return; }
+        deskAddrEdge(t, 0, 26, true);
+        if (fxOff()) return;
+        var dur = Math.max(1800, over / 30 * 1000);
+        var go = function (fwd, then) {
+            deskAddrEdge(t, 20, 26);
+            var a = t._anim = run.animate(
+                [{ transform: 'translateX(' + (fwd ? 0 : -over) + 'px)' }, { transform: 'translateX(' + (fwd ? -over : 0) + 'px)' }],
+                { duration: dur, easing: 'cubic-bezier(.45, 0, .25, 1)', fill: 'forwards' }
+            );
+            a.onfinish = function () {
+                if (t._anim !== a) return;
+                deskAddrEdge(t, fwd ? 20 : 0, fwd ? 0 : 26);
+                t._run = setTimeout(then, fwd ? 2000 : 3600);
+            };
+        };
+        var loop = function () { if (document.body.contains(t) && deskOn()) go(true, function () { go(false, loop); }); };
+        t._run = setTimeout(loop, 2400);
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (deskOn()) deskAddrRun(); });
     function deskHead() {
         var a = addr(S.addr), c = city(), tb = document.getElementById('tabbar');
         var key = [a ? a.street : '', a ? a.flat : '', c.name, S.auth ? 1 : 0].join('|');
         if (tb._dk === key) return;
         tb._dk = key;
+        deskAddrStop();
         document.getElementById('dAddr').innerHTML =
             '<button type="button" class="dh-city" data-act="open-city" aria-label="Город: ' + esc(c.name) + '. Сменить">' +
                 PIN + '<span>' + esc(c.name) + '</span>' +
             '</button>' +
             '<span class="dh-sep" aria-hidden="true">·</span>' +
             '<button type="button" class="dh-place" data-act="open-addr" aria-label="Адрес доставки">' +
-                (a ? '<span class="dh-st">' + esc(a.street) + '</span>' : '<span class="dh-tag">Укажите адрес</span>') +
+                (a ? '<span class="dh-st"><span class="dh-st__run">' + esc(a.street) + '</span></span>' : '<span class="dh-tag">Укажите адрес</span>') +
             '</button>';
         var s = document.getElementById('dSearch');
         if (!s.firstChild) { s.innerHTML = ic('i-search'); s.setAttribute('aria-label', 'Поиск блюд и ресторанов'); }
         var lg = document.getElementById('dLogin'); lg.hidden = true;
+        requestAnimationFrame(deskAddrRun);
         if (askEl) placeAskAddr();
     }
     /* 23.11: красивое тёмное окошко с уточнением адреса при первом запуске главной на десктопе.
@@ -210,6 +261,7 @@ window.cleverDesk = function (A) {
         var row = document.getElementById('promoRow');
         if (deskOn() && row) placePromoShadow(row);
         if (askEl) placeAskAddr();
+        clearTimeout(deskAddrRun._t); deskAddrRun._t = setTimeout(deskAddrRun, 180);
     });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
     // курьер в карточке заведения (21.11: «возьми бег курьера и ходьбу»): навели — идёт (crGame('walk')), через 0,7 с переходит на
@@ -227,7 +279,7 @@ window.cleverDesk = function (A) {
         r._dcr = 0; clearTimeout(r._dcrT); r.classList.remove('dcr-run');
     });
     function deskChrome() {
-        if (!deskOn()) { if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
+        if (!deskOn()) { deskAddrStop(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
         var top = S.stack[S.stack.length - 1];
         app.dataset.dtop = deskKind(top);
