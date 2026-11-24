@@ -25,9 +25,14 @@ html.desk .tabbar {
     transform: translate3d(0, calc(-1 * var(--dhead-y, 0px)), 0) !important; will-change: transform; z-index: 9;
 }
 html.desk .dlogo { display: block; order: 0; flex: none; border: 0; background: none; padding: 4px 10px 4px 0; margin-right: 14px; color: var(--ink); transition: transform .3s var(--dease), opacity .2s; }
-html.desk .dlogo svg { display: block; width: 150px; height: 60px; }
-html.desk .dlogo:hover { transform: scale(1.04) rotate(-1.5deg); }
-html.desk .dlogo:active { transform: scale(.97); }
+html.desk .dlogo svg { display: block; width: 150px; height: 60px; overflow: visible; }
+html.desk .dlogo svg path:nth-child(4) { filter: drop-shadow(0 0 0 rgba(251, 34, 34, 0)) drop-shadow(0 0 0 rgba(255, 56, 56, 0)); transition: filter .35s var(--dease); }
+html.desk .dlogo:is(:hover, :active) { transform: scale(1.04); }
+html.desk .dlogo:is(:hover, :active) svg path:nth-child(4) { filter: drop-shadow(0 4px 8px rgba(251, 34, 34, .42)) drop-shadow(0 0 12px rgba(255, 48, 48, .28)); }
+html.desk[data-theme="dark"] .dlogo:is(:hover, :active) svg path:nth-child(4) { filter: drop-shadow(0 4px 10px rgba(255, 42, 42, .58)) drop-shadow(0 0 16px rgba(255, 58, 58, .38)); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) .dlogo:is(:hover, :active) svg path:nth-child(4) { filter: drop-shadow(0 4px 10px rgba(255, 42, 42, .58)) drop-shadow(0 0 16px rgba(255, 58, 58, .38)); }
+}
 html.desk .dh { display: flex; align-items: center; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; }
 html.desk .dh-addr { order: 1; flex: 0 1 auto; min-width: 0; max-width: 300px; height: 52px; padding: 0 14px 0 10px; gap: 10px; border-radius: 16px; transition: background .2s; }
 html.desk .dh-addr:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
@@ -545,15 +550,15 @@ html.desk .dseg { order: 1; position: relative; flex: none; display: grid; grid-
 html.desk .dseg button { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: none; font: 500 16px/1 var(--font); color: var(--muted); border-radius: 12px; transition: color .25s; }
 html.desk .dseg button[aria-selected="true"] { color: var(--ink); }
 html.desk .dseg button:not([aria-selected="true"]):hover { color: var(--ink); }
-/* 24.11: плашка «−15%» рядом с «Навынос» — высотой на 1 px выше и ниже строчных букв (1ex + 2px) */
+/* 24.11: плашка «−15%» рядом с «Навынос» — аккуратная выразительная капсула высотой 22 px */
 html.desk .dseg__sale {
     flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
-    height: calc(1ex + 2px); padding: 0 5.5px; border-radius: 999px; font-style: normal; translate: 0 .6px;
+    height: 22px; padding: 0 7.5px; border-radius: 999px; font-style: normal;
     background: color-mix(in srgb, var(--brand) 14%, transparent); color: var(--brand);
     box-shadow: 0 0 0 rgba(227, 20, 28, 0);
     transition: background .25s, color .25s, box-shadow .25s, transform .25s var(--dease);
 }
-html.desk .dseg__sale > i { display: block; font: 700 9.5px/1 var(--font); font-style: normal; letter-spacing: -.01em; font-variant-numeric: proportional-nums; white-space: nowrap; }
+html.desk .dseg__sale > i { display: block; font: 700 11.5px/1 var(--font); font-style: normal; letter-spacing: -.01em; font-variant-numeric: proportional-nums; white-space: nowrap; }
 html.desk .dseg button[aria-selected="true"] .dseg__sale,
 html.desk .dseg button:hover .dseg__sale {
     background: linear-gradient(135deg, #ff5638 0%, #e3141c 100%); color: #fff;
