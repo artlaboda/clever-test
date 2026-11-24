@@ -120,6 +120,7 @@ html.desk #promoRow {
 html.desk #promoPager i:nth-last-child(-n+3) { display: none; }
 html.desk #s-home .dpromo-h { align-items: center; padding-right: 16px; }
 html.desk .dpromo-nav { display: flex; gap: 8px; }
+html.desk .dpromo-nav[hidden] { display: none; }
 html.desk .dpromo-nav button {
     display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--line);
     border-radius: 50%; background: var(--card); color: var(--ink);
@@ -273,10 +274,34 @@ html.desk #s-rest .rtabs__row { padding: 12px 16px; gap: 8px; }
 html.desk #s-rest .rtabs button { font-size: 15.5px; padding: 10px 16px; }
 html.desk #s-rest .msec { padding-top: 34px; gap: 18px; scroll-margin-top: 130px; }
 html.desk #s-rest .grid2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-html.desk #s-rest .pop-row { padding-left: 0; padding-right: 0; }
-html.desk #s-rest .msec > .h.pad { padding-left: calc(var(--r-tile) / 2); }
-html.desk #s-rest .pop-row .item { width: 320px; grid-template-columns: 132px 1fr; }
-html.desk #s-rest .item b { font-size: 15.5px; }
+html.desk #s-rest .grid2 .item__body { min-width: 0; padding: 4px 14px 0; }
+html.desk #s-rest .dpop-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px 0 calc(16px + var(--r-tile) / 2); }
+html.desk #s-rest .dpop-h .h { padding: 0; }
+html.desk #s-rest .pop-row {
+    --pop-gap: 20px; gap: var(--pop-gap); margin-inline: 0; padding-inline: 16px;
+    scroll-padding-inline: 16px; scroll-snap-type: x mandatory;
+}
+html.desk #s-rest .msec > .h.pad { padding-left: calc(16px + var(--r-tile) / 2); }
+html.desk #s-rest .pop-row .item {
+    width: calc((100% - 2 * var(--pop-gap)) / 3);
+    grid-template-columns: 136px minmax(0, 1fr); gap: 0 14px;
+}
+html.desk #s-rest .pop-row .item__body { min-width: 0; padding: 14px 16px 0 0; }
+html.desk #s-rest .pop-row .item__foot { min-width: 0; padding: 8px 16px 14px 0; }
+html.desk #s-rest .pop-row .item__tags { max-width: 120px; }
+html.desk #s-rest .pop-row .item__count { left: 128px; }
+html.desk #s-rest .item__body > b { font-size: 15.5px; min-width: 0; overflow-wrap: break-word; }
+/* рейтинг блюда на десктопе: крупнее мобильного (10 → 12 px), цифра оценки и число отзывов строго одного кегля */
+html.desk .app .rbadge { height: 24px; border-radius: 12px; font: 600 12px/24px var(--font); }
+html.desk .app .rbadge__v { gap: 3.5px; padding: 0 8px 0 7px; border-radius: 12px; }
+html.desk .app .rbadge__n { margin-left: -12px; padding: 0 8px 0 18px; border-radius: 0 12px 12px 0; font-weight: 500; }
+html.desk .app .rbadge svg { width: 10.5px; height: 10.5px; }
+html.desk .app .rbadge b { display: inline; font: inherit; letter-spacing: inherit; font-variant-numeric: proportional-nums; }
+html.desk .app[data-drate="photo"] .item__rate { margin-top: calc(100% - 37px); }
+html.desk .app[data-drate="photo"] .pop-row .item__rate { margin-top: 0; }
+@media (max-width: 1080px) {
+    html.desk #s-rest .pop-row .item { width: calc((100% - var(--pop-gap)) / 2); }
+}
 
 /* ── корзина и оформление — панель справа ── */
 html.desk #s-cart, html.desk #s-checkout {

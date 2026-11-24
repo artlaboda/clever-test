@@ -257,13 +257,50 @@ window.cleverDesk = function (A) {
         shadow.style.height = card.querySelector('.promo__banner').offsetHeight + 'px';
         shadow.classList.add('is-on');
     }
+    /* 24.11: карусель «Популярное» на странице заведения — ровно 3 (или 2) целых карточки и стрелки в шапке секции, как у «Акций» */
+    function deskPop() {
+        var sec = document.getElementById('m-popular'), row = sec && sec.querySelector('.pop-row');
+        if (!sec || !row || !deskOn()) return;
+        var hd = sec.querySelector('.dpop-h');
+        if (!hd) {
+            var title = sec.querySelector(':scope > h2.h');
+            if (!title) return;
+            hd = document.createElement('div'); hd.className = 'dpop-h';
+            sec.insertBefore(hd, title);
+            hd.appendChild(title);
+            var nav = document.createElement('span'); nav.className = 'dpromo-nav';
+            nav.innerHTML = '<button type="button" aria-label="Назад">' + ic('i-right') + '</button>' +
+                '<button type="button" aria-label="Вперёд">' + ic('i-right') + '</button>';
+            hd.appendChild(nav);
+            var btns = nav.querySelectorAll('button');
+            var sync = row._dpopSync = function () {
+                var max = row.scrollWidth - row.clientWidth;
+                nav.hidden = max < 8;
+                btns[0].disabled = row.scrollLeft < 2;
+                btns[1].disabled = row.scrollLeft >= max - 2;
+            };
+            [-1, 1].forEach(function (dir, i) {
+                btns[i].addEventListener('click', function () {
+                    if (row.children.length < 2) return;
+                    var pitch = row.children[1].getBoundingClientRect().left - row.children[0].getBoundingClientRect().left;
+                    if (!pitch) return;
+                    var next = (Math.round(row.scrollLeft / pitch) + dir) * pitch;
+                    row.scrollTo({ left: next, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+                });
+            });
+            row.addEventListener('scroll', sync, { passive: true });
+        }
+        if (row._dpopSync) requestAnimationFrame(row._dpopSync);
+    }
     window.addEventListener('resize', function () {
         var row = document.getElementById('promoRow');
         if (deskOn() && row) placePromoShadow(row);
+        if (deskOn()) deskPop();
         if (askEl) placeAskAddr();
         clearTimeout(deskAddrRun._t); deskAddrRun._t = setTimeout(deskAddrRun, 180);
     });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
+    (function () { var rs = document.getElementById('restScroll'); if (!rs || !window.MutationObserver) return; new MutationObserver(deskPop).observe(rs, { childList: true }); deskPop(); })();
     // курьер в карточке заведения (21.11: «возьми бег курьера и ходьбу»): навели — идёт (crGame('walk')), через 0,7 с переходит на
     // бег (crGame('run')); увели — снова значок. Спрайты вставляем при первом наведении (SMIL-анимация идёт, только пока видна)
     app.addEventListener('mouseover', function (e) {
@@ -289,7 +326,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskHead(); deskCats();
+        deskHead(); deskCats(); deskPop();
     }
     // закрыть всё, что поверх страницы (панель корзины, окна): по затемнению и по Esc
     function deskClose() { var n = 0; while (/drawer|win/.test(deskKind(S.stack[S.stack.length - 1])) && n++ < 6) popScreen(); }
@@ -392,7 +429,7 @@ window.cleverDesk = function (A) {
         }
         app.addEventListener('mouseover', function (e) {
             if (!deskOn() || e.target.closest('.hsnav')) return;
-            var h = e.target.closest('.hscroll:not(#promoRow), .filters, .rtabs__row, .ri-tks, .cdays, .slots');
+            var h = e.target.closest('.hscroll:not(#promoRow):not(.pop-row), .filters, .rtabs__row, .ri-tks, .cdays, .slots');
             if (h && h.scrollWidth - h.clientWidth < 8) h = null;
             if (h !== cur) { cur = h; put(); }
         });
