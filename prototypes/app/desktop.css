@@ -660,8 +660,12 @@ html.desk .dstrip button[data-act="noop"]:hover { color: inherit; }
 html.desk .dstrip i { font-style: normal; color: var(--faint); }
 html.desk .dlogo { margin-right: auto; }
 html.desk .dlogo svg { width: 160px; height: 64px; }
-/* переключатель «Доставка / Навынос» — тот же капсульный .cseg с линзой и перетягиванием, что в оформлении заказа */
-html.desk .cseg.dseg { order: 1; z-index: 2; flex: none; width: 340px; height: 54px; box-sizing: border-box; margin-right: 32px; }
+/* переключатель «Доставка / Навынос» — тот же .cseg с линзой и перетягиванием, что в оформлении заказа,
+   но со скруглением 16 / 12 px в ритм соседней рамки адреса (.dh-addr) */
+html.desk .cseg.dseg { order: 1; z-index: 2; flex: none; width: 340px; height: 54px; box-sizing: border-box; margin-right: 32px; border-radius: 16px; }
+html.desk .cseg.dseg button,
+html.desk .cseg.dseg > .cseg__th,
+html.desk .cseg.dseg > .cseg__lens { border-radius: 12px; }
 html.desk .cseg.dseg button,
 html.desk .cseg.dseg .cseg__c { gap: 7px; padding: 0 8px; font: 600 15.5px/1 var(--font); }
 html.desk .cseg.dseg button { overflow: visible; }
