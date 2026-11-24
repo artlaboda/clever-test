@@ -25,16 +25,10 @@ html.desk .tabbar {
     padding: 0 var(--dg); border-top: 0; border-bottom: 1px solid var(--line); transition: none;
     transform: none !important; z-index: 9;
 }
-html.desk #restScroll > .tabbar { width: auto; margin-inline: calc(16px - var(--dg)); }
+html.desk #restScroll > .tabbar { width: 100%; margin-inline: 0; border-bottom: 0; box-shadow: none; }
 html.desk .dlogo { display: block; order: 0; flex: none; border: 0; background: none; padding: 4px 10px 4px 0; margin-right: 14px; color: var(--ink); transition: transform .3s var(--dease), opacity .2s; }
-html.desk .dlogo svg { display: block; width: 150px; height: 60px; overflow: visible; }
-html.desk .dlogo svg path:nth-child(4) { filter: drop-shadow(0 0 0 rgba(251, 34, 34, 0)) drop-shadow(0 0 0 rgba(255, 56, 56, 0)); transition: filter .35s var(--dease); }
+html.desk .dlogo svg { display: block; width: 150px; height: 60px; }
 html.desk .dlogo:is(:hover, :active) { transform: scale(1.04); }
-html.desk .dlogo:is(:hover, :active) svg path:nth-child(4) { filter: drop-shadow(0 4px 8px rgba(251, 34, 34, .42)) drop-shadow(0 0 12px rgba(255, 48, 48, .28)); }
-html.desk[data-theme="dark"] .dlogo:is(:hover, :active) svg path:nth-child(4) { filter: drop-shadow(0 4px 10px rgba(255, 42, 42, .58)) drop-shadow(0 0 16px rgba(255, 58, 58, .38)); }
-@media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) .dlogo:is(:hover, :active) svg path:nth-child(4) { filter: drop-shadow(0 4px 10px rgba(255, 42, 42, .58)) drop-shadow(0 0 16px rgba(255, 58, 58, .38)); }
-}
 html.desk .dh { display: flex; align-items: center; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; }
 html.desk .dh-addr { order: 1; flex: 0 1 auto; min-width: 0; max-width: 300px; height: 52px; padding: 0 14px 0 10px; gap: 10px; border-radius: 16px; transition: background .2s; }
 html.desk .dh-addr:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
@@ -270,16 +264,17 @@ html.desk .hsnav.is-sm svg { width: 17px; height: 17px; }
 html.desk .screen:not(.is-tab) { --top: 0px; }
 html.desk #s-rest { top: 0; overflow: hidden; overflow: clip; transform: translateY(28px); opacity: 0; transition: transform .45s var(--dease), opacity .3s, visibility 0s linear .45s; }
 html.desk #s-rest.is-on, html.desk #s-rest.is-under { transform: none; opacity: 1; transition: transform .45s var(--dease), opacity .3s, visibility 0s; }
-html.desk #restScroll { padding: 0 calc(var(--dg) - 16px) 80px; }
+html.desk #restScroll { padding: 0 0 80px; }
 html.desk #s-rest .rglass { display: none !important; }
 html.desk #s-rest .rhero > .rtop { position: absolute; left: 0; right: 0; top: 0; padding: 20px 20px 0 !important; translate: none; }
 html.desk #s-rest .rtop { padding-left: var(--dg); padding-right: var(--dg); }
 html.desk #s-rest .rtop:not(.is-solid) { padding-top: 20px; }
-html.desk #s-rest .rhero { height: 340px; margin: 20px 16px 0; border-radius: 32px; overflow: hidden; }
+html.desk #s-rest .rhero { height: 340px; margin: 20px var(--dg) 0; border-radius: 32px; overflow: hidden; }
 html.desk #s-rest .rhero img { transition: transform 1.2s var(--dease); }
 html.desk #s-rest .rhero:hover img { transform: scale(1.03); }
 html.desk #s-rest .rhero--rate .ri-hrate { left: 24px; bottom: 24px; }
-html.desk #s-rest .rinfo.rinfo--simple { padding: 28px 16px 26px; }
+html.desk #s-rest .rinfo { padding-inline: var(--dg); }
+html.desk #s-rest .rinfo.rinfo--simple { padding: 28px var(--dg) 26px; }
 html.desk #s-rest .rinfo--simple h1 { font-size: 44px; }
 html.desk #s-rest .ri-dl { font-size: 16px; margin-top: 4px; }
 /* 24.11: акции на странице заведения на десктопе — крупнее и выше, как аккуратные карточки (не растягиваются на весь экран,
@@ -363,17 +358,16 @@ html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
     }
 }
 /* 24.11: верхняя липкая панель меню на странице заведения (десктоп): прилипает прямо к top: 0 во всю ширину экрана,
-   слева плавно выезжают «Назад», мини-аватар и название заведения, по центру — категории, справа — живая корзина */
+   при прилипании стекло, линия прогресса и само меню плавно раскрываются на всю ширину — слева «Назад» и заведение, справа корзина */
 html.desk #s-rest .rtabs {
-    position: sticky; top: 0 !important; z-index: 8;
-    margin: 4px calc(16px - var(--dg)) 0; padding: 0 calc(var(--dg) - 16px);
+    position: sticky; top: 0 !important; z-index: 8; width: 100%; margin: 4px 0 0; padding: 0;
 }
 html.desk #s-rest .rtabs::before {
     top: 0 !important;
     background: color-mix(in srgb, var(--app-bg) 84%, transparent);
     -webkit-backdrop-filter: blur(22px) saturate(1.85); backdrop-filter: blur(22px) saturate(1.85);
     box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 85%, transparent), 0 14px 36px -22px rgba(40, 24, 12, .22);
-    transition: opacity .3s var(--dease);
+    transition: opacity .34s var(--dease);
 }
 html.desk #s-rest .rtabs::after {
     content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; pointer-events: none;
@@ -393,8 +387,10 @@ html.desk[data-theme="dark"] #s-rest .rtabs::before {
 }
 html.desk #s-rest .rtabs__cap {
     position: relative; z-index: 1; display: flex; align-items: center;
-    max-width: calc(var(--dw) + 32px); margin-inline: auto; padding: 0 16px; min-height: 68px;
+    width: 100%; max-width: none; box-sizing: border-box; padding: 0 var(--dg); min-height: 68px;
+    transition: padding-inline .46s var(--dease);
 }
+html.desk #s-rest .rtabs.is-stuck .rtabs__cap { padding-inline: clamp(24px, 2.5vw, 44px); }
 html.desk #s-rest .rtabs__row { flex: 1 1 auto; min-width: 0; padding: 12px 0; gap: 6px; }
 html.desk #s-rest .rtabs button[data-act="rtab"] { font-size: 15.5px; padding: 10px 16px; }
 /* левый блок: назад + мини-обложка + название (выезжает при прилипании) */
@@ -405,7 +401,7 @@ html.desk #s-rest .drnav-id {
     transition: max-width .42s var(--dease), opacity .3s ease, transform .42s var(--dease), margin-right .42s var(--dease), padding-right .42s var(--dease), border-color .3s;
 }
 html.desk #s-rest .rtabs.is-stuck .drnav-id {
-    max-width: 268px; opacity: 1; margin-right: 14px; padding-right: 16px; border-right-color: var(--line);
+    max-width: 280px; opacity: 1; margin-right: 16px; padding-right: 18px; border-right-color: var(--line);
     transform: none; pointer-events: auto;
 }
 html.desk #s-rest .drnav-back {
@@ -427,7 +423,7 @@ html.desk #s-rest .drnav-who img {
     box-shadow: 0 0 0 1px var(--line);
 }
 html.desk #s-rest .drnav-who span {
-    min-width: 0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    min-width: 0; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     font: 700 15px/1.2 var(--font); letter-spacing: -.01em;
 }
 /* правый блок: кнопка корзины (пружинно выезжает при прилипании) */
@@ -460,7 +456,8 @@ html.desk #s-rest .drnav-cart__n {
 }
 html.desk #s-rest .drnav-cart__n[hidden] { display: none; }
 html.desk #s-rest .drnav-cart__sum { font-variant-numeric: tabular-nums; }
-html.desk #s-rest .msec { padding-top: 34px; gap: 18px; scroll-margin-top: 76px; }
+html.desk #s-rest .msec { padding: 34px var(--dg) 4px; gap: 18px; scroll-margin-top: 76px; }
+html.desk #s-rest #m-popular { padding-inline: calc(var(--dg) - 16px) !important; }
 html.desk #s-rest .grid2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 html.desk #s-rest .grid2 .item__body { min-width: 0; padding: 4px 14px 0; }
 html.desk #s-rest .dpop-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px 0 calc(16px + var(--r-tile) / 2); }
