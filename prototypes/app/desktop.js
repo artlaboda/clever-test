@@ -349,7 +349,7 @@ window.cleverDesk = function (A) {
         clearTimeout(deskAddrRun._t); deskAddrRun._t = setTimeout(deskAddrRun, 180);
     });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
-    (function () { var rs = document.getElementById('restScroll'); if (!rs || !window.MutationObserver) return; new MutationObserver(deskPop).observe(rs, { childList: true }); deskPop(); })();
+    (function () { var rs = document.getElementById('s-rest'); if (!rs || !window.MutationObserver) return; new MutationObserver(function () { if (deskOn()) { deskPlaceHead(); deskRestMount(); deskPop(); } }).observe(rs, { childList: true }); })();
     // курьер в карточке заведения (21.11: «возьми бег курьера и ходьбу»): навели — идёт (crGame('walk')), через 0,7 с переходит на
     // бег (crGame('run')); увели — снова значок. Спрайты вставляем при первом наведении (SMIL-анимация идёт, только пока видна)
     app.addEventListener('mouseover', function (e) {
@@ -464,34 +464,88 @@ window.cleverDesk = function (A) {
         e.preventDefault();
         history.back();
     }, true);
-    /* 24.11: вся верхняя шапка не фиксирована — плавно уезжает вверх 1:1 с прокруткой активной страницы */
-    function activePageScroll() {
-        if (S.stack.indexOf('rest') >= 0) return document.getElementById('restScroll');
-        return document.querySelector('#s-' + S.tab + ' > .scroll');
-    }
-    function deskHeadScrollSync(sc) {
-        if (!deskOn()) { deskHeadScrollSync._v = null; app.style.removeProperty('--dhead-y'); return; }
-        sc = sc || activePageScroll();
-        var dh = parseFloat(getComputedStyle(app).getPropertyValue('--dh')) || 150;
-        var y = sc ? Math.max(0, sc.scrollTop) : 0;
-        var off = y >= dh ? dh + 2 : y;
-        if (deskHeadScrollSync._v !== off) {
-            deskHeadScrollSync._v = off;
-            app.style.setProperty('--dhead-y', off.toFixed(1) + 'px');
-        }
-        if (askEl) {
-            if (y > 40) hideAskAddr();
-            else placeAskAddr();
-        }
+    /* 24.11: шапка — статичный блок в потоке активной страницы (не плавает и не догоняет скролл через JS) */
+    var lastHeadTab = '';
+    function deskPlaceHead() {
+        var tb = document.getElementById('tabbar'); if (!tb) return;
+        if (!deskOn()) { if (tb.parentNode !== app) app.appendChild(tb); return; }
+        var onRest = S.stack.indexOf('rest') >= 0;
+        var host = onRest ? document.getElementById('restScroll') : document.getElementById('s-' + S.tab);
+        if (host && tb.parentNode !== host) host.insertBefore(tb, host.firstChild);
+        if (!onRest && lastHeadTab && lastHeadTab !== S.tab && host) host.scrollTop = 0;
+        if (!onRest) lastHeadTab = S.tab;
     }
     app.addEventListener('scroll', function (e) {
-        if (!deskOn()) return;
-        var sc = activePageScroll();
-        if (e.target !== sc) return;
-        deskHeadScrollSync(sc);
+        if (askEl && deskOn() && e.target && e.target.scrollTop > 24) hideAskAddr();
     }, true);
+    /* 24.11: страница заведения на десктопе — кнопки .rtop на самой обложке .rhero, а при прокрутке к меню .rtabs
+       прилипает к верхнему краю: слева выезжают кнопка «Назад», мини-аватар и название заведения, справа — живая корзина */
+    function deskRestMount() {
+        if (!deskOn() || S.stack.indexOf('rest') < 0) return;
+        var scr = document.getElementById('s-rest'); if (!scr) return;
+        var hero = scr.querySelector('.rhero'), rtop = document.getElementById('rtop');
+        if (hero && rtop && rtop.parentNode !== hero) hero.appendChild(rtop);
+        var cap = scr.querySelector('#rtabs > .rtabs__cap'), row = cap && cap.querySelector('.rtabs__row');
+        if (!cap || !row || cap.querySelector('.drnav-cart')) return;
+        var r = A.rest && A.curRest && A.rest(A.curRest());
+        var himg = hero && hero.querySelector('img'), src = himg ? himg.getAttribute('src') : '';
+        var idEl = document.createElement('div');
+        idEl.className = 'drnav-id';
+        idEl.innerHTML =
+            '<button type="button" class="drnav-back" data-act="back" aria-label="Назад">' + ic('i-back') + '</button>' +
+            '<button type="button" class="drnav-who" aria-label="Наверх страницы">' +
+                (src ? '<img src="' + esc(src) + '" alt="">' : '') +
+                '<span>' + esc(r ? r.name : '') + '</span>' +
+            '</button>';
+        idEl.querySelector('.drnav-who').addEventListener('click', function (e) {
+            e.stopPropagation();
+            var sc = document.getElementById('restScroll');
+            if (sc) sc.scrollTo({ top: 0, behavior: fxOff() ? 'auto' : 'smooth' });
+        });
+        cap.insertBefore(idEl, row);
+        var cartEl = document.createElement('div');
+        cartEl.className = 'drnav-cart';
+        cartEl.innerHTML =
+            '<button type="button" class="drnav-cart__btn" aria-label="Открыть корзину">' +
+                '<span class="drnav-cart__bag" aria-hidden="true">' + ic('i-bag') + '<span class="drnav-cart__n" hidden>0</span></span>' +
+                '<span class="drnav-cart__sum">Корзина</span>' +
+            '</button>';
+        cartEl.querySelector('.drnav-cart__btn').addEventListener('click', function (e) {
+            e.stopPropagation();
+            deskCartToggle();
+        });
+        cap.appendChild(cartEl);
+        var n = A.cartCount ? A.cartCount() : 0;
+        var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
+        deskCartSync(n, sum, 0, 0);
+    }
+    function deskCartSync(n, sum, dir, delay) {
+        var btn = document.querySelector('#s-rest .drnav-cart__btn'); if (!btn) return;
+        var run = function () {
+            if (!btn.isConnected) return;
+            var cnt = btn.querySelector('.drnav-cart__n'), sm = btn.querySelector('.drnav-cart__sum');
+            btn.classList.toggle('has-sum', n > 0);
+            if (cnt) {
+                cnt.hidden = !n;
+                cnt.textContent = String(n);
+                if (n > 0 && dir > 0 && !fxOff() && cnt.animate) cnt.animate([{ scale: .45 }, { scale: 1.24, offset: .55 }, { scale: 1 }], { duration: 380, easing: 'cubic-bezier(.22, 1.2, .36, 1)' });
+            }
+            if (sm) sm.textContent = n > 0 && sum ? sum : 'Корзина';
+            if (dir > 0 && n > 0 && !fxOff() && btn.animate && btn.closest('.rtabs.is-stuck')) {
+                btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)', offset: .35 }, { transform: 'scale(.98)', offset: .72 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+            }
+        };
+        if (delay) setTimeout(run, delay); else run();
+    }
+    function deskCartBag() {
+        if (deskOn() && S.stack.indexOf('rest') >= 0) {
+            var stuck = document.querySelector('#s-rest #rtabs.is-stuck .drnav-cart__bag');
+            if (stuck) return stuck;
+        }
+        return document.getElementById('cartBag');
+    }
     function deskChrome() {
-        if (!deskOn()) { deskAddrStop(); deskHeadScrollSync(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
+        if (!deskOn()) { deskAddrStop(); deskPlaceHead(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
         var top = S.stack[S.stack.length - 1];
         app.dataset.dtop = deskKind(top);
@@ -501,7 +555,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskHead(); deskCats(); deskPop(); deskNavSync(); deskHeadScrollSync();
+        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskPop(); deskNavSync();
     }
     // закрыть всё, что поверх страницы (панель корзины, окна): по затемнению и по Esc
     function deskClose() { var n = 0; while (/drawer|win/.test(deskKind(S.stack[S.stack.length - 1])) && n++ < 6) popScreen(); }
@@ -532,7 +586,8 @@ window.cleverDesk = function (A) {
     function deskDishAdded(btn, q, from) {
         A.dishState().qty = 1; cntSet(document.getElementById('dqty'), 1); syncDish();
         if (!fxOff() && btn && btn.isConnected) btn.animate([{ transform: 'none' }, { transform: 'scale(.92)', offset: .26, easing: 'cubic-bezier(.3, 0, .4, 1)' }, { transform: 'scale(1.025)', offset: .66 }, { transform: 'none' }], { duration: 480, easing: 'ease-out' });
-        var bag = document.getElementById('cartBag');
+        var bag = deskCartBag();
+        var veilBtn = bag && bag.closest('.drnav-cart__btn') || document.getElementById('cartTab');
         if (fxOff() || !from || !bag) return;
         var fxl = document.getElementById('fx'), sh = document.getElementById('sheet');
         var under = function (on) { deskPortals = Math.max(0, deskPortals + (on ? 1 : -1)); fxl.style.zIndex = deskPortals ? '60' : ''; };   // 60 — над шапкой, под затемнением (70)
@@ -551,7 +606,7 @@ window.cleverDesk = function (A) {
             },
             land: function () {
                 if (dived) setTimeout(function () { under(false); }, 60);
-                deskVeil(document.getElementById('cartTab'));
+                deskVeil(veilBtn);
                 bag.animate([{ scale: 1 }, { scale: '1.12 .84', offset: .24 }, { scale: '.95 1.06', offset: .52 }, { scale: 1 }], { duration: 600, easing: 'ease-out' });
             } });
         var d = fxFly(from, q);
@@ -613,5 +668,5 @@ window.cleverDesk = function (A) {
         app.addEventListener('scroll', function () { if (cur) put(); }, true);
     })();
 
-    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded, askAddr: askAddr };
+    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded, askAddr: askAddr, cartSync: deskCartSync, cartBag: deskCartBag };
 };

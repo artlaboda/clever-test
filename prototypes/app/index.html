@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '24.11 · 19:58';
+    var BUILD = '24.11 · 20:21';
 
     /* ── состояние ── */
     var S = {
@@ -7019,6 +7019,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
                 badge._to = null; label._to = null; label.textContent = 'Мой заказ';
             }
             bagSet(FXV.tab === 'glass' ? 0 : n, delay);
+            if (Desk && Desk.cartSync) Desk.cartSync(n, sum, dir, delay);
         });
     }
     // уровень в пакете: «стопка» — кругами по BAG_K блюд (bagStack); жидкость — 1 − 0,78ⁿ (не выше 95%), едет от того места,
@@ -7793,7 +7794,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     function fxTarget() {
         if (fxTargetOver) return fxTargetOver;
         var top = S.stack[S.stack.length - 1];
-        if (deskOn() && (!top || top === 'rest')) return { el: document.getElementById('cartBag'), kind: 'tab' };   // десктоп: плашки заказа нет — точка летит в корзину в шапке
+        if (deskOn() && (!top || top === 'rest')) return { el: (Desk && Desk.cartBag && Desk.cartBag()) || document.getElementById('cartBag'), kind: 'tab' };   // десктоп: плашки заказа нет — точка летит в видимую корзину (в шапке или в верхней панели меню)
         if (!top) { var tb = document.getElementById('tabbar'); return tb.classList.contains('is-hidden') ? null : { el: document.getElementById('cartBag'), kind: 'tab' }; }
         if (top === 'rest') { var cb = document.getElementById('cartbar'); return cb.classList.contains('is-hidden') ? null : { el: cb.querySelector('.cartbar__n'), kind: 'bar', bar: cb }; }
         if (top === 'cart') { var sm = document.querySelector('#s-cart .cta__sum'); return sm ? { el: sm, kind: 'sum' } : null; }
@@ -10435,6 +10436,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         }).join('');
         h += '<p class="endnote">' + esc(r.name) + ' · Минск<br>Меню и цены от заведения</p><div style="height:110px"></div></div>';
         var scr = document.getElementById('s-rest');
+        var tb0 = document.getElementById('tabbar'); if (tb0 && scr.contains(tb0)) app.appendChild(tb0);
         scr.innerHTML = h;
         var sc = document.getElementById('restScroll'), top = document.getElementById('rtop');
         riFit(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(riFit);
@@ -10445,6 +10447,14 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         var inset = parseFloat(getComputedStyle(tb).top) - 44, off = 0, lastY = 0, upAcc = 0, rev = 0;   // полоса под часами: ряд прилипает на 44 ниже
         restBarOff = 0; restInset = inset;
         function place() {
+            if (deskOn()) {
+                var stuck = sc.scrollTop >= mark.offsetTop - 1;
+                tb.classList.toggle('is-stuck', stuck);
+                tb.classList.toggle('is-joined', stuck);
+                var maxS = Math.max(1, sc.scrollHeight - sc.clientHeight - mark.offsetTop);
+                tb.style.setProperty('--rprog', (stuck ? Math.max(0, Math.min(1, (sc.scrollTop - mark.offsetTop) / maxS)) : 0).toFixed(4));
+                return;
+            }
             var F = mark.offsetTop, nat = F - sc.scrollTop, edge = inset + 44 + off, joined = nat <= edge + .5;
             top.style.top = gl.style.top = off ? off.toFixed(2) + 'px' : '';   // стекло панели — вместе с ней
             tb.style.top = off ? (edge).toFixed(2) + 'px' : '';
@@ -10476,7 +10486,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         sc.addEventListener('touchstart', function (e) { tipY0 = e.touches[0] ? e.touches[0].clientY : null; }, { passive: true });
         sc.addEventListener('touchmove', function (e) { if (tipY0 == null || !e.touches[0] || Math.abs(e.touches[0].clientY - tipY0) < 6) return; tipY0 = null; favTipGone(); }, { passive: true });
         sc.addEventListener('scroll', function () {
-            var y = sc.scrollTop, dy = y - lastY, hOff = deskOn() ? (parseFloat(getComputedStyle(app).getPropertyValue('--dh')) || 0) : 0, solid = y > 210 + hOff, F = mark.offsetTop, now = performance.now(), jump = now < restJump;
+            if (deskOn()) { place(); spy(sc); return; }
+            var y = sc.scrollTop, dy = y - lastY, solid = y > 210, F = mark.offsetTop, now = performance.now(), jump = now < restJump;
             if (jump) restJump = Math.min(restJumpCap, Math.max(restJump, now + 160));
             var ft = top.querySelector('.favtip'); if (ft && Math.abs(y - (ft._y || 0)) > 4) favTipLeave(ft);   // лента поехала — подсказка лайка уходит
             if (solid !== top.classList.contains('is-solid')) setTimeout(syncChromeColor, 0);   // полоса под часами — в цвет стекла панели
@@ -10755,6 +10766,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     var restJump = 0, restJumpCap = 0;   // лента едет от касания пункта меню (не от пальца) — до этого времени; не дольше restJumpCap
     function menuOffset(shown) {
         var tb = document.getElementById('rtabs');
+        if (deskOn()) return tb ? tb.offsetHeight : 0;
         return restInset + 44 + (shown == null ? restBarOff : shown ? 0 : -44) + tb.offsetHeight;
     }
     var spyTap = null;   // раздел, выбранный касанием (пока лента не ушла от низа)
@@ -20826,7 +20838,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         return { S: S, app: app, $$: $$, ic: ic, esc: esc, addr: addr, city: city, rest: rest, Splash: Splash, deskOn: deskOn, standOn: standOn,
             popScreen: popScreen, pushScreen: pushScreen, setTab: setTab, resetStack: resetStack, renderHome: renderHome, syncChrome: syncChrome, syncDish: syncDish, cntSet: cntSet,
             closeSheet: closeSheet, closeSheetNice: closeSheetNice, fxFly: fxFly, fxPt: fxPt, fxOff: fxOff, crGame: crGame,
-            openSheet: openSheet, confirmAddr: confirmAddr, curRest: function () { return curRest; },
+            openSheet: openSheet, confirmAddr: confirmAddr, cartCount: cartCount, cartTotals: cartTotals, moneyShort: moneyShort, BYN: BYN, curRest: function () { return curRest; },
             sheetKind: function () { return sheetKind; }, dishState: function () { return dishState; }, setFxTarget: function (v) { fxTargetOver = v; } };
     }
     function deskLoad(cb) {

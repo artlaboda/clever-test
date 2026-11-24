@@ -14,16 +14,18 @@ html.desk .stand { display: block; padding: 0; height: 100%; min-height: 0; }
 html.desk .frame { width: 100% !important; height: 100% !important; }
 html.desk .frame__inner { width: 100%; height: 100%; border-radius: 0; box-shadow: none; transform: none !important; }
 html.desk .sbar, html.desk .home-ind, html.desk .cartbar, html.desk .sheet__grip { display: none !important; }
-html.desk .app { --top: 150px; --dh: 150px; --bottom: 0px; --dw: 1280px; --dg: max(32px, calc((100% - var(--dw)) / 2)); --dease: cubic-bezier(.2, .8, .2, 1); }
+html.desk .app { --top: 0px; --dh: 150px; --bottom: 0px; --dw: 1280px; --dg: max(32px, calc((100% - var(--dw)) / 2)); --dease: cubic-bezier(.2, .8, .2, 1); }
 html.desk .app button, html.desk .app [data-act], html.desk .app label { cursor: pointer; }
 html.desk .app [data-act="noop"] { cursor: default; }
 
-/* ── шапка ── */
+/* ── шапка (статичная в потоке страницы — не плавает при прокрутке) ── */
 html.desk .tabbar {
-    top: 0; bottom: auto; height: var(--dh); padding-top: 40px !important; box-sizing: border-box; display: flex; align-items: center; gap: 8px;
+    position: relative; top: auto; bottom: auto; left: auto; right: auto; width: 100%; height: var(--dh); padding-top: 40px !important;
+    box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 8px;
     padding: 0 var(--dg); border-top: 0; border-bottom: 1px solid var(--line); transition: none;
-    transform: translate3d(0, calc(-1 * var(--dhead-y, 0px)), 0) !important; will-change: transform; z-index: 9;
+    transform: none !important; z-index: 9;
 }
+html.desk #restScroll > .tabbar { width: auto; margin-inline: calc(16px - var(--dg)); }
 html.desk .dlogo { display: block; order: 0; flex: none; border: 0; background: none; padding: 4px 10px 4px 0; margin-right: 14px; color: var(--ink); transition: transform .3s var(--dease), opacity .2s; }
 html.desk .dlogo svg { display: block; width: 150px; height: 60px; overflow: visible; }
 html.desk .dlogo svg path:nth-child(4) { filter: drop-shadow(0 0 0 rgba(251, 34, 34, 0)) drop-shadow(0 0 0 rgba(255, 56, 56, 0)); transition: filter .35s var(--dease); }
@@ -98,10 +100,12 @@ html.desk .dscrim { display: block; position: absolute; inset: 0; z-index: 10; b
 html.desk .app[data-dtop="drawer"] .dscrim, html.desk .app[data-dtop="win"] .dscrim { opacity: 1; pointer-events: auto; }
 
 /* ── страницы ── */
-html.desk .screen.is-tab > .scroll, html.desk #restScroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent; }
+html.desk .screen.is-tab, html.desk #restScroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent; }
+html.desk .screen.is-tab { overflow-y: auto; overflow-x: hidden; }
+html.desk .screen.is-tab > .scroll { overflow: visible; flex: none; }
 html.desk .app[data-back] .screen::after { display: none; }
 html.desk .screen.is-under { transform: none; }
-html.desk .screen.is-tab:not(#s-home) > .scroll { padding-left: max(32px, calc((100% - 880px) / 2)); padding-right: max(32px, calc((100% - 880px) / 2)); }
+html.desk .screen.is-tab:not(#s-home) > .scroll { padding-top: 20px; padding-left: max(32px, calc((100% - 880px) / 2)); padding-right: max(32px, calc((100% - 880px) / 2)); }
 /* главная */
 html.desk #homeScroll { padding: 0 calc(var(--dg) - 16px); }
 html.desk #s-home .hero { padding-top: calc(var(--top) + 44px); gap: 0; overflow: visible; background: none; }
@@ -262,15 +266,16 @@ html.desk .hsnav svg { width: 20px; height: 20px; fill: none; stroke: currentCol
 html.desk .hsnav.is-sm { width: 36px; height: 36px; }
 html.desk .hsnav.is-sm svg { width: 17px; height: 17px; }
 
-/* ── заведение — страница под шапкой ── */
+/* ── заведение — страница со статичной шапкой и верхней липкой панелью меню с корзиной ── */
 html.desk .screen:not(.is-tab) { --top: 0px; }
 html.desk #s-rest { top: 0; overflow: hidden; overflow: clip; transform: translateY(28px); opacity: 0; transition: transform .45s var(--dease), opacity .3s, visibility 0s linear .45s; }
 html.desk #s-rest.is-on, html.desk #s-rest.is-under { transform: none; opacity: 1; transition: transform .45s var(--dease), opacity .3s, visibility 0s; }
-html.desk #restScroll { padding: var(--dh) calc(var(--dg) - 16px) 80px; }
-html.desk #s-rest .rtop, html.desk #s-rest .rglass { translate: 0 calc(var(--dh) - min(var(--dhead-y, 0px), var(--dh))); }
+html.desk #restScroll { padding: 0 calc(var(--dg) - 16px) 80px; }
+html.desk #s-rest .rglass { display: none !important; }
+html.desk #s-rest .rhero > .rtop { position: absolute; left: 0; right: 0; top: 0; padding: 20px 20px 0 !important; translate: none; }
 html.desk #s-rest .rtop { padding-left: var(--dg); padding-right: var(--dg); }
-html.desk #s-rest .rtop:not(.is-solid) { padding-top: 34px; padding-left: calc(var(--dg) + 18px); padding-right: calc(var(--dg) + 18px); }
-html.desk #s-rest .rhero { height: 340px; margin: 18px 16px 0; border-radius: 32px; overflow: hidden; }
+html.desk #s-rest .rtop:not(.is-solid) { padding-top: 20px; }
+html.desk #s-rest .rhero { height: 340px; margin: 20px 16px 0; border-radius: 32px; overflow: hidden; }
 html.desk #s-rest .rhero img { transition: transform 1.2s var(--dease); }
 html.desk #s-rest .rhero:hover img { transform: scale(1.03); }
 html.desk #s-rest .rhero--rate .ri-hrate { left: 24px; bottom: 24px; }
@@ -357,9 +362,105 @@ html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
         filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .58)) drop-shadow(0 4px 8px rgba(0, 0, 0, .36));
     }
 }
-html.desk #s-rest .rtabs__row { padding: 12px 16px; gap: 8px; }
-html.desk #s-rest .rtabs button { font-size: 15.5px; padding: 10px 16px; }
-html.desk #s-rest .msec { padding-top: 34px; gap: 18px; scroll-margin-top: 72px; }
+/* 24.11: верхняя липкая панель меню на странице заведения (десктоп): прилипает прямо к top: 0 во всю ширину экрана,
+   слева плавно выезжают «Назад», мини-аватар и название заведения, по центру — категории, справа — живая корзина */
+html.desk #s-rest .rtabs {
+    position: sticky; top: 0 !important; z-index: 8;
+    margin: 4px calc(16px - var(--dg)) 0; padding: 0 calc(var(--dg) - 16px);
+}
+html.desk #s-rest .rtabs::before {
+    top: 0 !important;
+    background: color-mix(in srgb, var(--app-bg) 84%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(1.85); backdrop-filter: blur(22px) saturate(1.85);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 85%, transparent), 0 14px 36px -22px rgba(40, 24, 12, .22);
+    transition: opacity .3s var(--dease);
+}
+html.desk #s-rest .rtabs::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; pointer-events: none;
+    background: linear-gradient(90deg, var(--brand) 0%, #ff6a45 100%);
+    transform-origin: 0 50%; transform: scaleX(var(--rprog, 0)); opacity: 0; transition: opacity .28s ease;
+}
+html.desk #s-rest .rtabs.is-stuck::after { opacity: .9; }
+html.desk[data-theme="dark"] #s-rest .rtabs::before {
+    background: color-mix(in srgb, var(--app-bg) 82%, transparent);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 16px 40px -18px rgba(0, 0, 0, .7);
+}
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #s-rest .rtabs::before {
+        background: color-mix(in srgb, var(--app-bg) 82%, transparent);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 16px 40px -18px rgba(0, 0, 0, .7);
+    }
+}
+html.desk #s-rest .rtabs__cap {
+    position: relative; z-index: 1; display: flex; align-items: center;
+    max-width: calc(var(--dw) + 32px); margin-inline: auto; padding: 0 16px; min-height: 68px;
+}
+html.desk #s-rest .rtabs__row { flex: 1 1 auto; min-width: 0; padding: 12px 0; gap: 6px; }
+html.desk #s-rest .rtabs button[data-act="rtab"] { font-size: 15.5px; padding: 10px 16px; }
+/* левый блок: назад + мини-обложка + название (выезжает при прилипании) */
+html.desk #s-rest .drnav-id {
+    flex: none; display: flex; align-items: center; gap: 8px; overflow: hidden;
+    max-width: 0; opacity: 0; margin-right: 0; padding-right: 0; border-right: 1px solid transparent;
+    transform: translateX(-16px); pointer-events: none;
+    transition: max-width .42s var(--dease), opacity .3s ease, transform .42s var(--dease), margin-right .42s var(--dease), padding-right .42s var(--dease), border-color .3s;
+}
+html.desk #s-rest .rtabs.is-stuck .drnav-id {
+    max-width: 268px; opacity: 1; margin-right: 14px; padding-right: 16px; border-right-color: var(--line);
+    transform: none; pointer-events: auto;
+}
+html.desk #s-rest .drnav-back {
+    flex: none; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%;
+    display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink);
+    transition: background .2s, transform .22s var(--dease);
+}
+html.desk #s-rest .drnav-back:hover { background: color-mix(in srgb, var(--ink) 12%, transparent); transform: translateX(-2px); }
+html.desk #s-rest .drnav-back:active { transform: scale(.93); }
+html.desk #s-rest .drnav-back svg.i { width: 19px; height: 19px; stroke-width: 2.2; }
+html.desk #s-rest .drnav-who {
+    min-width: 0; display: inline-flex; align-items: center; gap: 9px; padding: 4px 10px 4px 4px;
+    border: 0; border-radius: 999px; background: none; color: var(--ink); text-align: left;
+    transition: background .2s;
+}
+html.desk #s-rest .drnav-who:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+html.desk #s-rest .drnav-who img {
+    flex: none; width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+    box-shadow: 0 0 0 1px var(--line);
+}
+html.desk #s-rest .drnav-who span {
+    min-width: 0; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font: 700 15px/1.2 var(--font); letter-spacing: -.01em;
+}
+/* правый блок: кнопка корзины (пружинно выезжает при прилипании) */
+html.desk #s-rest .drnav-cart {
+    flex: none; display: flex; align-items: center; overflow: hidden;
+    max-width: 0; opacity: 0; margin-left: 0; transform: translateX(20px) scale(.92); pointer-events: none;
+    transition: max-width .44s var(--dease), opacity .3s ease .04s, transform .46s cubic-bezier(.22, 1.15, .36, 1), margin-left .44s var(--dease);
+}
+html.desk #s-rest .rtabs.is-stuck .drnav-cart {
+    max-width: 220px; opacity: 1; margin-left: 16px; transform: none; pointer-events: auto; overflow: visible;
+}
+html.desk #s-rest .drnav-cart__btn {
+    position: relative; height: 44px; min-width: 144px; padding: 0 18px 0 15px; border: 0; border-radius: 15px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 11px;
+    background: var(--cta); color: var(--on-cta); font: 650 14.5px/1 var(--font); white-space: nowrap;
+    box-shadow: var(--cta-ring, 0 0 #0000), 0 10px 22px -12px rgba(20, 12, 8, .5);
+    transition: transform .22s var(--dease), box-shadow .22s, background .2s;
+}
+html.desk #s-rest .drnav-cart__btn:hover {
+    transform: translateY(-1.5px);
+    box-shadow: var(--cta-ring, 0 0 #0000), 0 14px 28px -12px rgba(20, 12, 8, .62);
+}
+html.desk #s-rest .drnav-cart__btn:active { transform: scale(.97); }
+html.desk #s-rest .drnav-cart__bag { position: relative; flex: none; display: grid; place-items: center; width: 22px; height: 22px; }
+html.desk #s-rest .drnav-cart__bag svg.i { width: 21px; height: 21px; }
+html.desk #s-rest .drnav-cart__n {
+    position: absolute; top: -6px; right: -8px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+    border-radius: 999px; background: var(--brand); color: #fff; font: 750 10.5px/18px var(--font); text-align: center;
+    box-shadow: 0 0 0 2px var(--cta);
+}
+html.desk #s-rest .drnav-cart__n[hidden] { display: none; }
+html.desk #s-rest .drnav-cart__sum { font-variant-numeric: tabular-nums; }
+html.desk #s-rest .msec { padding-top: 34px; gap: 18px; scroll-margin-top: 76px; }
 html.desk #s-rest .grid2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 html.desk #s-rest .grid2 .item__body { min-width: 0; padding: 4px 14px 0; }
 html.desk #s-rest .dpop-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px 0 calc(16px + var(--r-tile) / 2); }
