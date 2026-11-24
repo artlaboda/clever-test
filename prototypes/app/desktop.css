@@ -316,16 +316,16 @@ html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="pct"]:has(.dc-bdg) { pad
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-bdg { width: 56px; height: 56px; right: -7px; bottom: -10px; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="pct"]:hover .dc-bdg { transform: scale(1.13) rotate(-10deg) translate(-1px, -2px); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="gift"]:has(.dc-gf, .dc-gi) { padding: 15px 60px 15px 18px; }
-html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-gi { width: 48px; height: 46px; right: -4px; bottom: -1px; }
-html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-gf { width: 50px; height: 47px; right: -6px; bottom: -2px; }
-html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="gift"]:hover :is(.dc-gi, .dc-gf) { transform: scale(1.13) translateY(-3px) rotate(-5deg); }
+html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-gi { width: 48px; height: 46px; right: -4px; bottom: -2.5px; transform-origin: 100% 100%; }
+html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-gf { width: 50px; height: 47px; right: -6px; bottom: -2.5px; transform-origin: 100% 100%; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="gift"]:hover :is(.dc-gi, .dc-gf) { transform: scale(1.13) rotate(-3.5deg); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk:has(.dc-dish) { padding: 15px 18px 15px 14px; gap: 3px 12px; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk:has(.dc-dish) > .ri-lv { width: 48px; height: 48px; margin-block: 0; }
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-dish { width: 48px; height: 48px; left: 0; top: 0; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk:hover .dc-dish { transform: scale(1.09); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="dlv"]:has(.dc-tb) { padding: 15px 60px 15px 18px; }
-html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-tb { width: 50px; height: 47px; right: -6px; bottom: -2px; }
-html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="dlv"]:hover .dc-tb { transform: scale(1.13) translate(-2px, -3px) rotate(-6deg); }
+html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-tb { width: 50px; height: 47px; right: -6px; bottom: -2.5px; transform-origin: 100% 100%; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="dlv"]:hover .dc-tb { transform: scale(1.13) rotate(-3.5deg); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk--pick {
     --stub: 84px; padding: 15px calc(var(--stub) + 16px) 15px 60px;
     box-shadow: none; filter: none;
