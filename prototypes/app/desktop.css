@@ -307,7 +307,15 @@ html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="dlv"]:has(.dc-tb) { padd
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-tb { width: 50px; height: 47px; right: -6px; bottom: -2px; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk--pick {
     --stub: 84px; padding: 15px calc(var(--stub) + 16px) 15px 60px;
-    box-shadow: none; filter: drop-shadow(0 0 0 rgba(120, 72, 18, 0)) drop-shadow(0 0 0 rgba(120, 72, 18, 0));
+    box-shadow: none; filter: none;
+}
+/* 24.11: тень под билетом «Навынос» — отдельным слоем строго ниже нижней кромки (clip-path обрезает всё выше кромки),
+   чтобы перфорация и выемки оставались кристально чистыми без грязных серых точек */
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick::after {
+    content: ''; position: absolute; left: 16px; right: 16px; top: calc(100% - 10px); height: 10px; z-index: -3;
+    border-radius: 10px; pointer-events: none; background: transparent;
+    box-shadow: 0 5px 10px -2px rgba(120, 72, 18, .20), 0 2px 4px -1px rgba(120, 72, 18, .12);
+    clip-path: inset(10px -18px -18px -18px); opacity: 0; transition: opacity .34s var(--dease);
 }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__bw { width: 50px; clip-path: inset(0 round 18px 0 0 18px); }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__bag { left: -4px; bottom: -11px; width: 44px; height: 57.5px; }
@@ -327,21 +335,16 @@ html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):active {
     scale: .98;
     transition: scale .16s ease-out, transform .22s var(--dease), box-shadow .22s var(--dease);
 }
-html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
-    transform: translateY(-2px); box-shadow: none;
-    filter: drop-shadow(0 4px 6px rgba(120, 72, 18, .12)) drop-shadow(0 1px 2px rgba(120, 72, 18, .08));
-}
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover { transform: translateY(-2px); box-shadow: none; filter: none; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover::after { opacity: 1; }
 html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) {
     box-shadow: 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0), inset 0 0 0 1px rgba(255, 255, 255, 0);
 }
 html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
     box-shadow: 0 6px 12px -4px rgba(0, 0, 0, .48), 0 2px 5px -2px rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(255, 255, 255, .10);
 }
-html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick {
-    filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)) drop-shadow(0 0 0 rgba(0, 0, 0, 0));
-}
-html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
-    filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .45)) drop-shadow(0 1px 3px rgba(0, 0, 0, .28));
+html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick::after {
+    box-shadow: 0 6px 12px -2px rgba(0, 0, 0, .56), 0 2px 5px -1px rgba(0, 0, 0, .34);
 }
 @media (prefers-color-scheme: dark) {
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) {
@@ -350,11 +353,8 @@ html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
         box-shadow: 0 6px 12px -4px rgba(0, 0, 0, .48), 0 2px 5px -2px rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(255, 255, 255, .10);
     }
-    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick {
-        filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)) drop-shadow(0 0 0 rgba(0, 0, 0, 0));
-    }
-    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
-        filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .45)) drop-shadow(0 1px 3px rgba(0, 0, 0, .28));
+    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick::after {
+        box-shadow: 0 6px 12px -2px rgba(0, 0, 0, .56), 0 2px 5px -1px rgba(0, 0, 0, .34);
     }
 }
 /* 24.11: верхняя липкая панель меню на странице заведения (десктоп): прилипает прямо к top: 0 во всю ширину экрана,
