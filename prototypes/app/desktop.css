@@ -217,8 +217,8 @@ html.desk .lrow:hover > svg.i:last-child, html.desk .me:hover > svg.i:last-child
 html.desk .lrow > svg.i:last-child, html.desk .me > svg.i:last-child, html.desk .sq__top > svg.i:last-child { transition: transform .25s var(--dease); }
 html.desk .tilecat { overflow: hidden; }
 html.desk .tilecat:hover { transform: translateY(-3px); box-shadow: 0 16px 28px -20px rgba(40, 24, 12, .5); }
-html.desk .app:not([data-deal="live"]) .ri-tk { transition: transform .36s var(--dease), box-shadow .36s var(--dease); }
-html.desk .app:not([data-deal="live"]) .ri-tk:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -12px rgba(80, 56, 10, .24), 0 4px 10px -4px rgba(80, 56, 10, .12); }
+html.desk .app:not([data-deal="live"]) .ri-tk { transition: transform .32s var(--dease), box-shadow .32s var(--dease); }
+html.desk .app:not([data-deal="live"]) .ri-tk:hover { transform: translateY(-2px); box-shadow: 0 5px 10px -4px rgba(80, 56, 10, .18), 0 2px 4px -2px rgba(80, 56, 10, .10); }
 html.desk .slot:hover, html.desk .cday:hover, html.desk .cwo:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
 html.desk .cpay:hover, html.desk .opt:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
 html.desk .ibtn { transition: transform .2s var(--dease), background-color .2s, color .2s, opacity .2s; }
@@ -320,41 +320,41 @@ html.desk .app[data-deal="live"] #s-rest .ri-pk__cp,
 html.desk .app[data-deal="live"] #s-rest .ri-pk__cp > svg { width: 22px; height: 22px; }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__stub > em { font-size: 9.8px; letter-spacing: .85px; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
-    transform: translateY(-3px);
-    box-shadow: 0 14px 28px -10px rgba(var(--lv-rgbd, 80, 56, 10), .24), 0 4px 10px -4px rgba(var(--lv-rgbd, 80, 56, 10), .12);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px -4px rgba(var(--lv-rgbd, 80, 56, 10), .18), 0 2px 4px -2px rgba(var(--lv-rgbd, 80, 56, 10), .10);
 }
 html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):active {
     scale: .98;
     transition: scale .16s ease-out, transform .22s var(--dease), box-shadow .22s var(--dease);
 }
 html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
-    transform: translateY(-3px); box-shadow: none;
-    filter: drop-shadow(0 12px 18px rgba(120, 72, 18, .17)) drop-shadow(0 3px 6px rgba(120, 72, 18, .08));
+    transform: translateY(-2px); box-shadow: none;
+    filter: drop-shadow(0 4px 6px rgba(120, 72, 18, .12)) drop-shadow(0 1px 2px rgba(120, 72, 18, .08));
 }
 html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) {
     box-shadow: 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0), inset 0 0 0 1px rgba(255, 255, 255, 0);
 }
 html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
-    box-shadow: 0 18px 34px -10px rgba(0, 0, 0, .62), 0 6px 14px -4px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(255, 255, 255, .10);
+    box-shadow: 0 6px 12px -4px rgba(0, 0, 0, .48), 0 2px 5px -2px rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(255, 255, 255, .10);
 }
 html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick {
     filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)) drop-shadow(0 0 0 rgba(0, 0, 0, 0));
 }
 html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
-    filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .58)) drop-shadow(0 4px 8px rgba(0, 0, 0, .36));
+    filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .45)) drop-shadow(0 1px 3px rgba(0, 0, 0, .28));
 }
 @media (prefers-color-scheme: dark) {
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) {
         box-shadow: 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0), inset 0 0 0 1px rgba(255, 255, 255, 0);
     }
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
-        box-shadow: 0 18px 34px -10px rgba(0, 0, 0, .62), 0 6px 14px -4px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(255, 255, 255, .10);
+        box-shadow: 0 6px 12px -4px rgba(0, 0, 0, .48), 0 2px 5px -2px rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(255, 255, 255, .10);
     }
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick {
         filter: drop-shadow(0 0 0 rgba(0, 0, 0, 0)) drop-shadow(0 0 0 rgba(0, 0, 0, 0));
     }
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
-        filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .58)) drop-shadow(0 4px 8px rgba(0, 0, 0, .36));
+        filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .45)) drop-shadow(0 1px 3px rgba(0, 0, 0, .28));
     }
 }
 /* 24.11: верхняя липкая панель меню на странице заведения (десктоп): прилипает прямо к top: 0 во всю ширину экрана,
