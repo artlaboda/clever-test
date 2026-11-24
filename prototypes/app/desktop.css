@@ -217,8 +217,8 @@ html.desk .lrow:hover > svg.i:last-child, html.desk .me:hover > svg.i:last-child
 html.desk .lrow > svg.i:last-child, html.desk .me > svg.i:last-child, html.desk .sq__top > svg.i:last-child { transition: transform .25s var(--dease); }
 html.desk .tilecat { overflow: hidden; }
 html.desk .tilecat:hover { transform: translateY(-3px); box-shadow: 0 16px 28px -20px rgba(40, 24, 12, .5); }
-html.desk .app:not([data-deal="live"]) .ri-tk { transition: transform .32s var(--dease), box-shadow .32s var(--dease); }
-html.desk .app:not([data-deal="live"]) .ri-tk:hover { transform: translateY(-2px); box-shadow: 0 5px 10px -4px rgba(80, 56, 10, .18), 0 2px 4px -2px rgba(80, 56, 10, .10); }
+html.desk .app:not([data-deal="live"]) .ri-tk { transition: filter .28s var(--dease); }
+html.desk .app:not([data-deal="live"]) .ri-tk:hover { filter: saturate(1.12) brightness(.985); }
 html.desk .slot:hover, html.desk .cday:hover, html.desk .cwo:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
 html.desk .cpay:hover, html.desk .opt:hover { background: color-mix(in srgb, var(--ink) 4%, transparent); }
 html.desk .ibtn { transition: transform .2s var(--dease), background-color .2s, color .2s, opacity .2s; }
@@ -277,9 +277,9 @@ html.desk #s-rest .rinfo { padding-inline: var(--dg); }
 html.desk #s-rest .rinfo.rinfo--simple { padding: 28px var(--dg) 26px; }
 html.desk #s-rest .rinfo--simple h1 { font-size: 44px; }
 html.desk #s-rest .ri-dl { font-size: 16px; margin-top: 4px; }
-/* 24.11: акции на странице заведения на десктопе — крупнее и выше, как аккуратные карточки (не растягиваются на весь экран,
-   даже если акция одна или две); при наведении — плавный мягкий подъём и цветная/атмосферная тень (у билета с перфорацией —
-   по силуэту через drop-shadow, чтобы тень не заливала выемки) */
+/* 24.11: акции на странице заведения на десктопе — крупнее и выше, как аккуратные карточки (не растягиваются на весь экран);
+   без теней вообще: при наведении — мягкий градиентный перелив с тонким кантом, плавно увеличивается и оживает картинка
+   (процент, подарок, сумка, пакет), а у билета «Навынос» чуть приоткрывается корешок и оживает значок копирования */
 html.desk #s-rest .ri-tks--3, html.desk #s-rest .ri-tks { grid-auto-flow: column; grid-auto-columns: minmax(260px, 340px); grid-template-columns: none; overflow: visible; margin: 22px 0 0; padding: 0; justify-content: start; }
 html.desk .app[data-deal="live"] #s-rest .ri-tks {
     display: flex; flex-wrap: wrap; gap: 14px; overflow: visible; margin: 24px 0 0; padding: 0;
@@ -288,74 +288,92 @@ html.desk .app[data-deal="live"] #s-rest .ri-tks > .ri-tk,
 html.desk .app[data-deal="live"] #s-rest .ri-tks > .ri-tk:only-child,
 html.desk .app[data-deal="live"] #s-rest .ri-tks > .ri-tk:first-child:nth-last-child(2),
 html.desk .app[data-deal="live"] #s-rest .ri-tks > .ri-tk:first-child:nth-last-child(2) + .ri-tk {
+    position: relative; isolation: isolate;
     flex: 0 1 auto; min-width: 236px; max-width: 340px; min-height: 78px; border-radius: 18px; row-gap: 4px;
-    box-shadow: 0 0 0 rgba(var(--lv-rgbd, 80, 56, 10), 0), 0 0 0 rgba(var(--lv-rgbd, 80, 56, 10), 0);
-    transition: transform .38s var(--dease), box-shadow .38s var(--dease), filter .38s var(--dease), scale .45s cubic-bezier(.25, .8, .3, 1);
+    box-shadow: none; filter: none;
+    transition: scale .45s cubic-bezier(.25, .8, .3, 1);
 }
+html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) > :is(b, small, .ri-lv) { position: relative; z-index: 1; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) > :is(.ri-lv--gift, .ri-lv--pct, .ri-lv--cr) { position: absolute; z-index: 1; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick)::before {
+    content: ''; position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(155px 115px at 94% 96%, rgba(var(--lv-rgb), .24), transparent 72%),
+        linear-gradient(135deg, rgba(255, 255, 255, .45) 0%, transparent 54%);
+    box-shadow: inset 0 0 0 1px rgba(var(--lv-rgb), .28);
+    opacity: 0; transition: opacity .36s var(--dease);
+}
+html.desk .app[data-deal="live"] #s-rest .ri-tk:has(.dc-dish)::before {
+    background: radial-gradient(140px 105px at 14% 52%, rgba(var(--lv-rgb), .22), transparent 72%),
+        linear-gradient(135deg, rgba(255, 255, 255, .42) 0%, transparent 58%);
+}
+html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover::before { opacity: 1; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk b { font: 700 16.5px/1.2 "Golos Text", var(--font); letter-spacing: -.01em; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk small { font: 500 13.5px/1.3 "Golos Text", var(--font); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk > :is(.ri-lv--gift, .ri-lv--pct, .ri-lv--cr) { clip-path: inset(0 round 18px); }
+html.desk .app[data-deal="live"] #s-rest .ri-lv__o,
+html.desk .app[data-deal="live"] #s-rest .ri-pk__bag { transition: transform .42s cubic-bezier(.22, 1.25, .36, 1); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="pct"]:has(.dc-bdg) { padding: 15px 62px 15px 18px; }
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-bdg { width: 56px; height: 56px; right: -7px; bottom: -10px; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="pct"]:hover .dc-bdg { transform: scale(1.13) rotate(-10deg) translate(-1px, -2px); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="gift"]:has(.dc-gf, .dc-gi) { padding: 15px 60px 15px 18px; }
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-gi { width: 48px; height: 46px; right: -4px; bottom: -1px; }
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-gf { width: 50px; height: 47px; right: -6px; bottom: -2px; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="gift"]:hover :is(.dc-gi, .dc-gf) { transform: scale(1.13) translateY(-3px) rotate(-5deg); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk:has(.dc-dish) { padding: 15px 18px 15px 14px; gap: 3px 12px; }
 html.desk .app[data-deal="live"] #s-rest .ri-tk:has(.dc-dish) > .ri-lv { width: 48px; height: 48px; margin-block: 0; }
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-dish { width: 48px; height: 48px; left: 0; top: 0; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk:hover .dc-dish { transform: scale(1.09); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="dlv"]:has(.dc-tb) { padding: 15px 60px 15px 18px; }
 html.desk .app[data-deal="live"] #s-rest .ri-lv__o.dc-tb { width: 50px; height: 47px; right: -6px; bottom: -2px; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk[data-k="dlv"]:hover .dc-tb { transform: scale(1.13) translate(-2px, -3px) rotate(-6deg); }
 html.desk .app[data-deal="live"] #s-rest .ri-tk--pick {
     --stub: 84px; padding: 15px calc(var(--stub) + 16px) 15px 60px;
     box-shadow: none; filter: none;
 }
-/* 24.11: тень под билетом «Навынос» — отдельным слоем строго ниже нижней кромки (clip-path обрезает всё выше кромки),
-   чтобы перфорация и выемки оставались кристально чистыми без грязных серых точек */
-html.desk .app[data-deal="live"] #s-rest .ri-tk--pick::after {
-    content: ''; position: absolute; left: 16px; right: 16px; top: calc(100% - 10px); height: 10px; z-index: -3;
-    border-radius: 10px; pointer-events: none; background: transparent;
-    box-shadow: 0 5px 10px -2px rgba(120, 72, 18, .20), 0 2px 4px -1px rgba(120, 72, 18, .12);
-    clip-path: inset(10px -18px -18px -18px); opacity: 0; transition: opacity .34s var(--dease);
-}
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick::before,
+html.desk .app[data-deal="live"] #s-rest .ri-pk__stub::before { transition: filter .34s var(--dease); }
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover::before,
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover .ri-pk__stub::before { filter: saturate(1.24) brightness(.985); }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__bw { width: 50px; clip-path: inset(0 round 18px 0 0 18px); }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__bag { left: -4px; bottom: -11px; width: 44px; height: 57.5px; }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__bag > svg { width: 44px; height: 57.5px; }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__bag:has(> svg.tee) { bottom: -9px; height: 54.5px; }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__bag > svg.tee { height: 54.5px; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover .ri-pk__bag { transform: translateY(-3px) scale(1.1) rotate(-3.5deg); }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__stub { gap: 4px; padding-bottom: 1px; transform-origin: 0 30px; }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__stub::before { border-radius: 0 18px 18px 0; }
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:not(.is-torn):hover .ri-pk__stub { rotate: 2deg; translate: 1px -.5px; }
+html.desk .app[data-deal="live"] #s-rest .ri-pk__cp { transition: transform .35s cubic-bezier(.22, 1.25, .36, 1); }
+html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover .ri-pk__cp { transform: scale(1.12); }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__cp,
 html.desk .app[data-deal="live"] #s-rest .ri-pk__cp > svg { width: 22px; height: 22px; }
 html.desk .app[data-deal="live"] #s-rest .ri-pk__stub > em { font-size: 9.8px; letter-spacing: .85px; }
-html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 10px -4px rgba(var(--lv-rgbd, 80, 56, 10), .18), 0 2px 4px -2px rgba(var(--lv-rgbd, 80, 56, 10), .10);
+html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):active { scale: .98; transition: scale .16s ease-out; }
+html.desk[data-theme="dark"] .app:not([data-deal="live"]) .ri-tk:hover { filter: brightness(1.1) saturate(1.08); }
+html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick)::before {
+    background: radial-gradient(155px 115px at 94% 96%, rgba(var(--lv-rgb), .32), transparent 72%),
+        linear-gradient(135deg, rgba(255, 255, 255, .08) 0%, transparent 54%);
+    box-shadow: inset 0 0 0 1px rgba(var(--lv-rgb), .36);
 }
-html.desk .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):active {
-    scale: .98;
-    transition: scale .16s ease-out, transform .22s var(--dease), box-shadow .22s var(--dease);
+html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:has(.dc-dish)::before {
+    background: radial-gradient(140px 105px at 14% 52%, rgba(var(--lv-rgb), .3), transparent 72%),
+        linear-gradient(135deg, rgba(255, 255, 255, .08) 0%, transparent 58%);
 }
-html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover { transform: translateY(-2px); box-shadow: none; filter: none; }
-html.desk .app[data-deal="live"] #s-rest .ri-tk--pick:hover::after { opacity: 1; }
-html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) {
-    box-shadow: 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0), inset 0 0 0 1px rgba(255, 255, 255, 0);
-}
-html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
-    box-shadow: 0 6px 12px -4px rgba(0, 0, 0, .48), 0 2px 5px -2px rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(255, 255, 255, .10);
-}
-html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick::after {
-    box-shadow: 0 6px 12px -2px rgba(0, 0, 0, .56), 0 2px 5px -1px rgba(0, 0, 0, .34);
-}
+html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover::before,
+html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover .ri-pk__stub::before { filter: brightness(1.14) saturate(1.1); }
 @media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick) {
-        box-shadow: 0 0 0 rgba(0, 0, 0, 0), 0 0 0 rgba(0, 0, 0, 0), inset 0 0 0 1px rgba(255, 255, 255, 0);
+    html.desk:not([data-theme="light"]) .app:not([data-deal="live"]) .ri-tk:hover { filter: brightness(1.1) saturate(1.08); }
+    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick)::before {
+        background: radial-gradient(155px 115px at 94% 96%, rgba(var(--lv-rgb), .32), transparent 72%),
+            linear-gradient(135deg, rgba(255, 255, 255, .08) 0%, transparent 54%);
+        box-shadow: inset 0 0 0 1px rgba(var(--lv-rgb), .36);
     }
-    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:not(.ri-tk--pick):hover {
-        box-shadow: 0 6px 12px -4px rgba(0, 0, 0, .48), 0 2px 5px -2px rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(255, 255, 255, .10);
+    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk:has(.dc-dish)::before {
+        background: radial-gradient(140px 105px at 14% 52%, rgba(var(--lv-rgb), .3), transparent 72%),
+            linear-gradient(135deg, rgba(255, 255, 255, .08) 0%, transparent 58%);
     }
-    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick::after {
-        box-shadow: 0 6px 12px -2px rgba(0, 0, 0, .56), 0 2px 5px -1px rgba(0, 0, 0, .34);
-    }
+    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick:hover::before,
+    html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick:hover .ri-pk__stub::before { filter: brightness(1.14) saturate(1.1); }
 }
 /* 24.11: верхняя липкая панель меню на странице заведения (десктоп): прилипает прямо к top: 0 во всю ширину экрана,
    при прилипании стекло, линия прогресса и само меню плавно раскрываются на всю ширину — слева «Назад» и заведение, справа корзина */
