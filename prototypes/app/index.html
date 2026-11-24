@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '24.11 · 23:16';
+    var BUILD = '24.11 · 23:55';
 
     /* ── состояние ── */
     var S = {
@@ -20839,6 +20839,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
             popScreen: popScreen, pushScreen: pushScreen, setTab: setTab, resetStack: resetStack, renderHome: renderHome, syncChrome: syncChrome, syncDish: syncDish, cntSet: cntSet,
             closeSheet: closeSheet, closeSheetNice: closeSheetNice, fxFly: fxFly, fxPt: fxPt, fxOff: fxOff, crGame: crGame,
             openSheet: openSheet, confirmAddr: confirmAddr, cartCount: cartCount, cartTotals: cartTotals, moneyShort: moneyShort, BYN: BYN, curRest: function () { return curRest; },
+            segPlay: segPlay, segStart: segStart,
             sheetKind: function () { return sheetKind; }, dishState: function () { return dishState; }, setFxTarget: function (v) { fxTargetOver = v; } };
     }
     function deskLoad(cb) {
