@@ -550,15 +550,22 @@ html.desk .dseg { order: 1; position: relative; flex: none; display: grid; grid-
 html.desk .dseg button { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: none; font: 500 16px/1 var(--font); color: var(--muted); border-radius: 12px; transition: color .25s; }
 html.desk .dseg button[aria-selected="true"] { color: var(--ink); }
 html.desk .dseg button:not([aria-selected="true"]):hover { color: var(--ink); }
+html.desk .dseg button > span { position: relative; z-index: 2; }
 /* 24.11: плашка «−15%» рядом с «Навынос» — аккуратная выразительная капсула высотой 22 px */
 html.desk .dseg__sale {
-    flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+    position: relative; z-index: 2; flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
     height: 22px; padding: 0 7.5px; border-radius: 999px; font-style: normal;
     background: color-mix(in srgb, var(--brand) 14%, transparent); color: var(--brand);
     box-shadow: 0 0 0 rgba(227, 20, 28, 0);
     transition: background .25s, color .25s, box-shadow .25s, transform .25s var(--dease);
 }
 html.desk .dseg__sale > i { display: block; font: 700 11.5px/1 var(--font); font-style: normal; letter-spacing: -.01em; font-variant-numeric: proportional-nums; white-space: nowrap; }
+html.desk .dseg__fx { position: absolute; z-index: 1; width: 0; height: 0; pointer-events: none; }
+html.desk .dseg__sp {
+    position: absolute; left: -1.2px; top: -3.2px; width: 2.4px; height: 6.4px; border-radius: 999px;
+    background: currentColor; box-shadow: 0 0 5px color-mix(in srgb, currentColor 65%, transparent); will-change: transform, opacity;
+}
+html.desk .dseg__sp--dot { left: -1.8px; top: -1.8px; width: 3.6px; height: 3.6px; box-shadow: 0 0 7px color-mix(in srgb, currentColor 80%, transparent); }
 html.desk .dseg button[aria-selected="true"] .dseg__sale,
 html.desk .dseg button:hover .dseg__sale {
     background: linear-gradient(135deg, #ff5638 0%, #e3141c 100%); color: #fff;

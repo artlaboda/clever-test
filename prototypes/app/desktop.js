@@ -191,7 +191,49 @@ window.cleverDesk = function (A) {
         seg.innerHTML = '<i class="dseg__th" aria-hidden="true"></i><button type="button" role="tab" data-m="dl">Доставка</button><button type="button" role="tab" data-m="pk"><span>Навынос</span><em class="dseg__sale"><i>\u221215%</i></em></button>';
         var setM = function (on) { seg.classList.toggle('is-pk', on); [].forEach.call(seg.querySelectorAll('button'), function (b) { b.setAttribute('aria-selected', String((b.dataset.m === 'pk') === on)); }); };
         setM(pk);
-        seg.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; e.stopPropagation(); var on = b.dataset.m === 'pk'; setM(on); try { localStorage.setItem('clever2-mode', on ? 'pick' : ''); } catch (er) {} });
+        /* 24.11: маленькие искры из-под капсулы «−15%» при клике/переключении на «Навынос» */
+        function deskPickSparks(btn) {
+            if (fxOff() || !btn) return;
+            var pill = btn.querySelector('.dseg__sale'); if (!pill) return;
+            if (pill.animate) pill.animate(
+                [{ transform: 'scale(1)' }, { transform: 'scale(.91)', offset: .22 }, { transform: 'scale(1.1)', offset: .58 }, { transform: 'scale(1)' }],
+                { duration: 400, easing: 'cubic-bezier(.22, 1, .36, 1)' }
+            );
+            var fx = document.createElement('span');
+            fx.className = 'dseg__fx';
+            fx.setAttribute('aria-hidden', 'true');
+            fx.style.left = (pill.offsetLeft + pill.offsetWidth / 2) + 'px';
+            fx.style.top = (pill.offsetTop + pill.offsetHeight / 2) + 'px';
+            var cols = ['#ff4733', '#ff8a2b', '#ffc226', '#ff2e4c', '#ff6b4a', '#ffd447'];
+            var N = 12;
+            for (var i = 0; i < N; i++) {
+                var dot = i % 3 === 1, sp = document.createElement('i');
+                sp.className = dot ? 'dseg__sp dseg__sp--dot' : 'dseg__sp';
+                sp.style.color = cols[i % cols.length];
+                var deg = i * (360 / N) + (Math.random() - .5) * 20;
+                var rad = deg * Math.PI / 180;
+                var sx = Math.cos(rad) * 14, sy = Math.sin(rad) * 6;
+                var dist = (dot ? 22 : 25) + Math.random() * 11;
+                var ex = Math.cos(rad) * (14 + dist), ey = Math.sin(rad) * (6 + dist * .78) + 3 + Math.random() * 4;
+                var rot = Math.atan2(ey - sy, ex - sx) * 180 / Math.PI + 90;
+                fx.appendChild(sp);
+                if (sp.animate) sp.animate([
+                    { transform: 'translate(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px) rotate(' + rot.toFixed(0) + 'deg) scale(.3)', opacity: 0 },
+                    { transform: 'translate(' + (sx + (ex - sx) * .35).toFixed(1) + 'px,' + (sy + (ey - sy) * .35).toFixed(1) + 'px) rotate(' + rot.toFixed(0) + 'deg) scale(' + (dot ? '1.15' : '1,1.25') + ')', opacity: 1, offset: .24 },
+                    { transform: 'translate(' + ex.toFixed(1) + 'px,' + ey.toFixed(1) + 'px) rotate(' + rot.toFixed(0) + 'deg) scale(.15)', opacity: 0 }
+                ], { duration: 480 + Math.round(Math.random() * 170), delay: (i % 4) * 14, easing: 'cubic-bezier(.16, .84, .32, 1)', fill: 'both' });
+            }
+            btn.appendChild(fx);
+            setTimeout(function () { fx.remove(); }, 760);
+        }
+        seg.addEventListener('click', function (e) {
+            var b = e.target.closest('button'); if (!b) return;
+            e.stopPropagation();
+            var on = b.dataset.m === 'pk';
+            setM(on);
+            if (on) deskPickSparks(b);
+            try { localStorage.setItem('clever2-mode', on ? 'pick' : ''); } catch (er) {}
+        });
         tb.insertBefore(seg, document.getElementById('dAddr'));
         var tel = document.createElement('button'); tel.type = 'button'; tel.className = 'dh dh-ic dh-tel'; tel.dataset.act = 'open-chat'; tel.setAttribute('aria-label', 'Поддержка'); tel.innerHTML = TEL;
         tb.insertBefore(tel, document.getElementById('dSearch').nextSibling);
