@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '24.11 · 23:12';
+    var BUILD = '24.11 · 23:16';
 
     /* ── состояние ── */
     var S = {
@@ -7750,7 +7750,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         var r = rest(a.dataset.id), sl = feeSlide(r), tip = document.getElementById('tip');
         // текст — сразу через «типограф»: он склеивает короткие слова с соседними, строки переносятся иначе — мерить нужно уже такой текст
         tip.innerHTML = typo('Заказ доставит партнёр Clever.by.' +   // без заголовка — сразу суть
-            (sl ? ' Чем больше заказ, тем дешевле доставка: она плавно уменьшается с\u00a0каждым рублём — от\u00a0' + r.fee + '\u00a0' + BYN + ', а\u00a0от\u00a0' + r.freeFrom + '\u00a0' + BYN + ' бесплатна.' : ''));
+            (sl ? ' Чем больше заказ, тем дешевле доставка: она плавно уменьшается с\u00a0каждым рублём — от\u00a0' + r.fee + '\u202f' + BYN + ', а\u00a0от\u00a0' + r.freeFrom + '\u202f' + BYN + ' бесплатна.' : ''));
         tip.hidden = false; tip.classList.remove('is-on');
         var ar = a.getBoundingClientRect(), c = fxPt(ar.left + ar.width / 2, ar.top), cb = fxPt(ar.left, ar.bottom), W = app.offsetWidth;
         var tw = tip.offsetWidth, th = tip.offsetHeight, up = c.y - th - 12 > 50;
@@ -21893,7 +21893,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     function tr(src) {
         if (!I18N || !LANG || LANG === 'ru' || !src || !/[А-Яа-яЁё]/.test(src)) return src;   // словарь ещё не готов (заставка на старте) — как есть
         var C = TRC[LANG] || (TRC[LANG] = {}); if (Object.prototype.hasOwnProperty.call(C, src)) return C[src];
-        var m = /^(\s*)([\s\S]*?)(\s*)$/.exec(src), core = m[2].split(NBS).join(' ').replace(/[ \t]+/g, ' '), r = trAff(core);
+        var m = /^(\s*)([\s\S]*?)(\s*)$/.exec(src), core = m[2].replace(/[\u00a0\u202f]/g, ' ').replace(/[ \t]+/g, ' '), r = trAff(core);
         if (r == null) r = trSplit(core);
         return (C[src] = r == null ? src : m[1] + r + m[3]);
     }
@@ -21907,6 +21907,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         if (n._tv === v) return;
         n._ru = v;
         var ini = txIni(n), o = ini != null ? ini : typo(LANG === 'ru' || trSkip(n) ? v : tr(v), typoNew(n));
+        if (n.parentNode && n.parentNode.id === 'tip') o = o.replace(/(\d)\u00a0(?=\u20C5)/g, '$1\u202f');
         n._tv = o;
         if (o !== v) n.nodeValue = o;
     }
