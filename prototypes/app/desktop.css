@@ -14,14 +14,15 @@ html.desk .stand { display: block; padding: 0; height: 100%; min-height: 0; }
 html.desk .frame { width: 100% !important; height: 100% !important; }
 html.desk .frame__inner { width: 100%; height: 100%; border-radius: 0; box-shadow: none; transform: none !important; }
 html.desk .sbar, html.desk .home-ind, html.desk .cartbar, html.desk .sheet__grip { display: none !important; }
-html.desk .app { --top: 128px; --dh: 128px; --bottom: 0px; --dw: 1280px; --dg: max(32px, calc((100% - var(--dw)) / 2)); --dease: cubic-bezier(.2, .8, .2, 1); }
+html.desk .app { --top: 150px; --dh: 150px; --bottom: 0px; --dw: 1280px; --dg: max(32px, calc((100% - var(--dw)) / 2)); --dease: cubic-bezier(.2, .8, .2, 1); }
 html.desk .app button, html.desk .app [data-act], html.desk .app label { cursor: pointer; }
 html.desk .app [data-act="noop"] { cursor: default; }
 
 /* ── шапка ── */
 html.desk .tabbar {
     top: 0; bottom: auto; height: var(--dh); padding-top: 40px !important; box-sizing: border-box; display: flex; align-items: center; gap: 8px;
-    padding: 0 var(--dg); border-top: 0; border-bottom: 1px solid var(--line); transition: none; transform: none !important; z-index: 9;
+    padding: 0 var(--dg); border-top: 0; border-bottom: 1px solid var(--line); transition: none;
+    transform: translate3d(0, calc(-1 * var(--dhead-y, 0px)), 0) !important; will-change: transform; z-index: 9;
 }
 html.desk .dlogo { display: block; order: 0; flex: none; border: 0; background: none; padding: 4px 10px 4px 0; margin-right: 14px; color: var(--ink); transition: transform .3s var(--dease), opacity .2s; }
 html.desk .dlogo svg { display: block; width: 150px; height: 60px; }
@@ -258,9 +259,10 @@ html.desk .hsnav.is-sm svg { width: 17px; height: 17px; }
 
 /* ── заведение — страница под шапкой ── */
 html.desk .screen:not(.is-tab) { --top: 0px; }
-html.desk #s-rest { top: var(--dh); overflow: hidden; overflow: clip; transform: translateY(28px); opacity: 0; transition: transform .45s var(--dease), opacity .3s, visibility 0s linear .45s; }
+html.desk #s-rest { top: 0; overflow: hidden; overflow: clip; transform: translateY(28px); opacity: 0; transition: transform .45s var(--dease), opacity .3s, visibility 0s linear .45s; }
 html.desk #s-rest.is-on, html.desk #s-rest.is-under { transform: none; opacity: 1; transition: transform .45s var(--dease), opacity .3s, visibility 0s; }
-html.desk #restScroll { padding: 0 calc(var(--dg) - 16px) 80px; }
+html.desk #restScroll { padding: var(--dh) calc(var(--dg) - 16px) 80px; }
+html.desk #s-rest .rtop, html.desk #s-rest .rglass { translate: 0 calc(var(--dh) - min(var(--dhead-y, 0px), var(--dh))); }
 html.desk #s-rest .rtop { padding-left: var(--dg); padding-right: var(--dg); }
 html.desk #s-rest .rtop:not(.is-solid) { padding-top: 34px; padding-left: calc(var(--dg) + 18px); padding-right: calc(var(--dg) + 18px); }
 html.desk #s-rest .rhero { height: 340px; margin: 18px 16px 0; border-radius: 32px; overflow: hidden; }
@@ -352,7 +354,7 @@ html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover {
 }
 html.desk #s-rest .rtabs__row { padding: 12px 16px; gap: 8px; }
 html.desk #s-rest .rtabs button { font-size: 15.5px; padding: 10px 16px; }
-html.desk #s-rest .msec { padding-top: 34px; gap: 18px; scroll-margin-top: 130px; }
+html.desk #s-rest .msec { padding-top: 34px; gap: 18px; scroll-margin-top: 72px; }
 html.desk #s-rest .grid2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 html.desk #s-rest .grid2 .item__body { min-width: 0; padding: 4px 14px 0; }
 html.desk #s-rest .dpop-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px 0 calc(16px + var(--r-tile) / 2); }
@@ -540,9 +542,37 @@ html.desk .dlogo svg { width: 160px; height: 64px; }
 /* переключатель «Доставка / Навынос» */
 html.desk .dseg { order: 1; position: relative; flex: none; display: grid; grid-template-columns: 1fr 1fr; width: 340px; height: 54px; padding: 4px; box-sizing: border-box;
     border-radius: 16px; background: color-mix(in srgb, var(--ink) 6%, var(--app-bg)); margin-right: 32px; }
-html.desk .dseg button { position: relative; z-index: 1; border: 0; background: none; font: 500 16px/1 var(--font); color: var(--muted); border-radius: 12px; transition: color .25s; }
+html.desk .dseg button { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: none; font: 500 16px/1 var(--font); color: var(--muted); border-radius: 12px; transition: color .25s; }
 html.desk .dseg button[aria-selected="true"] { color: var(--ink); }
 html.desk .dseg button:not([aria-selected="true"]):hover { color: var(--ink); }
+/* 24.11: плашка «−15%» рядом с «Навынос» — высотой на 1 px выше и ниже строчных букв (1ex + 2px) */
+html.desk .dseg__sale {
+    flex: none; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+    height: calc(1ex + 2px); padding: 0 5.5px; border-radius: 999px; font-style: normal; translate: 0 .6px;
+    background: color-mix(in srgb, var(--brand) 14%, transparent); color: var(--brand);
+    box-shadow: 0 0 0 rgba(227, 20, 28, 0);
+    transition: background .25s, color .25s, box-shadow .25s, transform .25s var(--dease);
+}
+html.desk .dseg__sale > i { display: block; font: 700 9.5px/1 var(--font); font-style: normal; letter-spacing: -.01em; font-variant-numeric: proportional-nums; white-space: nowrap; }
+html.desk .dseg button[aria-selected="true"] .dseg__sale,
+html.desk .dseg button:hover .dseg__sale {
+    background: linear-gradient(135deg, #ff5638 0%, #e3141c 100%); color: #fff;
+    box-shadow: 0 2px 7px -2px rgba(227, 20, 28, .48);
+}
+html.desk[data-theme="dark"] .dseg__sale { background: rgba(255, 92, 74, .20); color: #ff8678; }
+html.desk[data-theme="dark"] .dseg button[aria-selected="true"] .dseg__sale,
+html.desk[data-theme="dark"] .dseg button:hover .dseg__sale {
+    background: linear-gradient(135deg, #ff5d42 0%, #e02024 100%); color: #fff;
+    box-shadow: 0 2px 8px -2px rgba(255, 64, 52, .52);
+}
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) .dseg__sale { background: rgba(255, 92, 74, .20); color: #ff8678; }
+    html.desk:not([data-theme="light"]) .dseg button[aria-selected="true"] .dseg__sale,
+    html.desk:not([data-theme="light"]) .dseg button:hover .dseg__sale {
+        background: linear-gradient(135deg, #ff5d42 0%, #e02024 100%); color: #fff;
+        box-shadow: 0 2px 8px -2px rgba(255, 64, 52, .52);
+    }
+}
 html.desk .dseg__th { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 12px; background: var(--card);
     box-shadow: 0 2px 10px -3px rgba(40, 24, 12, .2), 0 0 0 .5px rgba(40, 24, 12, .05); transition: transform .4s cubic-bezier(.3, 1.25, .5, 1); }
 html.desk .dseg.is-pk .dseg__th { transform: translateX(100%); }
@@ -589,7 +619,7 @@ html.desk #s-home .cat[aria-pressed="true"] { background: var(--brand); }
 html.desk #s-home .cat[aria-pressed="true"] span { color: #fff; }
 html.desk #s-home .cat:hover .cat__pic, html.desk #s-home .cat:active .cat__pic { transform: none; }
 @media (max-width: 1180px) {
-    html.desk .dseg { width: 260px; margin-right: 16px; }
+    html.desk .dseg { width: 292px; margin-right: 16px; }
     html.desk .dh-addr { max-width: 280px; }
 }
 

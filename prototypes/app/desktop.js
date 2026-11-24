@@ -188,7 +188,7 @@ window.cleverDesk = function (A) {
         tb.insertBefore(st, tb.firstChild);
         var seg = document.createElement('div'); seg.className = 'dseg'; seg.setAttribute('role', 'tablist');
         var pk = false; try { pk = localStorage.getItem('clever2-mode') === 'pick'; } catch (e) {}
-        seg.innerHTML = '<i class="dseg__th" aria-hidden="true"></i><button type="button" role="tab" data-m="dl">Доставка</button><button type="button" role="tab" data-m="pk">Навынос</button>';
+        seg.innerHTML = '<i class="dseg__th" aria-hidden="true"></i><button type="button" role="tab" data-m="dl">Доставка</button><button type="button" role="tab" data-m="pk"><span>Навынос</span><em class="dseg__sale"><i>\u221215%</i></em></button>';
         var setM = function (on) { seg.classList.toggle('is-pk', on); [].forEach.call(seg.querySelectorAll('button'), function (b) { b.setAttribute('aria-selected', String((b.dataset.m === 'pk') === on)); }); };
         setM(pk);
         seg.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; e.stopPropagation(); var on = b.dataset.m === 'pk'; setM(on); try { localStorage.setItem('clever2-mode', on ? 'pick' : ''); } catch (er) {} });
@@ -415,8 +415,34 @@ window.cleverDesk = function (A) {
         e.preventDefault();
         history.back();
     }, true);
+    /* 24.11: вся верхняя шапка не фиксирована — плавно уезжает вверх 1:1 с прокруткой активной страницы */
+    function activePageScroll() {
+        if (S.stack.indexOf('rest') >= 0) return document.getElementById('restScroll');
+        return document.querySelector('#s-' + S.tab + ' > .scroll');
+    }
+    function deskHeadScrollSync(sc) {
+        if (!deskOn()) { deskHeadScrollSync._v = null; app.style.removeProperty('--dhead-y'); return; }
+        sc = sc || activePageScroll();
+        var dh = parseFloat(getComputedStyle(app).getPropertyValue('--dh')) || 150;
+        var y = sc ? Math.max(0, sc.scrollTop) : 0;
+        var off = y >= dh ? dh + 2 : y;
+        if (deskHeadScrollSync._v !== off) {
+            deskHeadScrollSync._v = off;
+            app.style.setProperty('--dhead-y', off.toFixed(1) + 'px');
+        }
+        if (askEl) {
+            if (y > 40) hideAskAddr();
+            else placeAskAddr();
+        }
+    }
+    app.addEventListener('scroll', function (e) {
+        if (!deskOn()) return;
+        var sc = activePageScroll();
+        if (e.target !== sc) return;
+        deskHeadScrollSync(sc);
+    }, true);
     function deskChrome() {
-        if (!deskOn()) { deskAddrStop(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
+        if (!deskOn()) { deskAddrStop(); deskHeadScrollSync(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
         var top = S.stack[S.stack.length - 1];
         app.dataset.dtop = deskKind(top);
@@ -426,7 +452,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskHead(); deskCats(); deskPop(); deskNavSync();
+        deskHead(); deskCats(); deskPop(); deskNavSync(); deskHeadScrollSync();
     }
     // закрыть всё, что поверх страницы (панель корзины, окна): по затемнению и по Esc
     function deskClose() { var n = 0; while (/drawer|win/.test(deskKind(S.stack[S.stack.length - 1])) && n++ < 6) popScreen(); }
@@ -498,6 +524,7 @@ window.cleverDesk = function (A) {
     function deskVeil(el) {
         var sc = document.getElementById('scrim'); if (!el || !sc.classList.contains('is-on')) return;
         var r = el.getBoundingClientRect(), a = app.getBoundingClientRect(), cx = r.left - a.left + r.width / 2, cy = r.top - a.top + r.height / 2;
+        if (cy < 0) return;
         var rx = r.width / 2 + 18, ry = r.height / 2 + 16, t0 = performance.now(), D = 1150, my = ++deskVeil.n;
         var f = function (now) {
             if (my !== deskVeil.n) return;

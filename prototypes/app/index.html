@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '24.11 · 19:22';
+    var BUILD = '24.11 · 19:33';
 
     /* ── состояние ── */
     var S = {
@@ -10476,7 +10476,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         sc.addEventListener('touchstart', function (e) { tipY0 = e.touches[0] ? e.touches[0].clientY : null; }, { passive: true });
         sc.addEventListener('touchmove', function (e) { if (tipY0 == null || !e.touches[0] || Math.abs(e.touches[0].clientY - tipY0) < 6) return; tipY0 = null; favTipGone(); }, { passive: true });
         sc.addEventListener('scroll', function () {
-            var y = sc.scrollTop, dy = y - lastY, solid = y > 210, F = mark.offsetTop, now = performance.now(), jump = now < restJump;
+            var y = sc.scrollTop, dy = y - lastY, hOff = deskOn() ? (parseFloat(getComputedStyle(app).getPropertyValue('--dh')) || 0) : 0, solid = y > 210 + hOff, F = mark.offsetTop, now = performance.now(), jump = now < restJump;
             if (jump) restJump = Math.min(restJumpCap, Math.max(restJump, now + 160));
             var ft = top.querySelector('.favtip'); if (ft && Math.abs(y - (ft._y || 0)) > 4) favTipLeave(ft);   // лента поехала — подсказка лайка уходит
             if (solid !== top.classList.contains('is-solid')) setTimeout(syncChromeColor, 0);   // полоса под часами — в цвет стекла панели
