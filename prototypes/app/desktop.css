@@ -187,10 +187,10 @@ html.desk .rest__pic img { transition: transform 1.1s var(--dease); }
 html.desk .rest:hover .rest__pic img { transform: scale(1.025); }
 /* 21.11: «курьер должен бежать, а он дёргается — возьми бег курьера из соседней ветки»: под курсором значок меняется на
    курьера из шторки доставки: идёт (crGame('walk')), через 0,7 с бежит (crGame('run')), 21×21 — на том же месте и того же размера */
-html.desk .rest__meta .dcr { display: none; width: 19px; height: 19px; margin: -1px 4px -1px -1px; color: var(--ink); flex: none; }
-html.desk .rest__meta .dcr > i { display: none; width: 100%; height: 100%; }
-html.desk .rest__meta .dcr svg { display: block; width: 100%; height: 100%; }
-html.desk .rest:not(.dcr-run) .dcr-w, html.desk .rest.dcr-run .dcr-r { display: block; }
+html.desk .rest__meta .dcr { display: none; position: relative; width: 19px; height: 19px; margin: -1px 4px -1px -1px; color: var(--ink); flex: none; overflow: visible; }
+html.desk .rest__meta .dcr > i { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .14s ease; }
+html.desk .rest__meta .dcr svg { display: block; width: 100%; height: 100%; overflow: visible; }
+html.desk .rest:not(.dcr-run) .dcr-w, html.desk .rest.dcr-run .dcr-r { opacity: 1; }
 html.desk .rest:hover .rest__meta .dcr { display: block; }
 html.desk .rest:hover .rest__meta > span:first-child > svg.i, html.desk .rest:hover .rest__meta > span:first-child > .cour { display: none; }
 html.desk .rest__txt b, html.desk .rest__txt > :first-child { transition: color .2s; }
