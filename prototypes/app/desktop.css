@@ -452,7 +452,61 @@ html.desk .sheet.is-dish #dishImg { scale: 1.28; }
 html.desk .sheet.is-dish .sheet__foot { position: absolute; left: 50%; right: 0; bottom: 0; width: auto; }
 html.desk .sheet__close { transition: transform .25s var(--dease), background-color .2s; }
 html.desk .sheet__close:hover { transform: rotate(90deg) scale(1.06); }
-/* 24.11: всплывающее окно акции на десктопе — нижний поясняющий текст и карточка условий крупнее, чтобы легко читались на широком экране */
+/* 24.11: всплывающее окно акции на десктопе — нижний поясняющий текст и карточка условий крупнее, чтобы легко читались на широком экране;
+   круг акции и значок чуть крупнее (+14%), внешний и внутренний круги плавно перетекают, как плазма звонка в Telegram */
+html.desk #sheet.is-deal .dls:has(.dls__orb) { --dls-grab: 6px; --dls-g: 30px; }
+html.desk #sheet.is-deal .dls__hero:has(.dls__orb) { --ow: 114px !important; --oh: 114px !important; --vt: -15px !important; --vh: 144px !important; }
+html.desk #sheet.is-deal .dls__ob.dls__orb { --dls-pa: color-mix(in srgb, var(--dls-orb) 48%, transparent); --dls-pb: color-mix(in srgb, var(--dls-orb) 34%, transparent); }
+html.desk[data-theme="dark"] #sheet.is-deal .dls__ob.dls__orb { --dls-pa: color-mix(in srgb, var(--dls-orb) 58%, transparent); --dls-pb: color-mix(in srgb, var(--dls-orb) 42%, transparent); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #sheet.is-deal .dls__ob.dls__orb { --dls-pa: color-mix(in srgb, var(--dls-orb) 58%, transparent); --dls-pb: color-mix(in srgb, var(--dls-orb) 42%, transparent); }
+}
+html.desk #sheet.is-deal .dls__orb::before {
+    inset: -16px; z-index: -2; background: var(--dls-pa); pointer-events: none; will-change: transform, border-radius;
+    animation: dlsPlasmaA 7.4s ease-in-out infinite, dlsPlasmaSpinA 18s linear infinite;
+}
+html.desk #sheet.is-deal .dls__orb::after {
+    inset: -13px; z-index: -1; background: var(--dls-pb); box-shadow: none; pointer-events: none; will-change: transform, border-radius;
+    animation: dlsPlasmaB 6.1s ease-in-out infinite, dlsPlasmaSpinB 13.5s linear infinite reverse;
+}
+html.desk #sheet.is-deal .dls__orb > .dls__it {
+    box-shadow: inset 0 0 0 1.5px var(--dls-rim); will-change: border-radius;
+    animation: dlsPlasmaCore 6.8s ease-in-out infinite;
+}
+html.desk #sheet.is-deal .dls__ob.dls__orb > .dls__gi > svg.i { width: 68px; height: 68px; }
+html.desk #sheet.is-deal .dls__ob.dls__orb > .dls__gi > svg.dls-gift { width: 73px; height: 73px; }
+html.desk #sheet:not(.is-on) :is(.dls__orb::before, .dls__orb::after, .dls__orb > .dls__it) { animation-play-state: paused; }
+@keyframes dlsPlasmaA {
+    0%, 100% { border-radius: 54% 46% 52% 48% / 47% 54% 46% 53%; }
+    25% { border-radius: 44% 56% 47% 53% / 55% 45% 54% 46%; }
+    50% { border-radius: 56% 44% 55% 45% / 46% 56% 44% 54%; }
+    75% { border-radius: 46% 54% 44% 56% / 54% 46% 56% 44%; }
+}
+@keyframes dlsPlasmaB {
+    0%, 100% { border-radius: 47% 53% 45% 55% / 54% 46% 55% 45%; }
+    33% { border-radius: 56% 44% 53% 47% / 45% 55% 47% 53%; }
+    66% { border-radius: 45% 55% 56% 44% / 53% 45% 46% 54%; }
+}
+@keyframes dlsPlasmaCore {
+    0%, 100% { border-radius: 52% 48% 51% 49% / 48% 52% 49% 51%; }
+    25% { border-radius: 47% 53% 48% 52% / 53% 48% 52% 47%; }
+    50% { border-radius: 53% 47% 53% 47% / 47% 53% 47% 53%; }
+    75% { border-radius: 48% 52% 47% 53% / 52% 47% 53% 48%; }
+}
+@keyframes dlsPlasmaSpinA {
+    0% { transform: rotate(0deg) scale(1, 1); }
+    33% { transform: rotate(120deg) scale(1.035, .98); }
+    66% { transform: rotate(240deg) scale(.985, 1.03); }
+    100% { transform: rotate(360deg) scale(1, 1); }
+}
+@keyframes dlsPlasmaSpinB {
+    0% { transform: rotate(0deg) scale(1, 1); }
+    50% { transform: rotate(180deg) scale(1.03, .975); }
+    100% { transform: rotate(360deg) scale(1, 1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    html.desk #sheet.is-deal :is(.dls__orb::before, .dls__orb::after, .dls__orb > .dls__it) { animation: none !important; border-radius: 50%; }
+}
 html.desk #sheet.is-deal .dls__t { max-width: 380px; }
 html.desk #sheet.is-deal .dls__s { max-width: 400px; font-size: 16.5px; line-height: 1.48; }
 html.desk #sheet.is-deal .dls__r { grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 16px 18px; }
