@@ -545,9 +545,9 @@ html.desk .dstrip i { font-style: normal; color: var(--faint); }
 html.desk .dlogo { margin-right: auto; }
 html.desk .dlogo svg { width: 160px; height: 64px; }
 /* переключатель «Доставка / Навынос» */
-html.desk .dseg { order: 1; position: relative; flex: none; display: grid; grid-template-columns: 1fr 1fr; width: 340px; height: 54px; padding: 4px; box-sizing: border-box;
+html.desk .dseg { order: 1; position: relative; z-index: 2; flex: none; display: grid; grid-template-columns: 1fr 1fr; width: 340px; height: 54px; padding: 4px; box-sizing: border-box;
     border-radius: 16px; background: color-mix(in srgb, var(--ink) 6%, var(--app-bg)); margin-right: 32px; }
-html.desk .dseg button { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; background: none; font: 500 16px/1 var(--font); color: var(--muted); border-radius: 12px; transition: color .25s; }
+html.desk .dseg button { position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; overflow: visible; border: 0; background: none; font: 500 16px/1 var(--font); color: var(--muted); border-radius: 12px; transition: color .25s; }
 html.desk .dseg button[aria-selected="true"] { color: var(--ink); }
 html.desk .dseg button:not([aria-selected="true"]):hover { color: var(--ink); }
 html.desk .dseg button > span { position: relative; z-index: 2; }
@@ -560,12 +560,16 @@ html.desk .dseg__sale {
     transition: background .25s, color .25s, box-shadow .25s, transform .25s var(--dease);
 }
 html.desk .dseg__sale > i { display: block; font: 700 11.5px/1 var(--font); font-style: normal; letter-spacing: -.01em; font-variant-numeric: proportional-nums; white-space: nowrap; }
-html.desk .dseg__fx { position: absolute; z-index: 1; width: 0; height: 0; pointer-events: none; }
-html.desk .dseg__sp {
-    position: absolute; left: -1.2px; top: -3.2px; width: 2.4px; height: 6.4px; border-radius: 999px;
-    background: currentColor; box-shadow: 0 0 5px color-mix(in srgb, currentColor 65%, transparent); will-change: transform, opacity;
+html.desk .dseg button > .dseg__fx { position: absolute; z-index: 1; width: 0; height: 0; pointer-events: none; overflow: visible; }
+html.desk .dseg__glow {
+    display: block; position: absolute; left: -24px; top: -13px; width: 48px; height: 26px; border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 76, 52, .52) 0%, rgba(255, 138, 43, .22) 55%, transparent 100%); will-change: transform, opacity;
 }
-html.desk .dseg__sp--dot { left: -1.8px; top: -1.8px; width: 3.6px; height: 3.6px; box-shadow: 0 0 7px color-mix(in srgb, currentColor 80%, transparent); }
+html.desk .dseg__sp {
+    display: block; position: absolute; left: -1.5px; top: -4px; width: 3px; height: 8px; border-radius: 999px;
+    background: currentColor; box-shadow: 0 0 6px color-mix(in srgb, currentColor 70%, transparent); will-change: transform, opacity;
+}
+html.desk .dseg__sp--dot { left: -2.2px; top: -2.2px; width: 4.4px; height: 4.4px; box-shadow: 0 0 8px color-mix(in srgb, currentColor 85%, transparent); }
 html.desk .dseg button[aria-selected="true"] .dseg__sale,
 html.desk .dseg button:hover .dseg__sale {
     background: linear-gradient(135deg, #ff5638 0%, #e3141c 100%); color: #fff;
