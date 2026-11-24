@@ -315,6 +315,106 @@ window.cleverDesk = function (A) {
         var r = e.target.closest('.rest'); if (!r || !r._dcr || (e.relatedTarget && r.contains(e.relatedTarget))) return;
         r._dcr = 0; clearTimeout(r._dcrT); r.classList.remove('dcr-run');
     });
+    /* 24.11: навигация браузера («Назад» / «Вперёд») на десктопе: переходы на страницу заведения и между вкладками
+       пишутся в history.pushState, а нажатие кнопки «Назад» в браузере (или на странице заведения) возвращает обратно */
+    var BASE_TITLE = document.title;
+    var navReady = false, navKey = '', navIdx = 0, navTrail = [], fromPop = false;
+    function navStateNow() {
+        var rid = A.curRest && A.curRest();
+        if (S.stack.indexOf('rest') >= 0 && rid) return { dnav: 1, key: 'rest:' + rid, page: 'rest', id: rid };
+        return { dnav: 1, key: 'tab:' + S.tab, page: 'tab', tab: S.tab };
+    }
+    function navUrl(st) {
+        var base = location.pathname + location.search;
+        if (st.page === 'rest') return base + '#rest=' + st.id;
+        if (st.tab && st.tab !== 'home') return base + '#' + st.tab;
+        return base;
+    }
+    function navTitle(st) {
+        if (st.page === 'rest') {
+            var r = A.rest && A.rest(st.id);
+            document.title = r ? r.name + ' — clever.by' : BASE_TITLE;
+        } else if (st.tab === 'search') document.title = 'Поиск — clever.by';
+        else if (st.tab === 'profile') document.title = 'Профиль — clever.by';
+        else document.title = BASE_TITLE;
+    }
+    function deskNavSync() {
+        if (!deskOn() || fromPop) return;
+        var st = navStateNow();
+        if (!navReady) {
+            if (st.page === 'tab' && st.tab === 'home' && /^#rest=([\w-]+)$/.test(location.hash || '')) return;
+            navReady = true;
+            navKey = st.key;
+            var prev = history.state && history.state.dnav ? history.state : null;
+            navIdx = prev && typeof prev.idx === 'number' ? prev.idx : 0;
+            st.idx = navIdx;
+            navTrail[navIdx] = st.key;
+            navTrail.length = navIdx + 1;
+            try { history.replaceState(st, '', navUrl(st)); } catch (e) {}
+            navTitle(st);
+            return;
+        }
+        if (st.key === navKey) { navTitle(st); return; }
+        navKey = st.key;
+        navIdx++;
+        st.idx = navIdx;
+        navTrail[navIdx] = st.key;
+        navTrail.length = navIdx + 1;
+        try { history.pushState(st, '', navUrl(st)); } catch (e) {}
+        navTitle(st);
+    }
+    function canHistBack() {
+        return deskOn() && navReady && navIdx > 0 && S.stack.length === 1 && S.stack[0] === 'rest' && navTrail[navIdx - 1] === 'tab:' + S.tab;
+    }
+    function applyNavState(st) {
+        fromPop = true;
+        navKey = st.key;
+        navIdx = typeof st.idx === 'number' ? st.idx : 0;
+        navTrail[navIdx] = st.key;
+        try {
+            if (A.sheetKind && A.sheetKind() && A.closeSheet) A.closeSheet();
+            deskClose();
+            if (st.page === 'rest' && A.rest && A.rest(st.id)) {
+                if (S.stack[S.stack.length - 1] !== 'rest' || (A.curRest && A.curRest() !== st.id)) {
+                    if (S.stack.length && A.resetStack) A.resetStack();
+                    pushScreen('rest', st.id);
+                }
+            } else {
+                var tab = st.tab || 'home';
+                if (S.stack.length === 1 && S.stack[0] === 'rest' && S.tab === tab) {
+                    popScreen();
+                } else {
+                    var had = S.stack.length;
+                    if (had && A.resetStack) A.resetStack();
+                    if ((S.tab !== tab || had) && A.setTab) A.setTab(tab, had ? 2 : 1);
+                }
+            }
+            navTitle(st);
+        } finally {
+            fromPop = false;
+        }
+    }
+    window.addEventListener('popstate', function (e) {
+        if (!deskOn()) return;
+        var st = e.state && e.state.dnav ? e.state : null;
+        if (!st) {
+            var h = location.hash || '', m = /^#rest=([\w-]+)$/.exec(h);
+            if (m && A.rest && A.rest(m[1])) st = { dnav: 1, idx: 0, page: 'rest', id: m[1], key: 'rest:' + m[1] };
+            else if (h === '#search' || h === '#profile' || h === '#fav' || h === '#orders') {
+                var tb = h.slice(1);
+                st = { dnav: 1, idx: 0, page: 'tab', tab: tb, key: 'tab:' + tb };
+            } else st = { dnav: 1, idx: 0, page: 'tab', tab: 'home', key: 'tab:home' };
+        }
+        applyNavState(st);
+    });
+    app.addEventListener('click', function (e) {
+        if (!deskOn()) return;
+        var b = e.target.closest('#s-rest [data-act="back"]');
+        if (!b || !canHistBack()) return;
+        e.stopPropagation();
+        e.preventDefault();
+        history.back();
+    }, true);
     function deskChrome() {
         if (!deskOn()) { deskAddrStop(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
@@ -326,7 +426,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskHead(); deskCats(); deskPop();
+        deskHead(); deskCats(); deskPop(); deskNavSync();
     }
     // закрыть всё, что поверх страницы (панель корзины, окна): по затемнению и по Esc
     function deskClose() { var n = 0; while (/drawer|win/.test(deskKind(S.stack[S.stack.length - 1])) && n++ < 6) popScreen(); }
@@ -342,7 +442,7 @@ window.cleverDesk = function (A) {
             if (askEl) { hideAskAddr(); e.preventDefault(); }
             else if (A.sheetKind()) { closeSheetNice(); e.preventDefault(); }
             else if (/drawer|win/.test(deskKind(S.stack[S.stack.length - 1]))) { popScreen(); e.preventDefault(); }
-            else if (S.stack.length) { popScreen(); e.preventDefault(); }
+            else if (S.stack.length) { if (canHistBack()) history.back(); else popScreen(); e.preventDefault(); }
         } else if (e.key === '/' && !ed && !A.sheetKind() && !e.ctrlKey && !e.metaKey) { e.preventDefault(); document.getElementById('dSearch').click(); }
     });
     /* 12.11: окно блюда на десктопе. «Корзина сверху в этой форме лишняя. Комета должна лететь сразу в корзину родную, сверху

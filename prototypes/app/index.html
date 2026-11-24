@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '24.11 · 18:18';
+    var BUILD = '24.11 · 18:36';
 
     /* ── состояние ── */
     var S = {
@@ -15044,7 +15044,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     function openFromHash() {
         var dl = /^#rest=([\w-]+)$/.exec(location.hash || '');
         if (!dl || !rest(dl[1])) return false;
-        try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+        if (deskOn() && S.stack[S.stack.length - 1] === 'rest' && curRest === dl[1]) return true;
+        if (!deskOn()) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }
         if (!S.city) setCity('minsk');
         if (sheetKind) closeSheet();
         resetStack(); setTab('home'); pushScreen('rest', dl[1]);
@@ -20822,10 +20823,10 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
        обратно свои действия — Desk.chrome / close / cartToggle / dishAdded. Пока Desk нет (телефон) — крючки молчат */
     var Desk = null;
     function deskApi() {
-        return { S: S, app: app, $$: $$, ic: ic, esc: esc, addr: addr, city: city, Splash: Splash, deskOn: deskOn, standOn: standOn,
-            popScreen: popScreen, pushScreen: pushScreen, renderHome: renderHome, syncChrome: syncChrome, syncDish: syncDish, cntSet: cntSet,
-            closeSheetNice: closeSheetNice, fxFly: fxFly, fxPt: fxPt, fxOff: fxOff, crGame: crGame,
-            openSheet: openSheet, confirmAddr: confirmAddr,
+        return { S: S, app: app, $$: $$, ic: ic, esc: esc, addr: addr, city: city, rest: rest, Splash: Splash, deskOn: deskOn, standOn: standOn,
+            popScreen: popScreen, pushScreen: pushScreen, setTab: setTab, resetStack: resetStack, renderHome: renderHome, syncChrome: syncChrome, syncDish: syncDish, cntSet: cntSet,
+            closeSheet: closeSheet, closeSheetNice: closeSheetNice, fxFly: fxFly, fxPt: fxPt, fxOff: fxOff, crGame: crGame,
+            openSheet: openSheet, confirmAddr: confirmAddr, curRest: function () { return curRest; },
             sheetKind: function () { return sheetKind; }, dishState: function () { return dishState; }, setFxTarget: function (v) { fxTargetOver = v; } };
     }
     function deskLoad(cb) {
