@@ -370,37 +370,24 @@ window.cleverDesk = function (A) {
     });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
     (function () { var rs = document.getElementById('s-rest'); if (!rs || !window.MutationObserver) return; new MutationObserver(function () { if (deskOn()) { deskPlaceHead(); deskRestMount(); deskPop(); } }).observe(rs, { childList: true }); })();
-    // курьер в карточке заведения: навели — идёт (crGame('walk')), через 0,62 с плавно переходит на бег (crGame('run'));
-    // у бегущего выровнен масштаб (viewBox 18×18 вместо 21×21 — голова и сумка не уменьшаются) и сглажены keyTimes (убрана
-    // пауза на 17–19 и 29–0 кадрах исходного спрайта); смена идёт мягким кроссфейдом без дёргания display:none у SMIL
+    // курьер в карточке заведения: при наведении сразу бежит (crGame('run')), уходит курсор — снова статичный значок;
+    // viewBox 19.2×19.2 выровнен по размеру и посадке под статичный #i-courier (17 px), keyTimes сглаживают паузы в цикле,
+    // у заведений со своими курьерами (без .cour) — .dcr--own (сумка в цвет фигуры и без логотипа Clever.by)
     var RUN_KT = '0;0.0144;0.0418;0.0618;0.0767;0.0957;0.1227;0.158;0.198;0.2399;0.282;0.3232;0.3645;0.4074;0.4509;0.4926;0.5266;0.5491;0.5598;0.5704;0.5925;0.6262;0.67;0.7211;0.775;0.8259;0.8697;0.9087;0.9467;0.9759;1';
     function deskRunSvg() {
         return A.crGame('run', { bag: 'red', rate: .86 })
-            .replace('viewBox="0 0 21 21"', 'viewBox="2.25 0.75 18 18"')
+            .replace('viewBox="0 0 21 21"', 'viewBox="1.6 0.4 19.2 19.2"')
             .replace(/ repeatCount="indefinite"/g, ' keyTimes="' + RUN_KT + '" repeatCount="indefinite"');
     }
     app.addEventListener('mouseover', function (e) {
         if (!deskOn() || !A.crGame) return;
         var r = e.target.closest('.rest'), m = r && r.querySelector('.rest__meta > span:first-child');
-        if (!m || r._dcr) return;
-        r._dcr = 1;
-        var c = m.querySelector('.dcr');
-        if (!c) {
-            c = document.createElement('i'); c.className = m.querySelector('.cour') ? 'dcr' : 'dcr dcr--own'; c.setAttribute('aria-hidden', 'true');
-            c.innerHTML = '<i class="dcr-w">' + A.crGame('walk', { bag: 'red' }) + '</i><i class="dcr-r">' + deskRunSvg() + '</i>';
-            m.insertBefore(c, m.firstChild);
-        }
-        var ws = c.querySelector('.dcr-w svg'), rs = c.querySelector('.dcr-r svg');
-        if (ws && ws.setCurrentTime) { try { ws.setCurrentTime(0); } catch (er) {} }
-        r.classList.remove('dcr-run'); clearTimeout(r._dcrT);
-        r._dcrT = setTimeout(function () {
-            if (rs && rs.setCurrentTime) { try { rs.setCurrentTime(0.056); } catch (er) {} }
-            r.classList.add('dcr-run');
-        }, 625);
-    });
-    app.addEventListener('mouseout', function (e) {
-        var r = e.target.closest('.rest'); if (!r || !r._dcr || (e.relatedTarget && r.contains(e.relatedTarget))) return;
-        r._dcr = 0; clearTimeout(r._dcrT); r.classList.remove('dcr-run');
+        if (!m || m.querySelector('.dcr')) return;
+        var c = document.createElement('i');
+        c.className = m.querySelector('.cour') ? 'dcr' : 'dcr dcr--own';
+        c.setAttribute('aria-hidden', 'true');
+        c.innerHTML = deskRunSvg();
+        m.insertBefore(c, m.firstChild);
     });
     /* 24.11: навигация браузера («Назад» / «Вперёд») на десктопе: переходы на страницу заведения и между вкладками
        пишутся в history.pushState, а нажатие кнопки «Назад» в браузере (или на странице заведения) возвращает обратно */
