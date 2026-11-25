@@ -727,10 +727,9 @@ window.cleverDesk = function (A) {
         if (anim) anim.onfinish = function () { if (!homeFloatOn) { el.hidden = true; homeFloatResetStyle(); inn.getAnimations().forEach(function (a) { a.cancel(); }); } };
         else { el.hidden = true; homeFloatResetStyle(); }
     }
-    /* мощная несимметричная водная волна по контуру #cartTab с плавным, долгим затуханием (~2,3–2,7 с):
-       • верхняя и нижняя кромки живут независимо — разные частоты, ширины, скорости, фазы и перекошенные гребни;
-       • локальный всплеск в реальной точке удара + отдельные бегущие волны по верху и низу + отражённый накат
-         от противоположного края + медленное несимметричное покачивание воды (slosh) при успокоении.
+    /* жидкая несимметричная водная волна по контуру #cartTab:
+       • низкая вязкость — узкие, быстрые гребни, многократные переотражения от краёв и шустрая капиллярная рябь (3–7 Гц);
+       • верхняя и нижняя кромки живут вразнобой (свои скорости, частоты, скосы, фазы) и плавно доигрывают ~4–4,8 с.
        Сама #cartTab не трансформируется — шрифт цены сохраняет идеальную жирность */
     var DC_PADX = 12, DC_PADY = 22;
     var dcSS = function (u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
@@ -752,28 +751,28 @@ window.cleverDesk = function (A) {
         var fromRight = xi > W * .52;
         var fromBottom = yi > H * .58 || (ivy != null && ivy < -40);
         var mainDir = fromRight ? -1 : 1;
-        var A = H * .142 * R(.9, 1.14);
+        var A = H * .148 * R(.9, 1.14);
 
-        // 1. несимметричный локальный всплеск в точке входа (верх и низ на разных частотах, со сдвигом центров, звенит ~2,5–3 с)
-        var xiTop = Math.max(12, Math.min(W - 12, xi + R(-16, 8) + mainDir * R(4, 14)));
-        var xiBot = Math.max(12, Math.min(W - 12, xi + R(-8, 16)));
-        var sdTop = R(20, 31), sdBot = R(24, 35);
-        var fTop = R(1.7, 2.35), fBot = R(2.15, 3.0);
-        var tauTop = R(760, 980), tauBot = R(660, 880);
-        var topLag = fromBottom ? R(26, 54) : R(0, 22);
-        var botLag = fromBottom ? 0 : R(14, 42);
-        var topK = R(.92, 1.24), botK = fromBottom ? R(1.06, 1.32) : R(.76, 1.08);
-        var T0 = R(2700, 3300);
+        // 1. резкий, жидкий локальный всплеск в точке входа (узкий, быстрый звон 4–6,5 Гц, затухает мягко ~2,6–3,2 с)
+        var xiTop = Math.max(12, Math.min(W - 12, xi + R(-14, 8) + mainDir * R(3, 12)));
+        var xiBot = Math.max(12, Math.min(W - 12, xi + R(-8, 14)));
+        var sdTop = R(13, 21), sdBot = R(15, 23);
+        var fTop = R(4.1, 5.4), fBot = R(4.8, 6.4);
+        var tauTop = R(680, 900), tauBot = R(600, 820);
+        var topLag = fromBottom ? R(16, 36) : R(0, 14);
+        var botLag = fromBottom ? 0 : R(10, 28);
+        var topK = R(.95, 1.25), botK = fromBottom ? R(1.06, 1.32) : R(.78, 1.1);
+        var T0 = R(2600, 3200);
         var hCapSign = xi > W * .55 ? 1 : (xi < W * .45 ? -1 : 0);
-        var hCapK = hCapSign ? R(.42, .68) : R(.18, .35), fCap = R(1.7, 2.4);
+        var hCapK = hCapSign ? R(.42, .68) : R(.18, .35), fCap = R(4.0, 5.4);
         st.list.push({
             t0: now, end: T0,
             f: function (t) {
                 if (t <= 0 || t >= T0) return null;
-                var fade = 1 - dcSS((t / T0 - .72) / .28);
-                var tt = t > topLag ? fade * topK * A * dcSS((t - topLag) / 55) * Math.exp(-(t - topLag) / tauTop) * Math.cos(2 * Math.PI * fTop * (t - topLag) / 1000) : 0;
-                var bt = t > botLag ? fade * botK * A * dcSS((t - botLag) / 48) * Math.exp(-(t - botLag) / tauBot) * Math.cos(2 * Math.PI * fBot * (t - botLag) / 1000) : 0;
-                var hc = fade * hCapK * A * dcSS(t / 46) * Math.exp(-t / 620) * Math.cos(2 * Math.PI * fCap * t / 1000);
+                var fade = 1 - dcSS((t / T0 - .74) / .26);
+                var tt = t > topLag ? fade * topK * A * dcSS((t - topLag) / 28) * Math.exp(-(t - topLag) / tauTop) * Math.cos(2 * Math.PI * fTop * (t - topLag) / 1000) : 0;
+                var bt = t > botLag ? fade * botK * A * dcSS((t - botLag) / 24) * Math.exp(-(t - botLag) / tauBot) * Math.cos(2 * Math.PI * fBot * (t - botLag) / 1000) : 0;
+                var hc = fade * hCapK * A * dcSS(t / 26) * Math.exp(-t / 560) * Math.cos(2 * Math.PI * fCap * t / 1000);
                 var invT = 1 / (sdTop * sdTop), invB = 1 / (sdBot * sdBot);
                 return function (x) {
                     var dt = x - xiTop, db = x - xiBot;
@@ -787,65 +786,75 @@ window.cleverDesk = function (A) {
             }
         });
 
-        // 2. раздельные несимметричные гребни для верха и низа (разные скорости, ширины, скос и слабое несинхронное эхо на второй кромке)
-        var env = function (q) { return (q < .06 ? dcSS(q / .06) : 1 - .42 * dcSS((q - .06) / .7)) * (1 - dcSS((q - .7) / .3)); };
+        // 2. узкие, быстрые бегущие гребни + серия переотражений туда-сюда (низкая вязкость — вода, а не мёд)
+        var env = function (q) { return (q < .07 ? dcSS(q / .07) : 1 - .32 * dcSS((q - .07) / .73)) * (1 - dcSS((q - .78) / .22)); };
         var makeCrest = function (edgeIdx, d, a, sw, dur, x0, x1, skew, bleed, bleedShift, wallPush) {
             return { t0: now, end: d + dur, f: function (t) {
                 var q = (t - d) / dur; if (q <= 0 || q >= 1) return null;
-                var c = x0 + (x1 - x0) * (1 - Math.pow(1 - q, 1.52)), w = sw * (1 + .55 * q), h = a * env(q);
-                var wp = wallPush ? wallPush * Math.exp(-Math.pow((q - .26) / .14, 2)) : 0;
+                var c = x0 + (x1 - x0) * (1 - Math.pow(1 - q, 1.18)), w = sw * (1 + .24 * q), h = a * env(q);
+                var wp = wallPush ? wallPush * Math.exp(-Math.pow((q - .22) / .13, 2)) : 0;
                 return function (x) {
                     var primary = h * dcWave((x - c) / w, skew);
-                    var other = bleed ? bleed * h * dcWave((x - c + bleedShift) / (w * 1.15), 1 / skew) : 0;
+                    var other = bleed ? bleed * h * dcWave((x - c + bleedShift) / (w * 1.12), 1 / skew) : 0;
                     return edgeIdx === 0
                         ? [primary, other, 0, wp]
                         : [other, primary, wp * .5, 0];
                 };
             } };
         };
-        var sBase = Math.max(21, Math.min(35, W * .2));
+        var sBase = Math.max(12, Math.min(19, W * .115));
         var xStart = Math.max(8, Math.min(W - 8, xi));
-        var xFar = mainDir < 0 ? -30 : W + 30;
-        var xNear = mainDir < 0 ? W + 26 : -26;
-        var xBounce = mainDir < 0 ? 10 : W - 10;
+        var xFar = mainDir < 0 ? -24 : W + 24;
+        var xNear = mainDir < 0 ? W + 22 : -22;
+        var xWallFar = mainDir < 0 ? 6 : W - 6;
+        var xWallNear = mainDir < 0 ? W - 6 : 6;
 
-        // верхняя кромка: главный гребень + второй + отражение от дальнего края + второе позднее отражение
-        var tTop1 = R(2600, 3200), skTop = mainDir < 0 ? R(1.18, 1.38) : R(.72, .86);
-        st.list.push(makeCrest(0, R(0, 35), A * R(.92, 1.15), sBase * R(.86, 1.14), tTop1, xStart, xFar, skTop, R(.16, .34) * (Math.random() < .35 ? -1 : 1), R(-16, 18), A * .32));
-        st.list.push(makeCrest(0, R(220, 340), A * R(.46, .68), sBase * R(1.06, 1.32), tTop1 * R(.9, 1.08), xStart + R(-10, 10), xFar, skTop * R(.92, 1.08), R(.1, .26), R(-14, 14), 0));
-        st.list.push(makeCrest(0, R(560, 760), A * R(.36, .54), sBase * R(1.16, 1.44), R(2500, 3100), xBounce, xNear, 1 / skTop, R(.12, .28) * -1, R(-18, 18), 0));
-        st.list.push(makeCrest(0, R(1300, 1650), A * R(.18, .28), sBase * R(1.3, 1.6), R(2600, 3200), xNear - mainDir * 16, xFar, skTop * R(.9, 1.1), R(.08, .2), R(-14, 14), 0));
+        // верхняя кромка: быстрый ударный гребень + догоняющий + 4 переотражения туда-обратно
+        var tTop = R(460, 620), skTop = mainDir < 0 ? R(1.22, 1.44) : R(.68, .82);
+        st.list.push(makeCrest(0, R(0, 20), A * R(.98, 1.18), sBase * R(.82, 1.06), tTop, xStart, xFar, skTop, R(.14, .28) * (Math.random() < .35 ? -1 : 1), R(-12, 14), A * .34));
+        st.list.push(makeCrest(0, R(105, 170), A * R(.52, .74), sBase * R(.76, 1.02), tTop * R(.9, 1.08), xStart + R(-8, 8), xFar, skTop * R(.92, 1.08), R(.08, .22), R(-12, 12), 0));
+        st.list.push(makeCrest(0, R(280, 390), A * R(.48, .66), sBase * R(.92, 1.16), R(520, 680), xWallFar, xNear, 1 / skTop, R(.1, .24) * -1, R(-14, 14), 0));
+        st.list.push(makeCrest(0, R(660, 840), A * R(.36, .52), sBase * R(1.0, 1.24), R(580, 760), xWallNear, xFar, skTop * R(.9, 1.1), R(.08, .18), R(-12, 12), 0));
+        st.list.push(makeCrest(0, R(1140, 1380), A * R(.26, .4), sBase * R(1.06, 1.32), R(660, 840), xWallFar, xNear, 1 / skTop, R(.06, .16) * -1, R(-12, 12), 0));
+        st.list.push(makeCrest(0, R(1720, 2040), A * R(.19, .3), sBase * R(1.12, 1.38), R(740, 940), xWallNear, xFar, skTop * R(.9, 1.1), R(.04, .12), R(-10, 10), 0));
 
-        // нижняя кромка: собственный ритм, другая скорость, другой момент старта и независимое отражение
-        var tBot1 = tTop1 * R(.82, 1.22), skBot = mainDir < 0 ? R(1.12, 1.36) : R(.74, .88);
-        st.list.push(makeCrest(1, R(35, 115), A * R(.78, 1.12), sBase * R(.92, 1.24), tBot1, xStart + R(-12, 12), xFar, skBot, R(.14, .3) * (Math.random() < .4 ? -1 : 1), R(-18, 16), 0));
-        st.list.push(makeCrest(1, R(310, 460), A * R(.38, .62), sBase * R(1.1, 1.38), tBot1 * R(.88, 1.08), xStart + R(-8, 12), xFar, skBot, R(.08, .22), R(-16, 16), 0));
-        st.list.push(makeCrest(1, R(760, 1000), A * R(.26, .44), sBase * R(1.22, 1.52), R(2400, 3000), xBounce, xNear, 1 / skBot, R(.08, .2), R(-14, 14), 0));
-        if (Math.random() < .7) st.list.push(makeCrest(1, R(1550, 1950), A * R(.14, .24), sBase * R(1.34, 1.66), R(2300, 2900), xNear - mainDir * 20, xFar, skBot * R(.9, 1.1), R(.06, .16), R(-12, 12), 0));
+        // нижняя кромка: свой ритм, своя скорость, асинхронные переотражения
+        var tBot = tTop * R(.82, 1.18), skBot = mainDir < 0 ? R(1.16, 1.4) : R(.7, .85);
+        st.list.push(makeCrest(1, R(18, 68), A * R(.84, 1.14), sBase * R(.86, 1.12), tBot, xStart + R(-10, 10), xFar, skBot, R(.12, .26) * (Math.random() < .4 ? -1 : 1), R(-14, 12), 0));
+        st.list.push(makeCrest(1, R(145, 230), A * R(.46, .66), sBase * R(.8, 1.08), tBot * R(.88, 1.08), xStart + R(-8, 10), xFar, skBot, R(.08, .2), R(-12, 12), 0));
+        st.list.push(makeCrest(1, R(360, 500), A * R(.38, .56), sBase * R(.96, 1.22), R(540, 700), xWallFar, xNear, 1 / skBot, R(.08, .2), R(-12, 12), 0));
+        st.list.push(makeCrest(1, R(820, 1040), A * R(.28, .44), sBase * R(1.04, 1.28), R(640, 820), xWallNear, xFar, skBot * R(.9, 1.1), R(.06, .16), R(-12, 12), 0));
+        st.list.push(makeCrest(1, R(1400, 1700), A * R(.2, .32), sBase * R(1.1, 1.36), R(720, 920), xWallFar, xNear, 1 / skBot, R(.04, .12), R(-10, 10), 0));
 
-        // если удар пришёлся ближе к центру снизу — дополнительная волна в обратную (правую) сторону
+        // если удар пришёлся ближе к центру — быстрый встречный гребень в обратную сторону
         if (xi < W * .78) {
-            st.list.push(makeCrest(Math.random() < .5 ? 0 : 1, R(20, 75), A * R(.52, .78), sBase * R(.82, 1.08), R(2200, 2700), xStart, xNear, R(.74, .88), R(.15, .32), R(-10, 12), 0));
+            st.list.push(makeCrest(Math.random() < .5 ? 0 : 1, R(10, 44), A * R(.56, .82), sBase * R(.76, 1.0), R(420, 560), xStart, xNear, R(.7, .86), R(.12, .28), R(-8, 10), 0));
         }
 
-        // 3. медленное несимметричное покачивание воды (slosh) — долго и мягко стихает (~5 с)
-        var tSlosh = R(4800, 5600), tauS = R(1700, 2100);
-        var fS1 = R(1.0, 1.35), fS2 = R(1.45, 1.95), ph1 = R(0, 6.28), ph2 = R(0, 6.28);
-        var aS1 = A * R(.3, .42), aS2 = A * R(.26, .38);
+        // 3. живая быстрая рябь + несимметричный плеск (slosh 2,8–5,4 Гц + капиллярная рябь 6,5–8,5 Гц) — долго и легко доигрывает (~4,2–5 с)
+        var tSlosh = R(4200, 5000), tauS = R(1700, 2100), tauRip = R(1150, 1450);
+        var fS1 = R(2.8, 3.6), fS2 = R(4.2, 5.4), fRip = R(6.5, 8.5);
+        var ph1 = R(0, 6.28), ph2 = R(0, 6.28), ph3 = R(0, 6.28);
+        var aS1 = A * R(.34, .46), aS2 = A * R(.3, .42), aRip = A * R(.2, .29);
         var dirS = Math.random() < .5 ? 1 : -1;
         st.list.push({
             t0: now, end: tSlosh,
             f: function (t) {
                 if (t <= 0 || t >= tSlosh) return null;
                 var q = t / tSlosh;
-                var dec = dcSS(t / 140) * Math.exp(-t / tauS) * (1 - dcSS((q - .7) / .3));
+                var fade = 1 - dcSS((q - .74) / .26);
+                var dec = dcSS(t / 70) * Math.exp(-t / tauS) * fade;
+                var decR = dcSS(t / 45) * Math.exp(-t / tauRip) * fade;
                 var om1 = 2 * Math.PI * fS1 * t / 1000 + ph1;
                 var om2 = 2 * Math.PI * fS2 * t / 1000 + ph2;
+                var om3 = 2 * Math.PI * fRip * t / 1000 + ph3;
                 return function (x) {
                     var u = x / W;
-                    // наклонная стоячая + бегущая гармоника, верх и низ вразнобой — абсолютно живая асимметрия
-                    var sTop = dec * aS1 * (Math.sin(Math.PI * (u * 1.35 + .15) + dirS * om1) * .68 + Math.sin(Math.PI * (u * 2.2) - om2) * .32);
-                    var sBot = dec * aS2 * (Math.sin(Math.PI * (u * 1.15 + .45) - dirS * om2) * .64 + Math.sin(Math.PI * (u * 1.95) + om1) * .36);
+                    // разнофазные бегущие моды + быстрая мелкая капиллярная рябь — верх и низ несимметричны
+                    var sTop = dec * aS1 * (Math.sin(Math.PI * (u * 1.85 + .12) + dirS * om1) * .62 + Math.sin(Math.PI * (u * 2.95) - om2) * .38)
+                        + decR * aRip * Math.sin(Math.PI * (u * 4.4) - dirS * om3);
+                    var sBot = dec * aS2 * (Math.sin(Math.PI * (u * 1.65 + .48) - dirS * om2) * .6 + Math.sin(Math.PI * (u * 2.65) + om1) * .4)
+                        + decR * aRip * Math.sin(Math.PI * (u * 4.9 + .9) + dirS * om3 * 1.12);
                     return [sTop, sBot, 0, 0];
                 };
             }
@@ -862,8 +871,8 @@ window.cleverDesk = function (A) {
         var ringCol = getComputedStyle(ct).getPropertyValue('--cta-ring-c');
         var ringOn = !/^\s*$|transparent|rgba\(0, 0, 0, 0\)/.test(ringCol);
         var W = ct.offsetWidth, H = ct.offsetHeight, R0 = Math.min(H / 2, parseFloat(getComputedStyle(ct).borderTopLeftRadius) || 16), E = Math.max(0, W - 2 * R0);
-        // точки [x, y, ny, nx] — nx позволяет торцам мягко дышать при ударе и отражении волны
-        var pts = [], i, a, nx = Math.max(2, Math.round(E / 3)), nc = 14;
+        // точки [x, y, ny, nx] — плотный шаг E/2.4 гладко передаёт узкие быстрые гребни и капиллярную рябь
+        var pts = [], i, a, nx = Math.max(2, Math.round(E / 2.4)), nc = 14;
         for (i = 0; i <= nx; i++) pts.push([R0 + E * i / nx, 0, -1, 0]);
         for (i = 1; i <= nc; i++) { a = -Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
         for (i = 1; i <= nc; i++) { a = Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
