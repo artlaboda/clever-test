@@ -85,62 +85,76 @@ html.desk #cartTab.has-sum { gap: 20px; }
 html.desk #cartTab .tab__badge { position: absolute; left: 31px; right: auto; top: 4px; margin: 0; min-width: 18px; height: 18px; padding: 0 5px;
     font: 750 10.5px/18px var(--font); box-shadow: 0 0 0 2px var(--cta); }
 html.desk #cartTab > span:last-child { white-space: nowrap; }
-/* 25.11: плавающая круглая корзина на главной (.dfcart) в правом верхнем углу — при добавлении со скроллом
-   ловит комету, при прокрутке вниз с товарами появляется фейд-ином, при возврате вверх как капля к магниту летит в #cartTab */
+/* 25.11: плавающая круглая корзина на главной (.dfcart) — при подъезде вверх .dfcart__drop вытягивается в каплю
+   носиком к #cartTab и влетает в неё; на #cartTab пробегает волна (.dcart-wave) и крошечные брызги (.dcart-splash) */
 html.desk .dfcart {
     position: absolute; top: 22px; right: 24px; z-index: 9;
-    width: 58px; height: 58px; padding: 0; border: 0; border-radius: 29px;
+    width: 58px; height: 58px; padding: 0; border: 0;
     background: none; color: var(--on-cta);
     transition: opacity .22s ease;
-    will-change: transform, left, top, width, height, border-radius;
+    will-change: transform, left, top, opacity;
 }
 html.desk .dfcart[hidden] { display: none; }
 html.desk .app[data-dtop="drawer"] .dfcart { opacity: 0; pointer-events: none; }
 html.desk .dfcart__in {
-    position: relative; display: block; width: 100%; height: 100%; border-radius: inherit;
-    background: var(--cta); color: var(--on-cta); overflow: visible; --p: 0;
-    box-shadow: var(--cta-ring, 0 0 #0000), 0 14px 30px -8px rgba(20, 12, 8, .45), 0 4px 12px -4px rgba(20, 12, 8, .22);
-    transition: transform .24s var(--dease), box-shadow .24s var(--dease);
+    position: relative; display: block; width: 100%; height: 100%;
+    transition: transform .24s var(--dease);
 }
-html.desk .dfcart:not(.is-morphing):hover .dfcart__in {
-    transform: scale(1.07);
-    box-shadow: var(--cta-ring, 0 0 #0000), 0 18px 36px -8px rgba(20, 12, 8, .55), 0 6px 14px -4px rgba(20, 12, 8, .28);
-}
+html.desk .dfcart:not(.is-morphing):hover .dfcart__in { transform: scale(1.07); }
 html.desk .dfcart:not(.is-morphing):active .dfcart__in { transform: scale(.94); }
 html.desk .dfcart.is-morphing { pointer-events: none; transition: none; }
-html.desk .dfcart.is-morphing .dfcart__in {
-    box-shadow: var(--cta-ring, 0 0 #0000), 0 calc((1 - var(--p)) * 14px) calc((1 - var(--p)) * 30px) -8px rgba(20, 12, 8, calc((1 - var(--p)) * .45));
+html.desk .dfcart__drop {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: var(--cta);
+    box-shadow: var(--cta-ring, 0 0 #0000), 0 14px 30px -8px rgba(20, 12, 8, .45), 0 4px 12px -4px rgba(20, 12, 8, .22);
+    transition: box-shadow .24s var(--dease);
+    will-change: transform, border-radius;
+}
+html.desk .dfcart:not(.is-morphing):hover .dfcart__drop {
+    box-shadow: var(--cta-ring, 0 0 #0000), 0 18px 36px -8px rgba(20, 12, 8, .55), 0 6px 14px -4px rgba(20, 12, 8, .28);
 }
 html.desk .dfcart__ring {
-    position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0;
+    position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: 0;
     box-shadow: inset 0 0 0 2px var(--brand), 0 0 0 2px rgba(255, 59, 59, .55);
 }
 html.desk .dfcart__bag {
-    position: absolute; left: 50%; top: 50%; translate: -50% -50%;
-    width: 25px; height: 25px; display: grid; place-items: center;
+    position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 1;
+    width: 25px; height: 25px; display: grid; place-items: center; color: var(--on-cta);
 }
 html.desk .dfcart__bag svg.i { width: 25px; height: 25px; }
 html.desk .dfcart__n {
-    position: absolute; left: 33px; top: 8px;
+    position: absolute; left: 33px; top: 8px; z-index: 2;
     min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box; border-radius: 999px;
     background: var(--brand); color: #fff; font: 750 10.5px/18px var(--font); text-align: center;
     box-shadow: 0 0 0 2px var(--cta); pointer-events: none;
-    transition: opacity .15s ease;
 }
-html.desk .dfcart.is-morphing .dfcart__n { opacity: calc(1 - var(--p) * 1.4); }
 html.desk .dfcart__n[hidden] { display: none; }
-html.desk[data-theme="dark"] .dfcart__in {
+/* внутренняя волна воды и брызги на #cartTab при влёте капли */
+html.desk .dcart-wave {
+    position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; z-index: 3;
+}
+html.desk .dcart-wave__s {
+    position: absolute; top: -18%; bottom: -18%; left: 0; width: 68%; display: block;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .2) 48%, rgba(255, 255, 255, .06) 72%, transparent 100%);
+    will-change: transform, opacity;
+}
+html.desk .dcart-splash {
+    position: absolute; z-index: 9; border-radius: 50%; pointer-events: none;
+    background: var(--cta); box-shadow: var(--cta-ring, 0 0 #0000);
+    will-change: transform, opacity;
+}
+html.desk[data-theme="dark"] .dfcart__drop {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 16px 36px -8px rgba(0, 0, 0, .75), 0 2px 10px rgba(0, 0, 0, .45);
 }
-html.desk[data-theme="dark"] .dfcart.is-morphing .dfcart__in {
-    box-shadow: var(--cta-ring, inset 0 0 0 1px rgba(255, 255, 255, .16)), 0 calc((1 - var(--p)) * 16px) calc((1 - var(--p)) * 36px) -8px rgba(0, 0, 0, calc((1 - var(--p)) * .75));
+html.desk[data-theme="dark"] .dcart-wave__s {
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .16) 48%, rgba(255, 255, 255, .04) 72%, transparent 100%);
 }
 @media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) .dfcart__in {
+    html.desk:not([data-theme="light"]) .dfcart__drop {
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 16px 36px -8px rgba(0, 0, 0, .75), 0 2px 10px rgba(0, 0, 0, .45);
     }
-    html.desk:not([data-theme="light"]) .dfcart.is-morphing .dfcart__in {
-        box-shadow: var(--cta-ring, inset 0 0 0 1px rgba(255, 255, 255, .16)), 0 calc((1 - var(--p)) * 16px) calc((1 - var(--p)) * 36px) -8px rgba(0, 0, 0, calc((1 - var(--p)) * .75));
+    html.desk:not([data-theme="light"]) .dcart-wave__s {
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .16) 48%, rgba(255, 255, 255, .04) 72%, transparent 100%);
     }
 }
 /* окно входа на десктопе: цифры номера, кода и «Отправили на …» — обычные, без разрядки (12.11: «сделай обычные цифры без
