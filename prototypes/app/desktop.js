@@ -1136,65 +1136,77 @@ window.cleverDesk = function (A) {
             st.raf = requestAnimationFrame(tick);
         })(now);
     }
-    /* летящая капля — струна: голова впереди, хвост повторяет реальную траекторию за последние tailMs мс и сужается
-       в нить; чем длиннее струна, тем меньше голова (масса сохраняется). На старте (L ≈ 0) плавно сохраняет носик nosePull */
-    function homeDropStringRender(path, hist, cx, cy, now, tailMs, tailMax, R0, ang, ph, nosePull) {
+    /* летящая капля — струна: на старте (extraL = 0) задняя половина — точный полукруг радиуса R0 (целая круглая плашка),
+       по мере разгона плавно морфится из полукруга sqrt(1−u²) в тонкую нить (1−u)^1.85 с сохранением массы */
+    function homeDropStringRender(path, hist, cx, cy, now, tailMs, tailMax, R0, ang, ph, nosePull, minBack) {
         if (!path) return '';
         var cut = now - tailMs, raw = [[cx, cy]], i, k;
         for (i = hist.length - 2; i >= 0; i--) {
             var h = hist[i], nx = hist[i + 1];
             if (h.t >= cut) { raw.push([h.x, h.y]); continue; }
-            var f = (nx.t - cut) / Math.max(1, nx.t - h.t);   // точка ровно на границе окна — хвост растёт плавно, без скачков
+            var f = (nx.t - cut) / Math.max(1, nx.t - h.t);
             raw.push([nx.x + (h.x - nx.x) * f, nx.y + (h.y - nx.y) * f]);
             break;
         }
-        // равномерно по длине, не длиннее tailMax
         var acc = [0];
         for (i = 1; i < raw.length; i++) acc.push(acc[i - 1] + Math.hypot(raw[i][0] - raw[i - 1][0], raw[i][1] - raw[i - 1][1]));
-        var L = Math.min(tailMax, acc[acc.length - 1]);
-        var rH = Math.max(R0 * .36, R0 / Math.sqrt(1 + L / (1.25 * 29)));
-        var noseKeep = (nosePull || 0) * Math.max(0, 1 - L / 40);
-        var toLoc = function (x, y) { return [x - cx + 29, y - cy + 29]; };
-        var pts = [], t = now * .001;
-        if (L < 2) {
-            // пока капля только тронулась — сохраняем точно ту же форму с носиком, что была у .dfcart на подлёте
-            for (i = 0; i < 36; i++) {
-                var a0 = i / 36 * Math.PI * 2, da0 = a0 - ang;
-                while (da0 > Math.PI) da0 -= Math.PI * 2;
-                while (da0 < -Math.PI) da0 += Math.PI * 2;
-                var n0 = noseKeep * 13.5 * Math.exp(-(da0 * da0) / .29);
-                var p0r = -noseKeep * 3.2 * Math.sin(da0) * Math.sin(da0);
-                var r0 = Math.max(6, rH + n0 + p0r + .9 * Math.sin(3 * a0 - t * 9 + ph));
-                pts.push(toLoc(cx + Math.cos(a0) * r0, cy + Math.sin(a0) * r0));
+        var Lraw = acc[acc.length - 1], minL = minBack != null ? minBack : R0;
+        // пока кончик хвоста короче minL (на первых кадрах), дотягиваем ось до задней кромки плашки — задняя половина не срезается
+        if (Lraw < minL) {
+            var bdx, bdy;
+            if (raw.length >= 2 && Lraw > .5) {
+                var last = raw[raw.length - 1], prev = raw[raw.length - 2];
+                bdx = last[0] - prev[0]; bdy = last[1] - prev[1];
+                var bl = Math.hypot(bdx, bdy) || 1; bdx /= bl; bdy /= bl;
+            } else {
+                bdx = -Math.cos(ang); bdy = -Math.sin(ang);
             }
-        } else {
-            var N = 16, sp = [];
-            for (i = 0, k = 1; i < N; i++) {
-                var s = L * i / (N - 1);
-                while (k < acc.length - 1 && acc[k] < s) k++;
-                var seg = acc[k] - acc[k - 1] || 1, q = Math.max(0, Math.min(1, (s - acc[k - 1]) / seg));
-                sp.push([raw[k - 1][0] + (raw[k][0] - raw[k - 1][0]) * q, raw[k - 1][1] + (raw[k][1] - raw[k - 1][1]) * q]);
-            }
-            var hdx = sp[0][0] - sp[1][0], hdy = sp[0][1] - sp[1][1];
-            var hAng = Math.hypot(hdx, hdy) > .5 ? Math.atan2(hdy, hdx) : ang;
-            // голова: полукруг вперёд по движению (на старте плавно доигрывает остаток носика noseKeep)
-            for (i = 0; i <= 10; i++) {
-                var a = hAng + Math.PI / 2 - Math.PI * i / 10, da = a - hAng, fr = Math.cos(da);
-                var nH = noseKeep * 13.5 * Math.exp(-(da * da) / .29);
-                var r = rH * (1 - .08 * Math.max(0, fr) * Math.min(1, L / 60)) + nH + .9 * Math.sin(3 * a - t * 9 + ph);
-                pts.push(toLoc(cx + Math.cos(a) * r, cy + Math.sin(a) * r));
-            }
-            var side = function (j, sign) {
-                var p = sp[j], a1 = sp[Math.max(0, j - 1)], b1 = sp[Math.min(N - 1, j + 1)];
-                var ta = Math.atan2(a1[1] - b1[1], a1[0] - b1[0]), u = j / (N - 1);
-                var w = Math.max(.85, rH * Math.pow(1 - u, 1.85)) * (1 + .15 * u * Math.sin(u * 11 - t * 14 + ph + (sign > 0 ? 0 : 1.7)));
-                var na = ta + sign * Math.PI / 2;
-                return toLoc(p[0] + Math.cos(na) * w, p[1] + Math.sin(na) * w);
-            };
-            for (i = 1; i < N - 1; i++) pts.push(side(i, -1));
-            pts.push(toLoc(sp[N - 1][0], sp[N - 1][1]));
-            for (i = N - 2; i >= 1; i--) pts.push(side(i, 1));
+            var end = raw[raw.length - 1];
+            raw.push([end[0] + bdx * (minL - Lraw), end[1] + bdy * (minL - Lraw)]);
+            acc.push(minL);
+            Lraw = minL;
         }
+        var ss = function (u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+        var L = Math.min(tailMax, Lraw);
+        var extraL = Math.max(0, L - R0);
+        var rH = Math.max(R0 * .38, R0 / Math.sqrt(1 + extraL / (1.35 * 29)));
+        var stretch = ss(extraL / 68);
+        var noseKeep = (nosePull || 0) * (1 - ss(extraL / 44));
+        var toLoc = function (x, y) { return [x - cx + 29, y - cy + 29]; };
+        var pts = [], t = now * .001, N = 16, sp = [];
+        for (i = 0, k = 1; i < N; i++) {
+            var s = L * i / (N - 1);
+            while (k < acc.length - 1 && acc[k] < s) k++;
+            var seg = acc[k] - acc[k - 1] || 1, q = Math.max(0, Math.min(1, (s - acc[k - 1]) / seg));
+            sp.push([raw[k - 1][0] + (raw[k][0] - raw[k - 1][0]) * q, raw[k - 1][1] + (raw[k][1] - raw[k - 1][1]) * q]);
+        }
+        var hdx = sp[0][0] - sp[1][0], hdy = sp[0][1] - sp[1][1];
+        var hAng = Math.hypot(hdx, hdy) > .5 ? Math.atan2(hdy, hdx) : ang;
+        // передняя полуокружность головы (с плавно уходящим носиком noseKeep)
+        for (i = 0; i <= 10; i++) {
+            var a = hAng + Math.PI / 2 - Math.PI * i / 10, da = a - hAng, fr = Math.cos(da);
+            var nH = noseKeep * 13.5 * Math.exp(-(da * da) / .29);
+            var pH = -noseKeep * 3.2 * Math.sin(da) * Math.sin(da);
+            var wHead = (.35 + .55 * stretch) * Math.sin(3 * a - t * 9 + ph);
+            var r = Math.max(2, rH * (1 - .07 * stretch * Math.max(0, fr)) + nH + pH + wHead);
+            pts.push(toLoc(cx + Math.cos(a) * r, cy + Math.sin(a) * r));
+        }
+        // задняя часть: плавный морф от полукруга sqrt(1−u²) к тонкой струне (1−u)^1.85 с тем же pinch на экваторе
+        var side = function (j, sign) {
+            var p = sp[j], a1 = sp[Math.max(0, j - 1)], b1 = sp[Math.min(N - 1, j + 1)];
+            var ta = Math.atan2(a1[1] - b1[1], a1[0] - b1[0]), u = j / (N - 1);
+            var circ = Math.sqrt(Math.max(0, 1 - u * u));
+            var str = Math.pow(1 - u, 1.85);
+            var prof = circ * (1 - stretch) + str * stretch;
+            var wob = 1 + .14 * stretch * u * Math.sin(u * 11 - t * 14 + ph + (sign > 0 ? 0 : 1.7));
+            var rSide = Math.max(2, rH - noseKeep * 3.2 * (1 - u));
+            var w = Math.max(.7 * stretch, rSide * prof) * wob;
+            var na = ta + sign * Math.PI / 2;
+            return toLoc(p[0] + Math.cos(na) * w, p[1] + Math.sin(na) * w);
+        };
+        for (i = 1; i < N - 1; i++) pts.push(side(i, -1));
+        pts.push(toLoc(sp[N - 1][0], sp[N - 1][1]));
+        for (i = N - 2; i >= 1; i--) pts.push(side(i, 1));
         var M = pts.length, d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
         for (var j = 0; j < M; j++) {
             var p0 = pts[(j - 1 + M) % M], p1 = pts[j], p2 = pts[(j + 1) % M], p3 = pts[(j + 2) % M];
@@ -1233,9 +1245,14 @@ window.cleverDesk = function (A) {
         var dist0 = Math.hypot(p2x0 - p0x, p2y0 - p0y) || 1;
         var bend = R(10, 26) * (Math.random() < .5 ? 1 : -1);
         var t0 = performance.now(), D = Math.min(430, Math.max(240, 200 + dist0 * .42)), DRAIN = 150;
-        var tailMs = 150, tailMax = Math.max(46, Math.min(280, dist0 * .85)), ph = R(0, 6.28);
-        var hist = [{ x: p0x, y: p0y, t: t0 }];
-        var absorbed = false, uHit = 1, lastAng = Math.atan2(p2y0 - p0y, p2x0 - p0x);
+        var tailMs = 165, tailMax = Math.max(46, Math.min(280, dist0 * .85)), ph = R(0, 6.28);
+        var initAng = pull0 > .05 ? ang0 : Math.atan2(p2y0 - p0y, p2x0 - p0x);
+        // кладём в историю заднюю кромку самой плашки (−29 px): хвост рождается прямо из её спины без отрезания
+        var hist = [
+            { x: p0x - Math.cos(initAng) * 29, y: p0y - Math.sin(initAng) * 29, t: t0 - 115 },
+            { x: p0x, y: p0y, t: t0 }
+        ];
+        var absorbed = false, uHit = 1, lastAng = initAng;
         var fly = null, flyPath = null;
         homeFloatRaf = requestAnimationFrame(function step(now) {
             if (!homeFloatDocking || !ct.isConnected) return;
@@ -1247,15 +1264,15 @@ window.cleverDesk = function (A) {
             var p1x = (p0x + p2x) * .5 + (-ddy / dist) * bend;
             var p1y = (p0y + p2y) * .5 + (ddx / dist) * bend;
             var tt = now - t0, u = Math.min(1, tt / D);
-            // мягкий ненулевой старт: плашка трогается сразу с первого кадра и тянет за собой хвост
-            var e = .2 * u + .8 * Math.pow(u, 1.85), ie = 1 - e;
+            // мягкий ненулевой старт: плашка трогается сразу с первого кадра и сама вытягивается в комету
+            var e = .16 * u + .84 * Math.pow(u, 1.85), ie = 1 - e;
             var cx = u < 1 ? (ie * ie * p0x + 2 * ie * e * p1x + e * e * p2x) : p2x;
             var cy = u < 1 ? (ie * ie * p0y + 2 * ie * e * p1y + e * e * p2y) : p2y;
             var vx = 2 * ie * (p1x - p0x) + 2 * e * (p2x - p1x);
             var vy = 2 * ie * (p1y - p0y) + 2 * e * (p2y - p1y);
             if (u < 1) lastAng = Math.atan2(vy, vx);
             hist.push({ x: cx, y: cy, t: now });
-            while (hist.length > 2 && hist[0].t < now - 260) hist.shift();
+            while (hist.length > 2 && hist[0].t < now - 280) hist.shift();
             // локальные координаты головы относительно #cartTab для точного касания любой кромки
             var relX = cx - offX, relY = cy - offY;
             var clX = Math.max(0, Math.min(tw, relX)), clY = Math.max(0, Math.min(th, relY));
@@ -1286,7 +1303,7 @@ window.cleverDesk = function (A) {
                 el.style.left = (cx - 29).toFixed(1) + 'px';
                 el.style.top = (cy - 29).toFixed(1) + 'px';
             }
-            homeDropStringRender(activePath, hist, cx, cy, now, tailMs, tailMax, 29 * sc, lastAng, ph, pull0);
+            homeDropStringRender(activePath, hist, cx, cy, now, tailMs, tailMax, 29 * sc, lastAng, ph, pull0, 29 * sc * (1 - inP));
             if (!absorbed) {
                 if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 2.6));
                 if (cnt) cnt.style.opacity = String(Math.max(0, 1 - u * 3));
