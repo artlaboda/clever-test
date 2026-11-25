@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '25.11 · 20:02';
+    var BUILD = '25.11 · 20:07';
 
     /* ── состояние ── */
     var S = {
@@ -20279,17 +20279,21 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
        16 px с той стороны, где её вкладка в таб-баре (правее — справа, левее — слева). Вернулись на ту же вкладку из открытого
        поверх экрана (ресторан, корзина) — проявляется слева, как «назад». Только сдвиг и прозрачность (композитор) */
     var tabPg = null;
-    function tabPageFx(prev, tab) {
+    function tabPageFx(prev, tab, dirOv) {
         if (tabPg) tabPg();   // прежний переход — сразу в конец
         var to = document.getElementById('s-' + tab), from = prev && prev !== tab ? document.getElementById('s-' + prev) : null;
         if (fxOff() || !to || !to.animate) return;
         var ord = [].map.call(document.querySelectorAll('#tabbar .tab'), function (b) { return b.dataset.tab; }), ix = function (k) { return ord.indexOf(k === 'orders' ? 'profile' : k); };
-        var dir = from && ix(tab) > ix(prev) ? 1 : -1, a2 = null, capEnd = tabCapFx(from, to, dir);
-        if (from) { from.classList.add('is-tabout'); a2 = from.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: (-dir * 10) + 'px 0' }], { duration: 150, easing: 'ease-out', fill: 'forwards' }); }
+        var dir = dirOv || (tab === 'rest' ? 1 : prev === 'rest' ? -1 : (from && ix(tab) > ix(prev) ? 1 : -1)), a2 = null, capEnd = tabCapFx(from, to, dir);
+        if (from) {
+            if (!from.classList.contains('is-tab') && !from.classList.contains('is-on')) from.style.zIndex = '';
+            from.classList.add('is-tabout');
+            a2 = from.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: (-dir * 10) + 'px 0' }], { duration: 150, easing: 'ease-out', fill: 'forwards' });
+        }
         var a1 = to.animate([{ opacity: 0, translate: (dir * 16) + 'px 0' }, { opacity: 1, translate: '0 0' }], { duration: 300, easing: 'cubic-bezier(.2, .8, .2, 1)' });
         var done = function () {
             if (tabPg !== done) return; tabPg = null; if (capEnd) capEnd();
-            if (from && !from.classList.contains('is-tab')) { from.style.transition = 'none'; requestAnimationFrame(function () { requestAnimationFrame(function () { from.style.transition = ''; }); }); }   // погасшая корзина — сразу прячется, без отъезда вправо
+            if (from && !from.classList.contains('is-tab')) { from.style.transition = 'none'; requestAnimationFrame(function () { requestAnimationFrame(function () { from.style.transition = ''; }); }); }   // погасшая корзина/витрина — сразу прячется, без отъезда вправо
             if (from) from.classList.remove('is-tabout'); if (a2) a2.cancel(); a1.cancel();
         };
         tabPg = done; a1.onfinish = done;
@@ -20367,11 +20371,12 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         el.style.zIndex = String(10 + Math.min(S.stack.length, 15));
         var sc = el.querySelector('.scroll'); if (sc) sc.scrollTop = 0;
         el._tabLike = arg === 'tab';
-        if (deskPage) {   // 25.11: на вебе страница заведения открывается как страница сайта — без мобильного выезда справа
+        if (deskPage) {   // 25.11: на вебе страница заведения открывается лёгким веб-переходом (tabPageFx), без мобильного выезда справа
             under.classList.add('is-under');
             el.style.transition = ''; el.style.transform = ''; el.style.visibility = '';
             el.classList.add('is-on');
             syncChrome();
+            tabPageFx(prev || S.tab, id, 1);
             return;
         }
         if (arg === 'tab') {   // 16.11: пустая корзина из таб-бара — как вкладка: на месте сразу, проявляется эффектом смены вкладки
@@ -20502,7 +20507,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         var prev = S.stack[S.stack.length - 1];
         var under = document.getElementById('s-' + (prev || S.tab));
         var bar = document.getElementById('cartbar');   // плашка заказа: с витрины уходит вместе с ней; из корзины на витрину — появляется
-        if (!(deskOn() && id === 'rest')) backMark([el, under, prev ? null : document.getElementById('tabbar'), bar.classList.contains('is-hidden') && id !== 'cart' ? null : bar]);
+        var deskPageBack = deskOn() && id === 'rest';
+        if (!deskPageBack) backMark([el, under, prev ? null : document.getElementById('tabbar'), bar.classList.contains('is-hidden') && id !== 'cart' ? null : bar]);
         el.classList.remove('is-on');
         under.classList.remove('is-under');
         // экран под уходящим — как был: меняем только то, что поменялось (soft). Пересборка здесь — это работа в первом кадре
@@ -20513,6 +20519,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         if (!prev && S.tab === 'orders') renderOrders(true);
         if (!prev && S.tab === 'fav') renderFav(true);
         syncChrome();
+        if (deskPageBack) tabPageFx(id, prev || S.tab, -1);
     }
     /* «назад»: у уходящего экрана, того, что под ним, и таб-бара — на время движения класс is-back: своя кривая и длительность
        (CSS, Варианты → «Назад»). Снимаем по таймеру; открыли экран вперёд, сменили вкладку — сразу (backClear) */
@@ -21063,7 +21070,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         if (t.classList.contains('tab')) {
             tabFx(t);   // эффект значка — из «Вариантов» (07.11)
             if (deskOn() && Desk && t.dataset.tab === 'cart') { Desk.cartToggle(); return; }   // десктоп: корзина — панель справа поверх страницы
-            var hadStack = S.stack.length, cTab = hadStack === 1 && S.stack[0] === 'cart' && document.getElementById('s-cart')._tabLike;
+            var hadStack = S.stack.length, cTab = hadStack === 1 && S.stack[0] === 'cart' && document.getElementById('s-cart')._tabLike, rTab = deskOn() && S.stack.indexOf('rest') >= 0;
             /* 16.11 (видео с iPhone): «Почему-то когда тапаю на иконку «Мой заказ», на какую-то миллисекунду вижу совершенно другой таб —
                избранное. А потом уже Мой заказ». Пустая корзина открыта «как вкладка» поверх прежней вкладки; касание «Мой заказ»
                сбрасывало стопку (корзина пропадала) и открывало её снова эффектом смены вкладки — с гаснущей прежней вкладкой.
@@ -21075,7 +21082,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
             }
             resetStack();
             if (t.dataset.tab === 'cart') { syncChrome(); pushScreen('cart', S.cart.length || deskOn() ? undefined : 'tab'); return; }
-            setTab(t.dataset.tab, hadStack ? 2 : 1, cTab ? 'cart' : null); return;
+            setTab(t.dataset.tab, hadStack ? 2 : 1, cTab ? 'cart' : rTab ? 'rest' : null); return;
         }
         var act = t.dataset.act, id = t.dataset.id;
         switch (act) {
@@ -21090,8 +21097,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
             case 'back': popScreen(); break;
             case 'desk-close': if (Desk) Desk.close(); break;
             // шапка десктопа: логотип — на главную, поле — в поиск с курсором (без data-tab: по нему ищут вкладки таб-бара)
-            case 'desk-home': { var dhs = S.stack.length; resetStack(); setTab('home', dhs ? 2 : 1); break; }
-            case 'desk-search': { var dss = S.stack.length; resetStack(); setTab('search', dss ? 2 : 1); var dsi = document.getElementById('searchInput'); if (dsi) kbFocus(dsi); break; }
+            case 'desk-home': { var dhs = S.stack.length, dhf = S.stack.indexOf('rest') >= 0 ? 'rest' : null; resetStack(); setTab('home', dhs ? 2 : 1, dhf); break; }
+            case 'desk-search': { var dss = S.stack.length, dsf = S.stack.indexOf('rest') >= 0 ? 'rest' : null; resetStack(); setTab('search', dss ? 2 : 1, dsf); var dsi = document.getElementById('searchInput'); if (dsi) kbFocus(dsi); break; }
             case 'open-cart': pushScreen('cart'); break;
             case 'open-dish': dishFrom = t; openSheet('dish', { id: id, rest: t.dataset.rest }); break;
             case 'cart-edit': cartEditOpen(t); break;   // корзина: фото строки — шторка блюда этой строки (17.11)
