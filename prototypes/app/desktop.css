@@ -190,6 +190,9 @@ html.desk .rest:hover .rest__pic img { transform: scale(1.025); }
 html.desk .rest__meta .dcr { display: none; position: relative; width: 19px; height: 19px; margin: -1px 4px -1px -1px; color: var(--ink); flex: none; overflow: visible; }
 html.desk .rest__meta .dcr > i { position: absolute; inset: 0; display: block; width: 100%; height: 100%; opacity: 0; transition: opacity .14s ease; }
 html.desk .rest__meta .dcr svg { display: block; width: 100%; height: 100%; overflow: visible; }
+html.desk .rest__meta .dcr:not(.dcr--own) [data-part="bag"] { fill: var(--brand); }
+html.desk .rest__meta .dcr--own [data-part="bag"] { fill: currentColor; }
+html.desk .rest__meta .dcr--own [data-part="logo"] { display: none; }
 html.desk .rest:not(.dcr-run) .dcr-w, html.desk .rest.dcr-run .dcr-r { opacity: 1; }
 html.desk .rest:hover .rest__meta .dcr { display: block; }
 html.desk .rest:hover .rest__meta > span:first-child > svg.i, html.desk .rest:hover .rest__meta > span:first-child > .cour { display: none; }

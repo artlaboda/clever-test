@@ -386,7 +386,7 @@ window.cleverDesk = function (A) {
         r._dcr = 1;
         var c = m.querySelector('.dcr');
         if (!c) {
-            c = document.createElement('i'); c.className = 'dcr'; c.setAttribute('aria-hidden', 'true');
+            c = document.createElement('i'); c.className = m.querySelector('.cour') ? 'dcr' : 'dcr dcr--own'; c.setAttribute('aria-hidden', 'true');
             c.innerHTML = '<i class="dcr-w">' + A.crGame('walk', { bag: 'red' }) + '</i><i class="dcr-r">' + deskRunSvg() + '</i>';
             m.insertBefore(c, m.firstChild);
         }
