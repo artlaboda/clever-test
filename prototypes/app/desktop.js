@@ -853,6 +853,111 @@ window.cleverDesk = function (A) {
 
         if (!st.raf) homeCartWaterRun(ct);
     }
+    /* iOS smooth corners (continuous corners, сглаживание 60% — ровно по алгоритму Figma / Apple HIG, как в index.html):
+       используем тот же контур и в статическом ободке тёмной темы, и как базовую форму во время волны — без скачка углов */
+    var DC_SQ_SMOOTH = .6, DC_CART_R = 15;
+    function dcSqCorner(r, bud) {
+        r = Math.min(r, bud);
+        var s = Math.max(0, Math.min(DC_SQ_SMOOTH, bud / r - 1)), p = Math.min((1 + s) * r, bud);
+        var arc = 90 * (1 - s), L = Math.sin(arc / 2 * Math.PI / 180) * r * Math.SQRT2;
+        var al = (90 - arc) / 2, p34 = r * Math.tan(al / 2 * Math.PI / 180), be = 45 * s;
+        var c = p34 * Math.cos(be * Math.PI / 180), d = c * Math.tan(be * Math.PI / 180);
+        var b = (p - L - c - d) / 3, a = 2 * b;
+        return { r: r, a: a, b: b, c: c, d: d, p: p, L: L, be: be };
+    }
+    function dcSqPath(w, h, r, ox, oy) {
+        var bud = Math.min(w, h) / 2, k = dcSqCorner(r, bud), f = function (v) { return Math.round(v * 100) / 100; };
+        var p = k.p, a = k.a, b = k.b, c = k.c, d = k.d, L = k.L, x = ox || 0, y = oy || 0;
+        return 'M' + f(x + w - p) + ' ' + f(y) +
+            'c' + f(a) + ' 0 ' + f(a + b) + ' 0 ' + f(a + b + c) + ' ' + f(d) +
+            'a' + f(k.r) + ' ' + f(k.r) + ' 0 0 1 ' + f(L) + ' ' + f(L) +
+            'c' + f(d) + ' ' + f(c) + ' ' + f(d) + ' ' + f(b + c) + ' ' + f(d) + ' ' + f(a + b + c) +
+            'L' + f(x + w) + ' ' + f(y + h - p) +
+            'c0 ' + f(a) + ' 0 ' + f(a + b) + ' ' + f(-d) + ' ' + f(a + b + c) +
+            'a' + f(k.r) + ' ' + f(k.r) + ' 0 0 1 ' + f(-L) + ' ' + f(L) +
+            'c' + f(-c) + ' ' + f(d) + ' ' + f(-(b + c)) + ' ' + f(d) + ' ' + f(-(a + b + c)) + ' ' + f(d) +
+            'L' + f(x + p) + ' ' + f(y + h) +
+            'c' + f(-a) + ' 0 ' + f(-(a + b)) + ' 0 ' + f(-(a + b + c)) + ' ' + f(-d) +
+            'a' + f(k.r) + ' ' + f(k.r) + ' 0 0 1 ' + f(-L) + ' ' + f(-L) +
+            'c' + f(-d) + ' ' + f(-c) + ' ' + f(-d) + ' ' + f(-(b + c)) + ' ' + f(-d) + ' ' + f(-(a + b + c)) +
+            'L' + f(x) + ' ' + f(y + p) +
+            'c0 ' + f(-a) + ' 0 ' + f(-(a + b)) + ' ' + f(d) + ' ' + f(-(a + b + c)) +
+            'a' + f(k.r) + ' ' + f(k.r) + ' 0 0 1 ' + f(L) + ' ' + f(-L) +
+            'c' + f(c) + ' ' + f(-d) + ' ' + f(b + c) + ' ' + f(-d) + ' ' + f(a + b + c) + ' ' + f(-d) + 'Z';
+    }
+    // дискретизация iOS smooth-corner контура в [x, y, ny, nx] с точными внешними нормалями для волн на #cartTab
+    function dcSqPts(W, H, R0) {
+        var bud = Math.min(W, H) / 2, k = dcSqCorner(R0, bud), r = k.r;
+        var pts = [], push = function (x, y, nx, ny) { var l = Math.hypot(nx, ny) || 1; pts.push([x, y, ny / l, nx / l]); };
+        var cubic = function (x0, y0, x1, y1, x2, y2, x3, y3, n, skipLast) {
+            var lim = skipLast ? n - 1 : n;
+            for (var i = 1; i <= lim; i++) {
+                var t = i / n, it = 1 - t;
+                var x = it * it * it * x0 + 3 * it * it * t * x1 + 3 * it * t * t * x2 + t * t * t * x3;
+                var y = it * it * it * y0 + 3 * it * it * t * y1 + 3 * it * t * t * y2 + t * t * t * y3;
+                var tx = 3 * it * it * (x1 - x0) + 6 * it * t * (x2 - x1) + 3 * t * t * (x3 - x2);
+                var ty = 3 * it * it * (y1 - y0) + 6 * it * t * (y2 - y1) + 3 * t * t * (y3 - y2);
+                push(x, y, ty, -tx);
+            }
+        };
+        var arcSeg = function (cx, cy, a0, a1, n) {
+            for (var i = 1; i <= n; i++) {
+                var a = a0 + (a1 - a0) * i / n;
+                push(cx + r * Math.cos(a), cy + r * Math.sin(a), Math.cos(a), Math.sin(a));
+            }
+        };
+        var p = k.p, a = k.a, b = k.b, c = k.c, d = k.d, L = k.L, eX = Math.max(0, W - 2 * p), eY = Math.max(0, H - 2 * p);
+        var nxTop = Math.max(2, Math.round(eX / 3)), nySide = Math.max(0, Math.round(eY / 4)), nb = 5, na = 5, i;
+        var aRad = k.be * Math.PI / 180;
+        for (i = 0; i <= nxTop; i++) push(p + eX * i / nxTop, 0, 0, -1);
+        var tx = W - p, ty = 0;
+        cubic(tx, ty, tx + a, ty, tx + a + b, ty, tx + a + b + c, ty + d, nb);
+        arcSeg(tx + a + b + c - r * Math.sin(aRad), ty + d + r * Math.cos(aRad), -Math.PI / 2 + aRad, -aRad, na);
+        var trx2 = tx + a + b + c + L, try2 = ty + d + L;
+        cubic(trx2, try2, trx2 + d, try2 + c, trx2 + d, try2 + b + c, W, p, nb);
+        for (i = 1; i <= nySide; i++) push(W, p + eY * i / nySide, 1, 0);
+        var brx = W, bry = H - p;
+        cubic(brx, bry, brx, bry + a, brx, bry + a + b, brx - d, bry + a + b + c, nb);
+        arcSeg(brx - d - r * Math.cos(aRad), bry + a + b + c - r * Math.sin(aRad), aRad, Math.PI / 2 - aRad, na);
+        var brx2 = brx - d - L, bry2 = bry + a + b + c + L;
+        cubic(brx2, bry2, brx2 - c, bry2 + d, brx2 - (b + c), bry2 + d, W - p, H, nb);
+        for (i = 1; i <= nxTop; i++) push(W - p - eX * i / nxTop, H, 0, 1);
+        var blx = p, bly = H;
+        cubic(blx, bly, blx - a, bly, blx - (a + b), bly, blx - (a + b + c), bly - d, nb);
+        arcSeg(blx - (a + b + c) + r * Math.sin(aRad), bly - d - r * Math.cos(aRad), Math.PI / 2 + aRad, Math.PI - aRad, na);
+        var blx2 = blx - (a + b + c) - L, bly2 = bly - d - L;
+        cubic(blx2, bly2, blx2 - d, bly2 - c, blx2 - d, bly2 - (b + c), 0, H - p, nb);
+        for (i = 1; i <= nySide; i++) push(0, H - p - eY * i / nySide, -1, 0);
+        var tlx = 0, tly = p;
+        cubic(tlx, tly, tlx, tly - a, tlx, tly - (a + b), tlx + d, tly - (a + b + c), nb);
+        arcSeg(tlx + d + r * Math.cos(aRad), tly - (a + b + c) + r * Math.sin(aRad), Math.PI + aRad, 1.5 * Math.PI - aRad, na);
+        var tlx2 = tlx + d + L, tly2 = tly - (a + b + c) - L;
+        cubic(tlx2, tly2, tlx2 + c, tly2 - d, tlx2 + (b + c), tly2 - d, p, 0, nb, true);
+        return pts;
+    }
+    // iOS smooth corners + тонкий 1px ободок тёмной темы на #cartTab (в светлой теме stroke прозрачен)
+    function homeCartRingSync(ct) {
+        if (!ct || !deskOn() || ct.classList.contains('is-wave')) return;
+        var W = ct.offsetWidth, H = ct.offsetHeight;
+        if (!W || !H) return;
+        var bodyD = 'path("' + dcSqPath(W, H, DC_CART_R, 0, 0) + '")';
+        if (ct.getAttribute('data-sq') !== 'clip') ct.setAttribute('data-sq', 'clip');
+        if (ct.style.getPropertyValue('--sq') !== bodyD) ct.style.setProperty('--sq', bodyD);
+        var NS = 'http://www.w3.org/2000/svg', sv = ct.querySelector(':scope > .dcart-ring');
+        if (!sv) {
+            sv = document.createElementNS(NS, 'svg');
+            sv.setAttribute('class', 'dcart-ring');
+            sv.setAttribute('aria-hidden', 'true');
+            sv.innerHTML = '<path/>';
+            ct.insertBefore(sv, ct.firstChild);
+        }
+        var d = dcSqPath(W - 1, H - 1, DC_CART_R - .5, .5, .5);
+        if (sv.firstChild.getAttribute('d') !== d) sv.firstChild.setAttribute('d', d);
+        if (!ct._dSqRo && window.ResizeObserver) {
+            ct._dSqRo = new ResizeObserver(function () { homeCartRingSync(ct); });
+            ct._dSqRo.observe(ct);
+        }
+    }
     function homeCartWaterRun(ct) {
         var st = ct._dwv, NS = 'http://www.w3.org/2000/svg';
         var bg = ct.querySelector(':scope > .dcart-bg'), sv = ct.querySelector(':scope > .dcart-ring');
@@ -861,15 +966,9 @@ window.cleverDesk = function (A) {
         var ring = sv.firstChild;
         var ringCol = getComputedStyle(ct).getPropertyValue('--cta-ring-c');
         var ringOn = !/^\s*$|transparent|rgba\(0, 0, 0, 0\)/.test(ringCol);
-        var W = ct.offsetWidth, H = ct.offsetHeight, R0 = Math.min(H / 2, parseFloat(getComputedStyle(ct).borderTopLeftRadius) || 16), E = Math.max(0, W - 2 * R0);
-        // точки [x, y, ny, nx] — nx позволяет торцам мягко дышать при ударе и отражении волны
-        var pts = [], i, a, nx = Math.max(2, Math.round(E / 3)), nc = 14;
-        for (i = 0; i <= nx; i++) pts.push([R0 + E * i / nx, 0, -1, 0]);
-        for (i = 1; i <= nc; i++) { a = -Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
-        for (i = 1; i <= nc; i++) { a = Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
-        for (i = 1; i <= nx; i++) pts.push([W - R0 - E * i / nx, H, 1, 0]);
-        for (i = 1; i <= nc; i++) { a = Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
-        for (i = 1; i < nc; i++) { a = Math.PI + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
+        var W = ct.offsetWidth, H = ct.offsetHeight;
+        // базовый контур — точные iOS smooth corners (60%), чтобы углы оставались гладкими и во время волны
+        var pts = dcSqPts(W, H, DC_CART_R);
         var OM = .21 * H, IM = .13 * H, HM = 3.6;
         var sat = function (v) { return v > 0 ? OM * Math.tanh(v / OM) : IM * Math.tanh(v / IM); };
         var satX = function (v) { return HM * Math.tanh(v / HM); };
@@ -877,7 +976,7 @@ window.cleverDesk = function (A) {
             cancelAnimationFrame(st.raf); st.raf = 0; st.list = [];
             ct.classList.remove('is-wave');
             bg.style.webkitClipPath = bg.style.clipPath = '';
-            if (ring) ring.removeAttribute('d');
+            homeCartRingSync(ct);
         };
         var frame = function (now) {
             if (!bg.isConnected || !ct.isConnected) { stop(); return; }
@@ -1233,6 +1332,7 @@ window.cleverDesk = function (A) {
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
         deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskPop(); deskNavSync();
+        homeCartRingSync(document.getElementById('cartTab'));
         homeFloatScroll();
     }
     // закрыть всё, что поверх страницы (панель корзины, окна): по затемнению и по Esc

@@ -67,8 +67,8 @@ html.desk .dh-login:hover { box-shadow: inset 0 0 0 1.5px var(--ink); }
 html.desk .dh-login:active { transform: scale(.96); }
 html.desk .dh-login[hidden] { display: none; }
 /* корзина в шапке — главная кнопка: тёмная, с суммой */
-html.desk #cartTab { order: 9; margin-left: 6px; padding: 0 18px 0 16px; height: 48px; border-radius: 16px; background: var(--cta); color: var(--on-cta); box-shadow: var(--cta-ring, 0 0 #0000); }
-html.desk #cartTab:hover { background: var(--cta); transform: translateY(-1px); box-shadow: var(--cta-ring, 0 0 #0000), 0 10px 22px -10px rgba(20, 12, 8, .55); }
+html.desk #cartTab { order: 9; margin-left: 6px; padding: 0 18px 0 16px; height: 48px; border-radius: 15px; background: var(--cta); color: var(--on-cta); box-shadow: none; }
+html.desk #cartTab:hover { background: var(--cta); transform: translateY(-1px); box-shadow: none; }
 html.desk #cartTab:active { transform: scale(.97); }
 html.desk #cartTab .tab__badge { position: static; margin: 0 0 0 2px; order: 3; box-shadow: none; background: var(--brand); }
 /* 12.11: «когда товар ещё не прилетел в корзину, а я кликнул — странное движение шапки». Сумма на кнопке докручивается, и её
@@ -88,15 +88,20 @@ html.desk #cartTab > span:last-child, html.desk #cartTab #cartLabel { white-spac
 html.desk #cartTab.has-sum #cartLabel { font-weight: 750; font-variant-numeric: proportional-nums; }
 html.desk #cartTab > :not(.dcart-bg):not(.dcart-ring):not(.dcart-fly):not(.dcart-sp):not(.tab__badge) { position: relative; z-index: 1; }
 html.desk #cartTab > .tab__badge { z-index: 2; }
-/* squircle в светлой теме ставит clip-path на саму #cartTab и обрезал бы вылет капли .dcart-fly, брызги .dcart-sp и гребни
-   волны .dcart-bg — переносим скругление на ::before (как у .nt__ic[data-sq="clip"]), а в тёмной прячем .sq-paint на время волны */
+/* iOS smooth corners (60% при 48px и r=15px): без box-shadow на самой #cartTab движок squircle всегда держит data-sq="clip"
+   в обеих темах и при hover (обычный круглый фон больше не выступает за скругление). Контур перенесён на ::before, чтобы
+   вылет капли .dcart-fly, брызги .dcart-sp и волны .dcart-bg не резались; тень при hover и ободок .dcart-ring идут по тому же контуру */
 html.desk #cartTab[data-sq="clip"] {
     clip-path: none !important; -webkit-clip-path: none !important;
-    border-radius: 16px !important; background: transparent !important; isolation: isolate;
+    border-radius: 0 !important; background: transparent !important; isolation: isolate;
 }
 html.desk #cartTab[data-sq="clip"]::before {
     content: ""; position: absolute; inset: 0; z-index: -1;
-    background: var(--cta); clip-path: var(--sq); pointer-events: none;
+    background: var(--cta); -webkit-clip-path: var(--sq); clip-path: var(--sq);
+    pointer-events: none; transition: filter .2s var(--dease);
+}
+html.desk #cartTab[data-sq="clip"]:hover::before {
+    filter: drop-shadow(0 8px 14px rgba(20, 12, 8, .36));
 }
 html.desk #cartTab.is-wave { background: transparent !important; box-shadow: none !important; }
 html.desk #cartTab.is-wave::before,
@@ -107,11 +112,10 @@ html.desk .dcart-bg {
 }
 html.desk .dcart-ring {
     position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 0;
-    overflow: visible; display: none; pointer-events: none;
+    overflow: visible; pointer-events: none;
 }
 html.desk .dcart-ring path { fill: none; stroke: var(--cta-ring-c, transparent); stroke-width: 1px; }
-html.desk #cartTab.is-wave > .dcart-bg,
-html.desk #cartTab.is-wave > .dcart-ring { display: block; }
+html.desk #cartTab.is-wave > .dcart-bg { display: block; }
 html.desk .dcart-fly {
     position: absolute; left: 0; top: 0; width: 58px; height: 58px; z-index: 0;
     pointer-events: none; overflow: visible; color: var(--on-cta);
@@ -548,15 +552,25 @@ html.desk #s-rest .rtabs.is-stuck .drnav-cart {
     max-width: 220px; opacity: 1; margin-left: 16px; transform: none; pointer-events: auto; overflow: visible;
 }
 html.desk #s-rest .drnav-cart__btn {
-    position: relative; height: 44px; min-width: 144px; padding: 0 18px 0 15px; border: 0; border-radius: 15px;
+    position: relative; height: 44px; min-width: 144px; padding: 0 18px 0 15px; border: 0; border-radius: 14px;
     display: inline-flex; align-items: center; justify-content: center; gap: 11px;
     background: var(--cta); color: var(--on-cta); font: 650 14.5px/1 var(--font); white-space: nowrap;
-    box-shadow: var(--cta-ring, 0 0 #0000), 0 10px 22px -12px rgba(20, 12, 8, .5);
-    transition: transform .22s var(--dease), box-shadow .22s, background .2s;
+    box-shadow: none;
+    transition: transform .22s var(--dease), background .2s;
 }
-html.desk #s-rest .drnav-cart__btn:hover {
-    transform: translateY(-1.5px);
-    box-shadow: var(--cta-ring, 0 0 #0000), 0 14px 28px -12px rgba(20, 12, 8, .62);
+html.desk #s-rest .drnav-cart__btn[data-sq="clip"] {
+    clip-path: none !important; -webkit-clip-path: none !important;
+    border-radius: 0 !important; background: transparent !important; isolation: isolate;
+}
+html.desk #s-rest .drnav-cart__btn[data-sq="clip"]::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: var(--cta); -webkit-clip-path: var(--sq); clip-path: var(--sq);
+    filter: drop-shadow(0 8px 14px rgba(20, 12, 8, .28));
+    pointer-events: none; transition: filter .22s var(--dease);
+}
+html.desk #s-rest .drnav-cart__btn:hover { transform: translateY(-1.5px); }
+html.desk #s-rest .drnav-cart__btn[data-sq="clip"]:hover::before {
+    filter: drop-shadow(0 12px 18px rgba(20, 12, 8, .38));
 }
 html.desk #s-rest .drnav-cart__btn:active { transform: scale(.97); }
 html.desk #s-rest .drnav-cart__bag { position: relative; flex: none; display: grid; place-items: center; width: 22px; height: 22px; }
