@@ -1306,7 +1306,6 @@ window.cleverDesk = function (A) {
             homeDropStringRender(activePath, hist, cx, cy, now, tailMs, tailMax, 29 * sc, lastAng, ph, pull0, 29 * sc * (1 - inP));
             if (!absorbed) {
                 if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 2.6));
-                if (cnt) cnt.style.opacity = String(Math.max(0, 1 - u * 3));
             } else if (flyPath) {
                 flyPath.style.strokeOpacity = String(Math.max(0, 1 - inP * 2.4));
             }

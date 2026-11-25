@@ -147,6 +147,7 @@ html.desk .dfcart__in {
 html.desk .dfcart:not(.is-morphing):hover .dfcart__in { transform: scale(1.07); }
 html.desk .dfcart:not(.is-morphing):active .dfcart__in { transform: scale(.94); }
 html.desk .dfcart.is-morphing { pointer-events: none; transition: none; }
+html.desk .dfcart.is-morphing .dfcart__n { display: none !important; }
 html.desk .dfcart__svg {
     position: absolute; left: -26px; top: -26px; width: 110px; height: 110px;
     overflow: visible; pointer-events: none;
