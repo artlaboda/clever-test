@@ -566,10 +566,204 @@ window.cleverDesk = function (A) {
         var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
         deskCartSync(n, sum, 0, 0);
     }
+    /* 25.11: плавающая круглая корзина на главной (.dfcart): если шапка прокручена и пользователь добавляет блюдо из
+       нижних блоков («Часто заказывают», «Снова хочется» и др. или из окна блюда), в правом верхнем углу выпрыгивает
+       круглая кнопка корзины — комета летит прямо в неё; при возврате наверх она плавно перетекает в #cartTab шапки */
+    var homeFloatEl = null, homeFloatOn = false, homeFloatP = 0, homeFloatDocking = false;
+    var homeFloatLast = (function () {
+        var n = A.cartCount ? A.cartCount() : 0;
+        var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
+        return { n: n, sum: sum };
+    })();
+    function homeCanFloat() {
+        return deskOn() && S.tab === 'home' && S.stack.indexOf('rest') < 0;
+    }
+    function homeCartHidden() {
+        var ct = document.getElementById('cartTab'), hs = document.getElementById('s-home');
+        if (!ct || !hs) return false;
+        if (hs.scrollTop < 72) return false;
+        var cr = ct.getBoundingClientRect(), ar = app.getBoundingClientRect();
+        return (cr.top - ar.top) < 16;
+    }
+    function homeFloatEnsure() {
+        if (homeFloatEl) return homeFloatEl;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'dfcart';
+        b.hidden = true;
+        b.setAttribute('aria-label', 'Открыть корзину');
+        b.innerHTML =
+            '<span class="dfcart__in">' +
+                '<span class="dfcart__ring" aria-hidden="true"></span>' +
+                '<span class="dfcart__bag" aria-hidden="true">' + ic('i-bag') + '</span>' +
+                '<span class="dfcart__n num" hidden>0</span>' +
+                '<span class="dfcart__sum num"></span>' +
+            '</span>';
+        b.addEventListener('click', function (e) {
+            e.stopPropagation();
+            deskCartToggle();
+        });
+        app.appendChild(b);
+        homeFloatEl = b;
+        return b;
+    }
+    function homeFloatPaint(n, sum, pop) {
+        if (!homeFloatEl) return;
+        var cnt = homeFloatEl.querySelector('.dfcart__n'), sm = homeFloatEl.querySelector('.dfcart__sum');
+        var inn = homeFloatEl.querySelector('.dfcart__in'), ring = homeFloatEl.querySelector('.dfcart__ring');
+        if (cnt) {
+            cnt.hidden = !n;
+            cnt.textContent = String(n);
+            if (pop && n > 0 && !fxOff() && cnt.animate) cnt.animate([{ scale: .4 }, { scale: 1.28, offset: .52 }, { scale: 1 }], { duration: 400, easing: 'cubic-bezier(.22, 1.25, .36, 1)' });
+        }
+        if (sm) sm.textContent = n > 0 && sum ? sum : 'Мой заказ';
+        if (pop && n > 0 && !fxOff() && homeFloatOn && !homeFloatDocking) {
+            if (inn && inn.animate) inn.animate(
+                [{ transform: 'scale(1)' }, { transform: 'scale(1.12, .89)', offset: .26 }, { transform: 'scale(.95, 1.06)', offset: .56 }, { transform: 'scale(1)' }],
+                { duration: 460, easing: 'cubic-bezier(.22, 1, .36, 1)' }
+            );
+            if (ring && ring.animate) ring.animate(
+                [{ transform: 'scale(.94)', opacity: .85 }, { transform: 'scale(1.48)', opacity: 0 }],
+                { duration: 540, easing: 'cubic-bezier(.16, .84, .32, 1)', fill: 'both' }
+            );
+        }
+    }
+    function homeFloatFinishDock(ct) {
+        homeFloatOn = false;
+        homeFloatP = 0;
+        homeFloatDocking = false;
+        if (ct) {
+            ct.classList.remove('is-docking');
+            if (!fxOff() && ct.animate) ct.animate(
+                [{ transform: 'scale(1)' }, { transform: 'scale(1.035)', offset: .4 }, { transform: 'scale(1)' }],
+                { duration: 300, easing: 'cubic-bezier(.22, 1, .36, 1)' }
+            );
+        }
+        if (homeFloatEl) {
+            homeFloatEl.classList.remove('is-on', 'is-morphing');
+            homeFloatEl.hidden = true;
+            homeFloatEl.style.cssText = '';
+        }
+    }
+    function homeFloatHide(immediate) {
+        homeFloatOn = false;
+        homeFloatP = 0;
+        homeFloatDocking = false;
+        var ct = document.getElementById('cartTab');
+        if (ct) ct.classList.remove('is-docking');
+        if (!homeFloatEl || homeFloatEl.hidden) return;
+        homeFloatEl.classList.remove('is-on', 'is-morphing');
+        if (immediate || fxOff()) {
+            homeFloatEl.hidden = true;
+            homeFloatEl.style.cssText = '';
+            return;
+        }
+        var el = homeFloatEl, inn = el.querySelector('.dfcart__in');
+        var anim = inn && inn.animate ? inn.animate([{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(.45)', opacity: 0 }], { duration: 200, easing: 'ease-in', fill: 'forwards' }) : null;
+        if (anim) anim.onfinish = function () { if (!homeFloatOn) { el.hidden = true; el.style.cssText = ''; inn.getAnimations().forEach(function (a) { a.cancel(); }); } };
+        else { el.hidden = true; el.style.cssText = ''; }
+    }
+    function homeFloatLayout() {
+        var ct = document.getElementById('cartTab');
+        if (!homeFloatOn || !homeFloatEl) { if (ct) ct.classList.remove('is-docking'); return; }
+        if (!homeCanFloat()) { homeFloatHide(true); return; }
+        if (homeFloatDocking) return;
+        var hs = document.getElementById('s-home');
+        if (!ct || !hs) return;
+        var cr = ct.getBoundingClientRect(), ar = app.getBoundingClientRect();
+        var ctTop = cr.top - ar.top, ctRight = Math.max(16, ar.right - cr.right);
+        var ctW = cr.width || 150, ctH = cr.height || 48;
+        if (ctTop <= 6 && hs.scrollTop > 4) {
+            homeFloatP = 0;
+            ct.classList.remove('is-docking');
+            homeFloatEl.classList.remove('is-morphing');
+            homeFloatEl.style.top = '20px';
+            homeFloatEl.style.right = ctRight.toFixed(1) + 'px';
+            homeFloatEl.style.width = '58px';
+            homeFloatEl.style.height = '58px';
+            homeFloatEl.style.borderRadius = '29px';
+            homeFloatEl.style.setProperty('--p', '0');
+            return;
+        }
+        if (ctTop < 68 && hs.scrollTop > 4) {
+            var p = Math.max(0, Math.min(1, (ctTop - 6) / 62));
+            var e = p * p * (3 - 2 * p);
+            homeFloatP = p;
+            ct.classList.add('is-docking');
+            homeFloatEl.classList.add('is-morphing');
+            var y = Math.max(20, ctTop);
+            var w = 58 + (ctW - 58) * e;
+            var h = 58 + (ctH - 58) * e;
+            var r = 29 + (16 - 29) * e;
+            homeFloatEl.style.top = y.toFixed(1) + 'px';
+            homeFloatEl.style.right = ctRight.toFixed(1) + 'px';
+            homeFloatEl.style.width = w.toFixed(1) + 'px';
+            homeFloatEl.style.height = h.toFixed(1) + 'px';
+            homeFloatEl.style.borderRadius = r.toFixed(1) + 'px';
+            homeFloatEl.style.setProperty('--p', e.toFixed(4));
+            return;
+        }
+        // вернулись наверх: если проскочили резко (клавишей Home / быстрым скроллом), плавно перетекаем за 320 мс
+        if (!fxOff() && homeFloatP < .45) {
+            homeFloatDocking = true;
+            ct.classList.add('is-docking');
+            homeFloatEl.classList.add('is-morphing');
+            var el = homeFloatEl, y0 = parseFloat(el.style.top) || 20, w0 = parseFloat(el.style.width) || 58, h0 = parseFloat(el.style.height) || 58, r0 = parseFloat(el.style.borderRadius) || 29;
+            var t0 = performance.now(), D = 320;
+            (function step(now) {
+                if (!homeFloatDocking) return;
+                var u = Math.min(1, (now - t0) / D), e2 = 1 - Math.pow(1 - u, 3);
+                var c2 = ct.getBoundingClientRect(), a2 = app.getBoundingClientRect();
+                var ty = c2.top - a2.top, tr = Math.max(16, a2.right - c2.right), tw = c2.width || 150, th = c2.height || 48;
+                el.style.top = (y0 + (ty - y0) * e2).toFixed(1) + 'px';
+                el.style.right = tr.toFixed(1) + 'px';
+                el.style.width = (w0 + (tw - w0) * e2).toFixed(1) + 'px';
+                el.style.height = (h0 + (th - h0) * e2).toFixed(1) + 'px';
+                el.style.borderRadius = (r0 + (16 - r0) * e2).toFixed(1) + 'px';
+                el.style.setProperty('--p', e2.toFixed(4));
+                if (u < 1) requestAnimationFrame(step);
+                else homeFloatFinishDock(ct);
+            })(t0);
+            return;
+        }
+        homeFloatFinishDock(ct);
+    }
+    function homeFloatShow() {
+        if (!homeCanFloat() || !homeCartHidden()) return null;
+        var el = homeFloatEnsure(), wasOn = homeFloatOn;
+        homeFloatOn = true;
+        homeFloatDocking = false;
+        el.hidden = false;
+        el.classList.add('is-on');
+        if (!wasOn) {
+            var inn = el.querySelector('.dfcart__in');
+            if (inn) inn.getAnimations().forEach(function (a) { a.cancel(); });
+            homeFloatPaint(homeFloatLast.n, homeFloatLast.sum, false);
+            homeFloatLayout();
+            if (!fxOff() && inn && inn.animate) {
+                inn.animate([
+                    { transform: 'scale(.32) translateY(-10px)', opacity: 0 },
+                    { transform: 'scale(1.08) translateY(0)', opacity: 1, offset: .62 },
+                    { transform: 'scale(1) translateY(0)', opacity: 1 }
+                ], { duration: 380, easing: 'cubic-bezier(.22, 1.15, .36, 1)' });
+            }
+        } else {
+            homeFloatLayout();
+        }
+        return el.querySelector('.dfcart__bag');
+    }
+    var homeScrEl = document.getElementById('s-home');
+    if (homeScrEl) homeScrEl.addEventListener('scroll', homeFloatLayout, { passive: true });
+    window.addEventListener('resize', function () { if (homeFloatOn) homeFloatLayout(); });
+
     function deskCartSync(n, sum, dir, delay) {
-        var btn = document.querySelector('#s-rest .drnav-cart__btn'); if (!btn) return;
+        if (dir > 0 && n > 0 && homeCanFloat() && homeCartHidden() && !homeFloatOn) homeFloatShow();
         var run = function () {
-            if (!btn.isConnected) return;
+            homeFloatLast = { n: n, sum: sum || '' };
+            if (n <= 0 && homeFloatOn) homeFloatHide(false);
+            else if (homeFloatEl) homeFloatPaint(n, sum, dir > 0);
+            var btn = document.querySelector('#s-rest .drnav-cart__btn');
+            if (!btn || !btn.isConnected) return;
             var cnt = btn.querySelector('.drnav-cart__n'), sm = btn.querySelector('.drnav-cart__sum');
             btn.classList.toggle('has-sum', n > 0);
             if (cnt) {
@@ -589,10 +783,14 @@ window.cleverDesk = function (A) {
             var stuck = document.querySelector('#s-rest #rtabs.is-stuck .drnav-cart__bag');
             if (stuck) return stuck;
         }
+        if (homeCanFloat() && homeCartHidden()) {
+            var fb = homeFloatShow();
+            if (fb) return fb;
+        }
         return document.getElementById('cartBag');
     }
     function deskChrome() {
-        if (!deskOn()) { deskAddrStop(); deskPlaceHead(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
+        if (!deskOn()) { homeFloatHide(true); deskAddrStop(); deskPlaceHead(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
         var top = S.stack[S.stack.length - 1];
         app.dataset.dtop = deskKind(top);
@@ -603,6 +801,7 @@ window.cleverDesk = function (A) {
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
         deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskPop(); deskNavSync();
+        if (homeFloatOn) homeFloatLayout();
     }
     // закрыть всё, что поверх страницы (панель корзины, окна): по затемнению и по Esc
     function deskClose() { var n = 0; while (/drawer|win/.test(deskKind(S.stack[S.stack.length - 1])) && n++ < 6) popScreen(); }
@@ -634,7 +833,7 @@ window.cleverDesk = function (A) {
         A.dishState().qty = 1; cntSet(document.getElementById('dqty'), 1); syncDish();
         if (!fxOff() && btn && btn.isConnected) btn.animate([{ transform: 'none' }, { transform: 'scale(.92)', offset: .26, easing: 'cubic-bezier(.3, 0, .4, 1)' }, { transform: 'scale(1.025)', offset: .66 }, { transform: 'none' }], { duration: 480, easing: 'ease-out' });
         var bag = deskCartBag();
-        var veilBtn = bag && bag.closest('.drnav-cart__btn') || document.getElementById('cartTab');
+        var veilBtn = bag && (bag.closest('.drnav-cart__btn') || bag.closest('.dfcart')) || document.getElementById('cartTab');
         if (fxOff() || !from || !bag) return;
         var fxl = document.getElementById('fx'), sh = document.getElementById('sheet');
         var under = function (on) { deskPortals = Math.max(0, deskPortals + (on ? 1 : -1)); fxl.style.zIndex = deskPortals ? '60' : ''; };   // 60 — над шапкой, под затемнением (70)
