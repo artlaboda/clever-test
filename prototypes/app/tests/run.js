@@ -4275,13 +4275,13 @@ test('сердце «Тёмное с обводкой» (как в Яндекс�
     if (!dark(h0) || h0.on) bad.push('главная, пустое сердце: ' + JSON.stringify(h0));
     await m.evaluate(s => document.querySelector(s).click(), RS); await m.waitForTimeout(1300);   // заливка доезжает за 0,4 с
     const h1 = await q(RS), brand = await m.evaluate(() => { const e = document.createElement('i'); e.style.color = 'var(--brand)'; document.getElementById('app').appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; });
-    if (!h1.on || h1.fill !== brand || h1.stroke !== 'none' || !/^matrix\(1\.2[0-9]*, 0, 0, 1\.2/.test(h1.tf) || !/ 0$/.test(h1.ring)) bad.push('главная, в избранном: ' + JSON.stringify(h1) + ' (красный ' + brand + ')');
+    if (!h1.on || h1.fill !== brand || h1.stroke !== 'none' || h1.tf !== 'none' || h1.ring !== 'rgb(255, 255, 255) miter 1') bad.push('главная, в избранном: ' + JSON.stringify(h1) + ' (красный ' + brand + ')');
     await m.evaluate(() => document.querySelector('#homeScroll [data-act="open-rest"]').click()); await m.waitForTimeout(1300);
     const d0 = await q('#s-rest .item__fav:not(.is-on)');
     if (!dark(d0)) bad.push('блюдо, пустое сердце: ' + JSON.stringify(d0));
     const sz = await m.evaluate(() => ['#homeScroll .rest__fav svg', '#s-rest .item__fav svg'].map(s => Math.round(([...document.querySelectorAll(s)].find(e => e.getBoundingClientRect().width) || document.body).getBoundingClientRect().width)));
     if (sz[0] < 23 || sz[0] > 25 || sz[1] < 20 || sz[1] > 22) bad.push('размер сердца: ' + sz.join(' / '));   // 11.11: «верни размер в прежнее состояние» — значок 23,5 / 21 px, с обводкой снаружи это прежние 26 / 23
-    out.push('пустое — заливка ' + h0.fill + ' по форме сердца (выемка острая), белая обводка ' + h0.sw + ' — только снаружи; размер ' + sz.join(' / ') + ' px (заведение / блюдо); в избранном — целиком красное, без белого края');
+    out.push('пустое — заливка ' + h0.fill + ' по форме сердца (выемка острая), белая обводка ' + h0.sw + ' — только снаружи; размер ' + sz.join(' / ') + ' px (заведение / блюдо); в избранном — красное с сохранённой белой обводкой');
     // вариант — первым в строке «Вариантов», с превью; по умолчанию — прежний «Без плашки»
     // по умолчанию — новое; у кого в памяти было прежнее «Без плашки» — один раз меняется на новое (а выбранное после этого — остаётся)
     const m2 = await open(); const v = { def: await m2.evaluate(() => document.getElementById('app').dataset.fav) };

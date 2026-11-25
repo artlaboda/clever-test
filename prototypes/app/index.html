@@ -1935,13 +1935,10 @@ button.rbadge:active .rbadge__n { background-color: rgba(26, 20, 16, .58); }
    обводка — только снаружи: линия вдвое толще, внутреннюю половину закрывает маска (у неё залито само сердце); углы — острые.
    В избранном — красное того же размера, обводка гаснет */
 .app[data-fav="ya"] .item__fav mask use, .app[data-fav="ya"] .rest__fav mask use { fill: #000; stroke: none; }
-.app[data-fav="ya"] .item__fav .hrt-ring, .app[data-fav="ya"] .rest__fav .hrt-ring, .app[data-fav="ya"] .item__fav.is-on .hrt-ring { display: inline; fill: none; stroke: #fff; stroke-width: 4.4; stroke-linejoin: miter; opacity: 1; transition: opacity .3s; }
-.app[data-fav="ya"] .item__fav.is-on .hrt-ring, .app[data-fav="ya"] .rest__fav.is-on .hrt-ring { opacity: 0; }
+.app[data-fav="ya"] .item__fav .hrt-ring, .app[data-fav="ya"] .rest__fav .hrt-ring, .app[data-fav="ya"] .item__fav.is-on .hrt-ring, .app[data-fav="ya"] .rest__fav.is-on .hrt-ring { display: inline; fill: none; stroke: #fff; stroke-width: 4.4; stroke-linejoin: miter; opacity: 1; transition: opacity .3s; }
 .app[data-fav="ya"] .item__fav .hrt-body, .app[data-fav="ya"] .rest__fav .hrt-body, .app[data-fav="ya"] .rest__fav:not(.is-on) .hrt-body { fill: rgba(20, 14, 12, .5); stroke: none; opacity: 1; transform-origin: 12px 12.65px; transition: fill .4s, transform .35s cubic-bezier(.3, 1.4, .5, 1); }
-/* 11.11 (снимок 22:40): «теперь у лайкнутого сердца декольте плохое. Нужно его глубже делать». Красное сердце дорастало до
-   размера обводки толстой красной линией — она заливала выемку. Теперь оно просто крупнее (масштаб от середины, 1,24 — до
-   внешнего края обводки): форма та же, выемка глубокая, как у самого сердца */
-.app[data-fav="ya"] .item__fav.is-on .hrt-body, .app[data-fav="ya"] .rest__fav.is-on .hrt-body { fill: var(--brand); stroke: none; opacity: 1; transform: scale(1.24); }
+/* 26.11: в избранном белая внешняя обводка сохраняется, чтобы красное сердце читалось на любом фоне; само сердце остаётся того же размера (scale 1), с острой выемкой */
+.app[data-fav="ya"] .item__fav.is-on .hrt-body, .app[data-fav="ya"] .rest__fav.is-on .hrt-body { fill: var(--brand); stroke: none; opacity: 1; }
 /* 11.11, ещё позже: «верни размер сердца в прежнее состояние». Обводка теперь снаружи, поэтому при том же размере значка сердце
    выходило шире; значок на 10% меньше — внешний край сердца там же, где был до увеличения (26 px у заведения, 23 px у блюда) */
 .app[data-fav="ya"] .item__fav svg.i { width: 21px; height: 21px; }
@@ -1961,6 +1958,7 @@ button.rbadge:active .rbadge__n { background-color: rgba(26, 20, 16, .58); }
 .hb-brk .hbst__h, .hb-seal .hbst__h, .hb-mend .hbst__b { display: inline; }
 .hbst use { fill: var(--brand); stroke: var(--brand); }
 .app[data-fav="ya"] .item__fav .hbst use { stroke: none; }
+.hbst .hbst__ring, .app[data-fav="ya"] .item__fav .hbst .hbst__ring { fill: none; stroke: #fff; stroke-width: 4.4; stroke-linejoin: miter; }
 .hbb0, .hbb1, .hbb2 { fill: none; stroke-linecap: butt; stroke-linejoin: round; }
 .hbb0 { stroke: rgba(70, 0, 8, .3); }   /* тень полосы на сердце (ширины — у самих полос: бинт каждый раз свой) */
 .hbb1 { stroke: #d9d2ca; }   /* кромка бинта */
@@ -1971,6 +1969,8 @@ button.rbadge:active .rbadge__n { background-color: rgba(26, 20, 16, .58); }
 .fx__hb { color: var(--brand); pointer-events: none; }
 .fx__hb > i { position: absolute; left: 0; top: 0; width: 100%; height: 100%; will-change: transform, opacity; }
 .fx__hb svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; fill: currentColor; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+.fx__hb .hb__ring { fill: none; stroke: #fff; stroke-width: 4.4; stroke-linejoin: miter; }
+.fx__hb .hb__fill { fill: currentColor; stroke: none; }
 .fx__hb > .hb__p, .fx__hb > .hb__dot, .fx__hb > .hb__tear, .fx__hb > .hb__star, .fx__hb .hb__tn { opacity: 0; }
 .fx__hb .hb__tn { will-change: opacity; }
 .fx__hb > .hb__dot { border-radius: 50%; }
@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '26.11 · 00:07';
+    var BUILD = '26.11 · 00:21';
 
     /* ── состояние ── */
     var S = {
@@ -8284,10 +8284,11 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         // неё виден фон: на любом фоне красиво); потом треснувшее сердце не распадается, а мягко растёт и тает. Под ним проявляется
         // пустое белое
         var r = svg.getBoundingClientRect(), p = fxPt(r.left, r.top), w = r.width / p.k, h = r.height / p.k, mid = 'hcut' + (++favCut), CR = 340, T = CR + 820, k = CR / T;   // трещина 0,34 с, рост и растворение — 0,82 с (медленнее)
+        var ringEl = svg.querySelector('.hrt-ring'), rs = ringEl && getComputedStyle(ringEl), hasRing = !!(app.dataset.fav === 'ya' && rs && rs.display !== 'none' && parseFloat(rs.opacity) > .5);
         var e = fxNew('heart', p.x, p.y, w, h);
-        e.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><mask id="' + mid + '" maskUnits="userSpaceOnUse" x="-2" y="-2" width="28" height="28">' +
-            '<rect x="-2" y="-2" width="28" height="28" fill="#fff"/><path d="M12 6.3 12 7.6 10.9 10.2 13.1 12.6 10.8 15.1 12.9 17.6 12 20.6 12 21.9" pathLength="1" fill="none" stroke="#000" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"/></mask></defs>' +
-            '<use href="#i-heart" mask="url(#' + mid + ')"/></svg>';
+        e.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><defs><mask id="' + mid + '" maskUnits="userSpaceOnUse" x="-3" y="-3" width="30" height="30">' +
+            '<rect x="-3" y="-3" width="30" height="30" fill="#fff"/><path d="M12 6.3 12 7.6 10.9 10.2 13.1 12.6 10.8 15.1 12.9 17.6 12 20.6 12 21.9" pathLength="1" fill="none" stroke="#000" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1" stroke-dashoffset="1"/></mask></defs>' +
+            (hasRing ? '<g mask="url(#' + mid + ')"><use href="#i-heart" fill="none" stroke="#fff" stroke-width="4.4" stroke-linejoin="miter"/><use href="#i-heart" stroke="none"/></g>' : '<use href="#i-heart" mask="url(#' + mid + ')"/>') + '</svg>';
         e.querySelector('mask path').animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 340, easing: 'cubic-bezier(.55,0,.35,1)', fill: 'both' });
         // сначала целое — по нему бежит трещина; дальше растёт в 1,6 раза и тает, плавно и неспешно
         fxKill(e.animate([{ scale: 1, opacity: 1 }, { scale: 1, opacity: 1, offset: k, easing: 'cubic-bezier(.25,.5,.3,1)' }, { scale: 1.6, opacity: 0 }], { duration: T, fill: 'both' }), e);
@@ -8522,15 +8523,17 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
        самой накладки (её Safari рисует верно): увеличение красного сердца «Тёмного с обводкой» — рамкой (viewBox) вложенного
        рисунка, наклоны половинок — атрибутом transform с явной точкой поворота; смыкание — покадрово, тем же атрибутом */
     function hbsTA(i, s, k) { var s1 = i ? 1 : -1; return 'translate(' + (s1 * s.dx * k).toFixed(3) + ' 0) rotate(' + (s1 * s.A[i] * k).toFixed(3) + ' 12 20.2)'; }
-    function hbsVB(svg) {   // рамка рисунка: у «Тёмного с обводкой» красное сердце увеличено в 1,24 раза от точки transform-origin знака
+    function hbsVB(svg) {   // рамка рисунка: масштаб тела берём из фактического transform (при сохранении белой обводки scale = 1)
         var body = svg.querySelector(':scope > .hrt-body'), K = 1, ox = 0, oy = 0, S = parseFloat(getComputedStyle(svg).width) || svg.getBoundingClientRect().width || 24;
-        if (body && app.dataset.fav === 'ya') { var to = getComputedStyle(body).transformOrigin.split(' '); K = 1.24; ox = parseFloat(to[0]) * 24 / S || 0; oy = parseFloat(to[1]) * 24 / S || 0; }
+        if (body && app.dataset.fav === 'ya') { var bs = getComputedStyle(body), mt = /^matrix\(([\d.]+)/.exec(bs.transform), to = bs.transformOrigin.split(' '); if (mt && +mt[1] > 1 && +mt[1] < 1.32) { K = +mt[1]; ox = parseFloat(to[0]) * 24 / S || 0; oy = parseFloat(to[1]) * 24 / S || 0; } }
         var vw = 24 / K; return (ox * (1 - 1 / K)).toFixed(3) + ' ' + (oy * (1 - 1 / K)).toFixed(3) + ' ' + vw.toFixed(3) + ' ' + vw.toFixed(3);
     }
     function hbsMake(svg, s) {
+        var ring = app.dataset.fav === 'ya' && !!svg.querySelector(':scope > .hrt-ring');
+        var half = function (cp) { return ring ? '<g clip-path="url(#' + cp + ')"><use class="hbst__ring" href="#i-heart" width="24" height="24"/><use href="#i-heart" width="24" height="24"/></g>' : '<use href="#i-heart" width="24" height="24" clip-path="url(#' + cp + ')"/>'; };
         var n = 'hs' + (++hbsN), h = '<g class="hbst"><svg viewBox="' + hbsVB(svg) + '" x="0" y="0" width="100%" height="100%" overflow="visible"><defs><clipPath id="' + n + 'l"><path d="' + s.L + '"/></clipPath><clipPath id="' + n + 'r"><path d="' + s.R + '"/></clipPath>' + hbBandSvg(n) + '</defs>' +
-            '<g class="hbst__h" transform="' + hbsTA(0, s, 1) + '"><use href="#i-heart" width="24" height="24" clip-path="url(#' + n + 'l)"/></g>' +
-            '<g class="hbst__h" transform="' + hbsTA(1, s, 1) + '"><use href="#i-heart" width="24" height="24" clip-path="url(#' + n + 'r)"/></g>' + hbBandG(n, 'hbst__b', s.band) + '</svg></g>';
+            '<g class="hbst__h" transform="' + hbsTA(0, s, 1) + '">' + half(n + 'l') + '</g>' +
+            '<g class="hbst__h" transform="' + hbsTA(1, s, 1) + '">' + half(n + 'r') + '</g>' + hbBandG(n, 'hbst__b', s.band) + '</svg></g>';
         svg.insertAdjacentHTML('beforeend', h); var g = svg.lastElementChild; g._v = s.v; return g;
     }
     // значок кнопки — по состоянию: разбито (не в избранном), забинтовано (в избранном), иначе — как обычно
@@ -8600,10 +8603,11 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
            в самой кнопке (host), в её собственных координатах: пружинит вместе с капсулой и в покое стоит точно на месте значка */
         var host = !sc && t.closest('.rtop') ? t : null, hl = 0, ht = 0;
         if (host) { var r0 = svg.getBoundingClientRect(), sx = tr.width / (t.offsetWidth || 1) || 1, sy = tr.height / (t.offsetHeight || 1) || 1; hl = (r0.left - tr.left) / sx; ht = (r0.top - tr.top) / sy; r = { left: r0.left, top: r0.top, width: r0.width / sx * (fxPt(0, 0).k || 1), height: r0.height / sy * (fxPt(0, 0).k || 1) }; }
-        var p = fxPt(r.left, r.top), w = r.width / p.k, h = r.height / p.k, cs = getComputedStyle(svg), body = svg.querySelector('.hrt-body'), bs = body && getComputedStyle(body);
-        // видимое красное сердце: линия знака (у «Тёмного с обводкой» её нет) и масштаб тела (там же — 1,24 от своей середины)
+        var p = fxPt(r.left, r.top), w = r.width / p.k, h = r.height / p.k, cs = getComputedStyle(svg), body = svg.querySelector('.hrt-body'), bs = body && getComputedStyle(body), ringEl = svg.querySelector('.hrt-ring'), rs = ringEl && getComputedStyle(ringEl);
+        var hasRing = !!(app.dataset.fav === 'ya' && rs && rs.display !== 'none' && parseFloat(rs.opacity) > .5), hbPad = hasRing ? 3.8 : 1.4;
+        // видимое красное сердце: линия знака (у «Тёмного с обводкой» её нет, белая обводка — снаружи) и фактический масштаб тела
         var sw = bs && bs.stroke === 'none' ? 0 : parseFloat(cs.strokeWidth) || 0, K = 1, ox = 0, oy = 0;
-        if (bs && app.dataset.fav === 'ya') { var mt = /^matrix\(([\d.]+)/.exec(bs.transform), to = bs.transformOrigin.split(' '); K = mt && +mt[1] > 1 && +mt[1] < 1.32 ? +mt[1] : 1.24; ox = parseFloat(to[0]) * 24 / w || 0; oy = parseFloat(to[1]) * 24 / w || 0; }
+        if (bs && app.dataset.fav === 'ya') { var mt = /^matrix\(([\d.]+)/.exec(bs.transform), to = bs.transformOrigin.split(' '); if (mt && +mt[1] > 1 && +mt[1] < 1.32) { K = +mt[1]; ox = parseFloat(to[0]) * 24 / w || 0; oy = parseFloat(to[1]) * 24 / w || 0; } }
         var vw = 24 / K, vx = ox * (1 - 1 / K), vy = oy * (1 - 1 / K), q = w / vw, z = w * K / 24, X = function (x) { return (x - vx) * q; }, Y = function (y) { return (y - vy) * q; };
         var dist = function (I) { return function (x, y) { return Math.sqrt((x - I[0]) * (x - I[0]) + (y - I[1]) * (y - I[1])); }; };
         var S, C, I, T, tB, rev, mv, shake = null, show, tint = null, crumbs = null, extra = null, inner = null, cap = 0, hinge, sd, i;
@@ -8710,7 +8714,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
             }
             S = hbSplit({ pts: ZP, ws: ZW, br: 0 }); C = S.cells; I = S.I;
             var zf = 0, zd = function (q) { return Math.sqrt((q[0] - I[0]) * (q[0] - I[0]) + (q[1] - I[1]) * (q[1] - I[1])); };
-            hbHeart().forEach(function (q) { zf = Math.max(zf, zd(q)); }); zf = 2 * (zf + 1.4);   // поперечник круга маски — как его считает общая часть
+            hbHeart().forEach(function (q) { zf = Math.max(zf, zd(q)); }); zf = 2 * (zf + hbPad);   // поперечник круга маски — как его считает общая часть
             var k1 = Math.min(.9, 2 * (zd(K[4]) + .15) / zf);   // первый приём — до четвёртого излома (две трети сердца)
             /* 12.11, позже: «склеивать сердце — небольшой перебор. Давай не будем. Давай просто сохраним это в настройках. Как должно быть
                сейчас: сердце распадается. Ждёт некоторое время — и плавно растворяется. А сзади — незаполненное». «Молния»: половинки
@@ -8750,7 +8754,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
                 inner = function (c, i) {   // крошки «Пепла», что легли на эту половинку; маска — сама половинка
                     var cs = aC[i] = hbPieces(aK, 0, c.P), mk = id + 'h' + i;
                     return '<svg ' + vb + '><mask id="' + mk + '" maskUnits="userSpaceOnUse" x="-3" y="-3" width="30" height="30"><path d="' + c.d + '" fill="#fff" stroke="none"/></mask></svg>' + cs.map(function (a, j) {
-                        return '<i class="hb__cr"><svg ' + vb + '><clipPath id="' + mk + j + '"><path d="' + a.d + '"/></clipPath>' + use + ' clip-path="url(#' + mk + j + ')" mask="url(#' + mk + ')"/></svg></i>';
+                        return '<i class="hb__cr"><svg ' + vb + '><clipPath id="' + mk + j + '"><path d="' + a.d + '"/></clipPath>' + heartG('clip-path="url(#' + mk + j + ')" mask="url(#' + mk + ')"') + '</svg></i>';
                     }).join('');
                 };
                 extra = function (e) {
@@ -8784,20 +8788,21 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
             e.style.left = Math.round(eL) + 'px'; e.style.top = Math.round(eT) + 'px'; vx -= (eL - Math.round(eL)) / q; vy -= (eT - Math.round(eT)) / q;
         }
         var vb = 'viewBox="' + vx.toFixed(3) + ' ' + vy.toFixed(3) + ' ' + vw.toFixed(3) + ' ' + vw.toFixed(3) + '" aria-hidden="true"', use = '<use href="#i-heart" width="24" height="24" stroke-width="' + sw + '"';
+        var heartG = function (ref) { return hasRing ? '<g ' + ref + '><use class="hb__ring" href="#i-heart" width="24" height="24"/><use class="hb__fill" href="#i-heart" width="24" height="24"/></g>' : use + ' ' + ref + '/>'; };
         var tn = function (ref) { return tint ? '<svg class="hb__tn" ' + vb + ' style="color:' + tint.col + '">' + use + ' ' + ref + '/></svg>' : ''; };
         // целое сердце с бегущей трещиной: маска — белое поле, чёрный круг растёт из точки удара, поверх него белые куски
         var html = '<i class="hb__w"><svg ' + vb + '><mask id="' + id + '" maskUnits="userSpaceOnUse" x="-3" y="-3" width="30" height="30"><rect x="-3" y="-3" width="30" height="30" fill="#fff" stroke="none"/>' +
             '<path class="hb__rev" d="M' + I[0].toFixed(2) + ' ' + I[1].toFixed(2) + 'h.01" fill="none" stroke="#000" stroke-linecap="round" stroke-width="0"/><path d="' + all + '" fill="#fff" stroke="none"/></mask>' +
-            (crumbs ? '<mask id="' + id + 's" maskUnits="userSpaceOnUse" x="-3" y="-3" width="30" height="30"><path d="' + all + '" fill="#fff" stroke="none"/></mask>' : '') + use + ' mask="url(#' + id + ')"/></svg>' + tn('mask="url(#' + id + ')"') + '</i>';
+            (crumbs ? '<mask id="' + id + 's" maskUnits="userSpaceOnUse" x="-3" y="-3" width="30" height="30"><path d="' + all + '" fill="#fff" stroke="none"/></mask>' : '') + heartG('mask="url(#' + id + ')"') + '</svg>' + tn('mask="url(#' + id + ')"') + '</i>';
         Q.forEach(function (c, i) { var ref = 'clip-path="url(#' + id + 'c' + i + ')"' + (crumbs ? ' mask="url(#' + id + 's)"' : '');
-            html += '<i class="hb__p"><svg ' + vb + '><clipPath id="' + id + 'c' + i + '"><path d="' + c.d + '"/></clipPath>' + use + ' ' + ref + '/></svg>' + tn(ref) + (inner ? inner(c, i) : '') + '</i>'; });
+            html += '<i class="hb__p"><svg ' + vb + '><clipPath id="' + id + 'c' + i + '"><path d="' + c.d + '"/></clipPath>' + heartG(ref) + '</svg>' + tn(ref) + (inner ? inner(c, i) : '') + '</i>'; });
         if (mended) html += '<i class="hb__bd"><svg ' + vb + '><defs>' + hbBandSvg(id) + '</defs>' + hbBandG(id, 'hb__bdg', mended) + '</svg></i>';   // было забинтовано — бинт слетает, пока бежит трещина
         e.innerHTML = html;
         var kt = function (a) { return a.map(function (x) { return { offset: x[0] / T, opacity: x[1] }; }); }, els = e.children, whole = els[0], ord = Q.map(function (c, i) { return i; }), small = 0;
         for (i = ord.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), x = ord[i]; ord[i] = ord[j]; ord[j] = x; }
         Q.forEach(function (c, i) { if (c.n < Q[small].n) small = i; });
         var far = 0; hbHeart().forEach(function (pt) { far = Math.max(far, (pt[0] - I[0]) * (pt[0] - I[0]) + (pt[1] - I[1]) * (pt[1] - I[1])); });
-        far = 2 * (Math.sqrt(far) + 1.4);   // круг маски: поперечник 1 — до самой дальней точки сердца от точки удара (с запасом на линию знака)
+        far = 2 * (Math.sqrt(far) + hbPad);   // круг маски: поперечник 1 — до самой дальней точки сердца от точки удара (с запасом на линию/обводку)
         whole.querySelector('.hb__rev').animate(rev.map(function (x) { return { offset: x[0] / T, strokeWidth: (x[1] * far).toFixed(2) + 'px', easing: x[2] || 'linear' }; }).concat(rev[rev.length - 1][0] < T ? [{ offset: 1, strokeWidth: far.toFixed(2) + 'px' }] : []), { duration: T, fill: 'both' });
         whole.animate([{ opacity: 1, offset: 0 }, { opacity: 1, offset: tB / T }, { opacity: 0, offset: tB / T }, { opacity: 0, offset: 1 }], { duration: T, fill: 'both' });
         if (tint && tint.whole) whole.lastChild.animate(kt(tint.whole), { duration: T, fill: 'both' });
