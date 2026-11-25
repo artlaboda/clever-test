@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '25.11 · 23:50';
+    var BUILD = '25.11 · 23:53';
 
     /* ── состояние ── */
     var S = {
@@ -19974,7 +19974,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
             // ручки: пакет поднимают за ручки и ставят, он пружинит
             lift: function (p, t) {   // 25.11: пакет движется вместе с заливкой (.bag), а не один контур
                 var bag = (t && t.querySelector('.bag')) || p.q('bagb')[0];
-                tbAll(p.q('handle'), [{ transform: 'none' }, { transform: 'translateY(-2.6px) scale(1, 1.25)', offset: .3 }, { transform: 'translateY(-1px)', offset: .55 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
+                tbAll(p.q('handle'), [{ transform: 'none' }, { transform: 'translateY(-1.8px) scale(1, 1.175)', offset: .3 }, { transform: 'translateY(-.7px)', offset: .55 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
                 bag.style.transformOrigin = '50% 100%';
                 var a = tbA(bag, [{ transform: 'none' }, { transform: 'translateY(-1.6px)', offset: .3 }, { transform: 'translateY(.6px) scale(1.05, .94)', offset: .62 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
                 if (a) a.onfinish = a.oncancel = function () { bag.style.transformOrigin = ''; };
