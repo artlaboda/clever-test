@@ -149,7 +149,7 @@ html.desk .dfcart:not(.is-morphing):active .dfcart__in { transform: scale(.94); 
 html.desk .dfcart.is-morphing { pointer-events: none; transition: none; }
 html.desk .dfcart.is-morphing .dfcart__n { display: none !important; }
 html.desk .dfcart__svg {
-    position: absolute; left: -26px; top: -26px; width: 110px; height: 110px;
+    position: absolute; left: -260px; top: -260px; width: 578px; height: 578px;
     overflow: visible; pointer-events: none;
     filter: drop-shadow(0 12px 18px rgba(20, 12, 8, .32)) drop-shadow(0 3px 6px rgba(20, 12, 8, .18));
     transition: filter .24s var(--dease);

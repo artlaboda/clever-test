@@ -608,7 +608,7 @@ window.cleverDesk = function (A) {
         b.setAttribute('aria-label', 'Открыть корзину');
         b.innerHTML =
             '<span class="dfcart__in">' +
-                '<svg class="dfcart__svg" viewBox="-26 -26 110 110" aria-hidden="true"><path class="dfcart__p" d="' + DROP_CIRC + '"/></svg>' +
+                '<svg class="dfcart__svg" viewBox="-260 -260 578 578" aria-hidden="true"><path class="dfcart__p" d="' + DROP_CIRC + '"/></svg>' +
                 '<span class="dfcart__bag" aria-hidden="true">' + ic('i-bag') + '</span>' +
                 '<span class="dfcart__n num" hidden>0</span>' +
             '</span>';
@@ -1136,9 +1136,9 @@ window.cleverDesk = function (A) {
             st.raf = requestAnimationFrame(tick);
         })(now);
     }
-    /* летящая капля — струна: на старте (extraL = 0) задняя половина — точный полукруг радиуса R0 (целая круглая плашка),
-       по мере разгона плавно морфится из полукруга sqrt(1−u²) в тонкую нить (1−u)^1.85 с сохранением массы */
-    function homeDropStringRender(path, hist, cx, cy, now, tailMs, tailMax, R0, ang, ph, nosePull, minBack) {
+    /* летящая капля — струна: на старте (u=0, extraL=0) задняя половина — точный полукруг радиуса R0 (целая круглая плашка),
+       с первого же кадра плашка сама вытягивается в каплю и затем в тонкую нить (1−u)^1.85 с сохранением массы */
+    function homeDropStringRender(path, hist, cx, cy, now, tailMs, tailMax, R0, ang, ph, nosePull, minBack, uFlight) {
         if (!path) return '';
         var cut = now - tailMs, raw = [[cx, cy]], i, k;
         for (i = hist.length - 2; i >= 0; i--) {
@@ -1169,9 +1169,11 @@ window.cleverDesk = function (A) {
         var ss = function (u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
         var L = Math.min(tailMax, Lraw);
         var extraL = Math.max(0, L - R0);
-        var rH = Math.max(R0 * .38, R0 / Math.sqrt(1 + extraL / (1.35 * 29)));
-        var stretch = ss(extraL / 68);
-        var noseKeep = (nosePull || 0) * (1 - ss(extraL / 44));
+        // морфинг из круглой плашки в каплю начинается с самого старта полёта (работает и на узких экранах, и при быстром скролле)
+        var stretch = Math.max(ss((uFlight || 0) / .42), ss(extraL / 52));
+        var rH = Math.max(R0 * .38, R0 / Math.sqrt(1 + extraL / (1.3 * 29) + stretch * .35));
+        var noseEnv = Math.max(nosePull || 0, Math.sin(Math.min(1, (uFlight || 0) / .38) * Math.PI) * .55);
+        var noseKeep = noseEnv * (1 - ss(Math.max((uFlight || 0) / .38, extraL / 44)));
         var toLoc = function (x, y) { return [x - cx + 29, y - cy + 29]; };
         var pts = [], t = now * .001, N = 16, sp = [];
         for (i = 0, k = 1; i < N; i++) {
@@ -1185,9 +1187,9 @@ window.cleverDesk = function (A) {
         // передняя полуокружность головы (с плавно уходящим носиком noseKeep)
         for (i = 0; i <= 10; i++) {
             var a = hAng + Math.PI / 2 - Math.PI * i / 10, da = a - hAng, fr = Math.cos(da);
-            var nH = noseKeep * 13.5 * Math.exp(-(da * da) / .29);
-            var pH = -noseKeep * 3.2 * Math.sin(da) * Math.sin(da);
-            var wHead = (.35 + .55 * stretch) * Math.sin(3 * a - t * 9 + ph);
+            var nH = noseKeep * 12 * Math.exp(-(da * da) / .3);
+            var pH = -noseKeep * 3.0 * Math.sin(da) * Math.sin(da);
+            var wHead = (.3 + .55 * stretch) * Math.sin(3 * a - t * 9 + ph);
             var r = Math.max(2, rH * (1 - .07 * stretch * Math.max(0, fr)) + nH + pH + wHead);
             pts.push(toLoc(cx + Math.cos(a) * r, cy + Math.sin(a) * r));
         }
@@ -1199,7 +1201,7 @@ window.cleverDesk = function (A) {
             var str = Math.pow(1 - u, 1.85);
             var prof = circ * (1 - stretch) + str * stretch;
             var wob = 1 + .14 * stretch * u * Math.sin(u * 11 - t * 14 + ph + (sign > 0 ? 0 : 1.7));
-            var rSide = Math.max(2, rH - noseKeep * 3.2 * (1 - u));
+            var rSide = Math.max(2, rH - noseKeep * 3.0 * (1 - u));
             var w = Math.max(.7 * stretch, rSide * prof) * wob;
             var na = ta + sign * Math.PI / 2;
             return toLoc(p[0] + Math.cos(na) * w, p[1] + Math.sin(na) * w);
@@ -1238,14 +1240,15 @@ window.cleverDesk = function (A) {
         el.style.left = (p0x - 29).toFixed(1) + 'px';
         el.style.top = (p0y - 29).toFixed(1) + 'px';
         el.style.transform = '';
-        var elPath = el.querySelector('.dfcart__p'), bag = el.querySelector('.dfcart__bag'), cnt = el.querySelector('.dfcart__n');
+        var elPath = el.querySelector('.dfcart__p'), bag = el.querySelector('.dfcart__bag');
         var R = function (a, b) { return a + Math.random() * (b - a); };
-        var rx = R(.46, .72), ry = R(.38, .62);
+        var near = Math.hypot((cr0.left - ar0.left + tw0 * .5) - p0x, (cr0.top - ar0.top + th0 * .5) - p0y) < 160;
+        var rx = near ? R(.3, .54) : R(.46, .72), ry = R(.38, .62);
         var p2x0 = (cr0.left - ar0.left) + tw0 * rx, p2y0 = (cr0.top - ar0.top) + th0 * ry;
         var dist0 = Math.hypot(p2x0 - p0x, p2y0 - p0y) || 1;
-        var bend = R(10, 26) * (Math.random() < .5 ? 1 : -1);
-        var t0 = performance.now(), D = Math.min(430, Math.max(240, 200 + dist0 * .42)), DRAIN = 150;
-        var tailMs = 165, tailMax = Math.max(46, Math.min(280, dist0 * .85)), ph = R(0, 6.28);
+        var bend = (near ? R(22, 34) : R(12, 26)) * (Math.random() < .5 ? 1 : -1);
+        var t0 = performance.now(), D = Math.min(440, Math.max(300, 220 + dist0 * .45)), DRAIN = 150;
+        var tailMs = 165, tailMax = Math.max(58, Math.min(280, dist0 * .9)), ph = R(0, 6.28);
         var initAng = pull0 > .05 ? ang0 : Math.atan2(p2y0 - p0y, p2x0 - p0x);
         // кладём в историю заднюю кромку самой плашки (−29 px): хвост рождается прямо из её спины без отрезания
         var hist = [
@@ -1265,7 +1268,7 @@ window.cleverDesk = function (A) {
             var p1y = (p0y + p2y) * .5 + (ddx / dist) * bend;
             var tt = now - t0, u = Math.min(1, tt / D);
             // мягкий ненулевой старт: плашка трогается сразу с первого кадра и сама вытягивается в комету
-            var e = .16 * u + .84 * Math.pow(u, 1.85), ie = 1 - e;
+            var e = .14 * u + .86 * Math.pow(u, 1.85), ie = 1 - e;
             var cx = u < 1 ? (ie * ie * p0x + 2 * ie * e * p1x + e * e * p2x) : p2x;
             var cy = u < 1 ? (ie * ie * p0y + 2 * ie * e * p1y + e * e * p2y) : p2y;
             var vx = 2 * ie * (p1x - p0x) + 2 * e * (p2x - p1x);
@@ -1273,10 +1276,11 @@ window.cleverDesk = function (A) {
             if (u < 1) lastAng = Math.atan2(vy, vx);
             hist.push({ x: cx, y: cy, t: now });
             while (hist.length > 2 && hist[0].t < now - 280) hist.shift();
-            // локальные координаты головы относительно #cartTab для точного касания любой кромки
+            // локальные координаты головы относительно #cartTab; не срабатываем раньше u >= 0.42, чтобы на ноутбуках
+            // (где #cartTab рядом с .dfcart) плашка сначала успела зримо превратиться в каплю, а не исчезла в 1-м кадре
             var relX = cx - offX, relY = cy - offY;
             var clX = Math.max(0, Math.min(tw, relX)), clY = Math.max(0, Math.min(th, relY));
-            if (!absorbed && (Math.hypot(relX - clX, relY - clY) <= 22 || u >= .82)) {
+            if (!absorbed && ((u >= .42 && Math.hypot(relX - clX, relY - clY) <= 12) || u >= .82)) {
                 absorbed = true;
                 uHit = Math.min(.9, u);
                 // только в момент касания #cartTab переносим хвост в .dcart-fly (z-index:0 внутри #cartTab),
@@ -1284,7 +1288,7 @@ window.cleverDesk = function (A) {
                 fly = document.createElement('span');
                 fly.className = 'dcart-fly is-in';
                 fly.setAttribute('aria-hidden', 'true');
-                fly.innerHTML = '<svg class="dfcart__svg" viewBox="-26 -26 110 110" aria-hidden="true"><path class="dfcart__p"/></svg>';
+                fly.innerHTML = '<svg class="dfcart__svg" viewBox="-260 -260 578 578" aria-hidden="true"><path class="dfcart__p"/></svg>';
                 flyPath = fly.querySelector('.dfcart__p');
                 ct.insertBefore(fly, ct.firstChild);
                 homeFloatFly = fly;
@@ -1303,9 +1307,9 @@ window.cleverDesk = function (A) {
                 el.style.left = (cx - 29).toFixed(1) + 'px';
                 el.style.top = (cy - 29).toFixed(1) + 'px';
             }
-            homeDropStringRender(activePath, hist, cx, cy, now, tailMs, tailMax, 29 * sc, lastAng, ph, pull0, 29 * sc * (1 - inP));
+            homeDropStringRender(activePath, hist, cx, cy, now, tailMs, tailMax, 29 * sc, lastAng, ph, pull0, 29 * sc * (1 - inP), u);
             if (!absorbed) {
-                if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 2.6));
+                if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 4.2));
             } else if (flyPath) {
                 flyPath.style.strokeOpacity = String(Math.max(0, 1 - inP * 2.4));
             }
@@ -1381,8 +1385,8 @@ window.cleverDesk = function (A) {
             var tcx = Math.max(cr.left - ar.left + 20, Math.min(cr.right - ar.left - 16, baseCx));
             var tcy = Math.max(cr.top - ar.top + 12, Math.min(cr.bottom - ar.top - 8, baseCy));
             var dx = tcx - baseCx, dy = tcy - baseCy, dist = Math.hypot(dx, dy) || 1;
-            var move = Math.min(26, dist * .16) * e;
-            homeFloatEl.style.transform = 'translate(' + (dx / dist * move).toFixed(1) + 'px,' + (dy / dist * move).toFixed(1) + 'px)';
+            var move = Math.min(18, Math.max(0, (dist - 80) * .12)) * e;
+            homeFloatEl.style.transform = move > .2 ? 'translate(' + (dx / dist * move).toFixed(1) + 'px,' + (dy / dist * move).toFixed(1) + 'px)' : '';
             homeDropSt.target = e;
             homeDropSt.ang = Math.atan2(dy, dx);
             homeDropWake();
