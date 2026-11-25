@@ -86,11 +86,11 @@ html.desk #cartTab .tab__badge { position: absolute; left: 31px; right: auto; to
     font: 750 10.5px/18px var(--font); box-shadow: 0 0 0 2px var(--cta); }
 html.desk #cartTab > span:last-child, html.desk #cartTab #cartLabel { white-space: nowrap; }
 html.desk #cartTab.has-sum #cartLabel { font-weight: 750; font-variant-numeric: proportional-nums; }
-html.desk #cartTab > :not(.dcart-bg):not(.dcart-ring):not(.tab__badge) { position: relative; z-index: 1; }
+html.desk #cartTab > :not(.dcart-bg):not(.dcart-ring):not(.dcart-fly):not(.dcart-sp):not(.tab__badge) { position: relative; z-index: 1; }
 html.desk #cartTab > .tab__badge { z-index: 2; }
 html.desk #cartTab.is-wave { background: transparent !important; box-shadow: none !important; }
 html.desk .dcart-bg {
-    position: absolute; left: 0; right: 0; top: -16px; bottom: -16px; z-index: 0;
+    position: absolute; left: -12px; right: -12px; top: -22px; bottom: -22px; z-index: 0;
     display: none; pointer-events: none; background: var(--cta);
 }
 html.desk .dcart-ring {
@@ -100,6 +100,20 @@ html.desk .dcart-ring {
 html.desk .dcart-ring path { fill: none; stroke: var(--cta-ring-c, transparent); stroke-width: 1px; }
 html.desk #cartTab.is-wave > .dcart-bg,
 html.desk #cartTab.is-wave > .dcart-ring { display: block; }
+html.desk .dcart-fly {
+    position: absolute; left: 0; top: 0; width: 58px; height: 58px; z-index: 0;
+    pointer-events: none; overflow: visible; color: var(--on-cta);
+}
+html.desk .dcart-fly.is-in .dfcart__svg { filter: none !important; }
+html.desk .dcart-sp {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 0;
+    overflow: visible; pointer-events: none;
+}
+html.desk .dcart-sp path { fill: var(--cta); stroke: none; }
+html.desk[data-theme="dark"] .dcart-sp path { stroke: var(--cta-ring-c, rgba(255, 255, 255, .14)); stroke-width: .75px; }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) .dcart-sp path { stroke: var(--cta-ring-c, rgba(255, 255, 255, .14)); stroke-width: .75px; }
+}
 /* 25.11: плавающая круглая корзина на главной (.dfcart) — SVG-капля .dfcart__svg оживает волнами при подъезде вверх */
 html.desk .dfcart {
     position: absolute; top: 22px; right: 24px; z-index: 9;

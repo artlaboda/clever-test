@@ -569,12 +569,12 @@ window.cleverDesk = function (A) {
     /* 25.11: плавающая круглая корзина на главной (.dfcart) с живой водой:
        • при добавлении блюда со скроллом выпрыгивает справа и ловит комету; при повторном скролле вниз с товарами
          плавно появляется справа фейд-ином;
-       • при подъезде вверх (−110…+18 px) кружок оживает живыми капиллярными волнами по контуру (SVG-сплайн) и
-         вытягивает каплю носиком к #cartTab;
-       • в момент срыва волнистая капля влетает в правый край #cartTab, запуская мягкую водную волну по контуру
-         #cartTab справа налево (как у мобильной плашки barWave, каждый раз со случайными гребнями) — без transform
-         на самой #cartTab, поэтому жирность цены остаётся идеально чёткой */
-    var homeFloatEl = null, homeFloatOn = false, homeFloatDocking = false, homeFloatRaf = 0;
+       • при подъезде вверх (−145…−14 px) кружок оживает капиллярными волнами по контуру (SVG-сплайн) и вытягивает
+         подвижный носик капли в сторону 5 часов кнопки #cartTab;
+       • на подлёте вверх (ctTop ≥ −14 px) вся масса без фейд-аута быстро врезается в #cartTab с 5 часов (снизу-справа
+         вверх-влево) на слое z-index:0, поднимая мощную водную волну с отражением от левого края и брызгами — без
+         transform на самой #cartTab, поэтому жирность цены остаётся идеально чёткой */
+    var homeFloatEl = null, homeFloatFly = null, homeFloatOn = false, homeFloatDocking = false, homeFloatRaf = 0;
     var homeDropSt = { pull: 0, target: 0, ang: Math.PI, raf: 0 };
     var homeFloatLast = (function () {
         var n = A.cartCount ? A.cartCount() : 0;
@@ -593,7 +593,10 @@ window.cleverDesk = function (A) {
     }
     function homeCartHidden() {
         var hs = document.getElementById('s-home');
-        return !!(hs && hs.scrollTop > 72 && homeCartTop() < 16);
+        return !!(hs && hs.scrollTop > 92 && homeCartTop() < -22);
+    }
+    function homeFloatFlyClear() {
+        if (homeFloatFly) { homeFloatFly.remove(); homeFloatFly = null; }
     }
     function homeFloatEnsure() {
         if (homeFloatEl) return homeFloatEl;
@@ -638,27 +641,26 @@ window.cleverDesk = function (A) {
         }
     }
     // живой контур капли: замкнутый Catmull-Rom сплайн из 40 точек с вытянутым носиком в сторону #cartTab и бегущими волнами
-    function homeDropRender(now, pull, ang, noseBoost, waveBoost, scaleAll) {
-        if (!homeFloatEl) return;
-        var path = homeFloatEl.querySelector('.dfcart__p');
+    function homeDropRender(now, pull, ang, noseBoost, waveBoost, scaleAll, pathEl) {
+        var path = pathEl || (homeFloatEl && homeFloatEl.querySelector('.dfcart__p'));
         if (!path) return;
         if (pull <= .004 && !waveBoost) { path.setAttribute('d', DROP_CIRC); return; }
         var M = 40, pts = [], t = now * .001, R0 = 29 * (scaleAll || 1);
-        var nb = noseBoost != null ? noseBoost : 12.5;
-        var wAmp = (.55 + 1.55 * Math.min(1, pull)) * (waveBoost != null ? waveBoost : 1) * Math.min(1, pull * 2.2);
+        var nb = noseBoost != null ? noseBoost : 13.5;
+        var wAmp = (.6 + 1.65 * Math.min(1, pull)) * (waveBoost != null ? waveBoost : 1) * Math.min(1, pull * 2.2);
         for (var i = 0; i < M; i++) {
             var th = (i / M) * Math.PI * 2;
             var d = th - ang;
             while (d > Math.PI) d -= Math.PI * 2;
             while (d < -Math.PI) d += Math.PI * 2;
             var nose = pull * nb * Math.exp(-(d * d) / .29);
-            var pinch = -pull * (3.1 * (scaleAll || 1)) * Math.sin(d) * Math.sin(d);
+            var pinch = -pull * (3.2 * (scaleAll || 1)) * Math.sin(d) * Math.sin(d);
             var w = wAmp * (
-                Math.sin(3 * d - t * 6.4) * .52 +
-                Math.sin(4 * d + t * 8.9 + 1.3) * .30 +
-                Math.sin(2 * d - t * 4.3 + 2.7) * .36
+                Math.sin(3 * d - t * 6.6) * .52 +
+                Math.sin(4 * d + t * 9.1 + 1.3) * .30 +
+                Math.sin(2 * d - t * 4.5 + 2.7) * .36
             );
-            var r = Math.max(8, R0 + nose + pinch + w);
+            var r = Math.max(6, R0 + nose + pinch + w);
             pts.push([29 + Math.cos(th) * r, 29 + Math.sin(th) * r]);
         }
         var dStr = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
@@ -692,6 +694,7 @@ window.cleverDesk = function (A) {
     }
     function homeFloatResetStyle() {
         homeDropStop();
+        homeFloatFlyClear();
         if (!homeFloatEl) return;
         homeFloatEl.style.top = '22px';
         homeFloatEl.style.right = '24px';
@@ -709,6 +712,7 @@ window.cleverDesk = function (A) {
         homeFloatOn = false;
         homeFloatDocking = false;
         homeDropStop();
+        homeFloatFlyClear();
         if (homeFloatRaf) { cancelAnimationFrame(homeFloatRaf); homeFloatRaf = 0; }
         if (!homeFloatEl || homeFloatEl.hidden) return;
         homeFloatEl.classList.remove('is-on', 'is-morphing');
@@ -722,35 +726,63 @@ window.cleverDesk = function (A) {
         if (anim) anim.onfinish = function () { if (!homeFloatOn) { el.hidden = true; homeFloatResetStyle(); inn.getAnimations().forEach(function (a) { a.cancel(); }); } };
         else { el.hidden = true; homeFloatResetStyle(); }
     }
-    /* мягкая водная волна по контуру #cartTab (как CB_WAVE.water у мобильного стики-бара, но справа налево от точки
-       влёта капли и чуть мягче; сама кнопка #cartTab не трансформируется — шрифт цены сохраняет идеальную жирность) */
-    var DC_PAD = 16;
+    /* мощная водная волна по контуру #cartTab от влёта большой массы с 5 часов:
+       1) входной вал снизу-справа и перелив через верхнюю кромку + лёгкое дыхание правого торца;
+       2) два крупных гребня («мексиканская шляпа») справа налево через всю кнопку;
+       3) отражённый накат от левого края обратно направо + случайная тихая доводка.
+       Сама #cartTab не трансформируется — шрифт цены сохраняет идеальную жирность */
+    var DC_PADX = 12, DC_PADY = 22;
     var dcSS = function (u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
     var dcHat = function (u) { return u > -4 && u < 4 ? (1 - u * u) * Math.exp(-u * u / 2) : 0; };
-    function homeCartWaterImpact(ct) {
+    function homeCartWaterImpact(ct, ix) {
         if (!ct || fxOff()) return;
         var W = ct.offsetWidth, H = ct.offsetHeight;
         if (!W || !H) return;
         var st = ct._dwv || (ct._dwv = { list: [], raf: 0 }), now = performance.now();
         var R = function (a, b) { return a + Math.random() * (b - a); };
-        var A = H * .058 * R(.84, 1.16);
-        var s = Math.max(20, Math.min(34, W * .18)) * R(.86, 1.2);
-        var T = 1280 * R(.88, 1.15);
-        var lag = R(4, 11) * (Math.random() < .25 ? -1 : 1);
-        var kb = R(.78, .96);
-        var x0 = W - 10 + R(-5, 4), x1 = -26;
-        var d2 = R(170, 265), r2 = R(.5, .74);
-        var env = function (q) { return (q < .11 ? dcSS(q / .11) : 1 - .58 * dcSS((q - .11) / .72)) * (1 - dcSS((q - .8) / .2)); };
-        var crest = function (d, a, sw) {
-            return { t0: now, end: d + T, f: function (t) {
-                var q = (t - d) / T; if (q <= 0 || q >= 1) return null;
-                var c = x0 + (x1 - x0) * (1 - Math.pow(1 - q, 1.45)), w = sw * (1 + .45 * q), h = a * env(q);
-                return function (x) { return [h * dcHat((x - c) / w), kb * h * dcHat((x - c - lag) / w)]; };
+        var xi = ix != null ? ix : W * .76;
+        var A = H * .142 * R(.88, 1.15);
+        var s = Math.max(22, Math.min(34, W * .2)) * R(.88, 1.16);
+        var T = 1340 * R(.9, 1.12);
+        var lag = R(5, 11);
+        var kb = R(.88, 1.02);
+        // 1. локальный всплеск в точке входа на 5 часах (сначала выпирает низ, через 26 мс — гребень сверху + толкает правый край)
+        var sd = R(22, 30), f0 = R(2.6, 3.2), T0 = R(660, 800);
+        st.list.push({
+            t0: now, end: T0,
+            f: function (t) {
+                if (t <= 0 || t >= T0) return null;
+                var bt = 1.24 * A * dcSS(t / 42) * Math.exp(-t / 220) * Math.cos(2 * Math.PI * f0 * t / 1000);
+                var tt = t > 22 ? 1.14 * A * dcSS((t - 22) / 52) * Math.exp(-(t - 22) / 240) * Math.cos(2 * Math.PI * f0 * (t - 22) / 1000) : 0;
+                var hr = .62 * A * dcSS(t / 38) * Math.exp(-t / 195) * Math.cos(2 * Math.PI * (f0 * .95) * t / 1000);
+                var inv = 1 / (sd * sd);
+                return function (x) {
+                    var dx = x - xi, g = Math.exp(-dx * dx * inv);
+                    return [tt * g, bt * g, hr, 0];
+                };
+            }
+        });
+        // 2. бегущие гребни справа налево и отражённый накат от левого края обратно
+        var env = function (q) { return (q < .09 ? dcSS(q / .09) : 1 - .52 * dcSS((q - .09) / .74)) * (1 - dcSS((q - .82) / .18)); };
+        var crest = function (d, a, sw, dur, x0, x1, dir, hLeft) {
+            return { t0: now, end: d + dur, f: function (t) {
+                var q = (t - d) / dur; if (q <= 0 || q >= 1) return null;
+                var c = x0 + (x1 - x0) * (1 - Math.pow(1 - q, 1.48)), w = sw * (1 + .46 * q), h = a * env(q);
+                var hl = hLeft ? hLeft * Math.exp(-Math.pow((q - .28) / .14, 2)) : 0;
+                return function (x) {
+                    return [
+                        h * dcHat((x - c) / w),
+                        kb * h * dcHat((x - c + dir * lag) / w),
+                        0, hl
+                    ];
+                };
             } };
         };
-        st.list.push(crest(0, A, s));
-        st.list.push(crest(d2, A * r2, s * R(1.06, 1.24)));
-        if (Math.random() < .55) st.list.push(crest(d2 + R(170, 240), A * R(.22, .34), s * R(1.18, 1.35)));
+        var d2 = R(170, 240), dRef = R(320, 420);
+        st.list.push(crest(0, A * 1.05, s, T, xi + R(-3, 5), -28, 1, A * .34));
+        st.list.push(crest(d2, A * R(.56, .74), s * R(1.08, 1.24), T * .96, xi + R(-2, 6), -26, 1, 0));
+        st.list.push(crest(dRef, A * R(.34, .48), s * R(1.18, 1.38), 1140 * R(.9, 1.12), 12, W + 24, -1, 0));
+        if (Math.random() < .65) st.list.push(crest(dRef + R(180, 260), A * R(.18, .26), s * R(1.25, 1.45), 960, xi, -22, 1, 0));
         if (!st.raf) homeCartWaterRun(ct);
     }
     function homeCartWaterRun(ct) {
@@ -762,15 +794,17 @@ window.cleverDesk = function (A) {
         var ringCol = getComputedStyle(ct).getPropertyValue('--cta-ring-c');
         var ringOn = !/^\s*$|transparent|rgba\(0, 0, 0, 0\)/.test(ringCol);
         var W = ct.offsetWidth, H = ct.offsetHeight, R0 = Math.min(H / 2, parseFloat(getComputedStyle(ct).borderTopLeftRadius) || 16), E = Math.max(0, W - 2 * R0);
+        // точки [x, y, ny, nx] — nx позволяет торцам мягко дышать при ударе и отражении волны
         var pts = [], i, a, nx = Math.max(2, Math.round(E / 3)), nc = 14;
-        for (i = 0; i <= nx; i++) pts.push([R0 + E * i / nx, 0, -1]);
-        for (i = 1; i <= nc; i++) { a = -Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a)]); }
-        for (i = 1; i <= nc; i++) { a = Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a)]); }
-        for (i = 1; i <= nx; i++) pts.push([W - R0 - E * i / nx, H, 1]);
-        for (i = 1; i <= nc; i++) { a = Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a)]); }
-        for (i = 1; i < nc; i++) { a = Math.PI + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a)]); }
-        var OM = .15 * H, IM = .1 * H;
+        for (i = 0; i <= nx; i++) pts.push([R0 + E * i / nx, 0, -1, 0]);
+        for (i = 1; i <= nc; i++) { a = -Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
+        for (i = 1; i <= nc; i++) { a = Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
+        for (i = 1; i <= nx; i++) pts.push([W - R0 - E * i / nx, H, 1, 0]);
+        for (i = 1; i <= nc; i++) { a = Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
+        for (i = 1; i < nc; i++) { a = Math.PI + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a), Math.cos(a)]); }
+        var OM = .30 * H, IM = .17 * H, HM = 6.5;
         var sat = function (v) { return v > 0 ? OM * Math.tanh(v / OM) : IM * Math.tanh(v / IM); };
+        var satX = function (v) { return HM * Math.tanh(v / HM); };
         var stop = function () {
             cancelAnimationFrame(st.raf); st.raf = 0; st.list = [];
             ct.classList.remove('is-wave');
@@ -783,17 +817,18 @@ window.cleverDesk = function (A) {
             st.list = st.list.filter(function (w) { return now - w.t0 < w.end; });
             st.list.forEach(function (w) { var f = w.f(now - w.t0); if (f) fs.push(f); });
             var edge = function (x) {
-                var t = 0, b = 0, v;
-                for (k = 0; k < fs.length; k++) { v = fs[k](x); t += v[0]; b += v[1]; }
-                return [sat(t), sat(b)];
+                var t = 0, b = 0, hr = 0, hl = 0, v;
+                for (k = 0; k < fs.length; k++) { v = fs[k](x); t += v[0]; b += v[1]; hr += v[2]; hl += v[3]; }
+                return [sat(t), sat(b), satX(hr), satX(hl)];
             };
-            var cp = '', rd = '', j, p, e, y, cache = {};
+            var cp = '', rd = '', j, p, e, x, y, cache = {};
             for (j = 0; j < pts.length; j++) {
                 p = pts[j]; e = cache[p[0]] || (cache[p[0]] = edge(p[0]));
+                x = p[3] > 0 ? p[0] + p[3] * e[2] : (p[3] < 0 ? p[0] + p[3] * e[3] : p[0]);
                 y = p[2] < 0 ? p[1] + p[2] * e[0] : p[1] + p[2] * e[1];
-                if (Math.abs(y - p[1]) > .04) still = false;
-                cp += (j ? 'L' : 'M') + p[0].toFixed(1) + ' ' + (y + DC_PAD).toFixed(1);
-                if (ringOn) rd += (j ? 'L' : 'M') + p[0].toFixed(1) + ' ' + y.toFixed(2);
+                if (Math.abs(y - p[1]) > .04 || Math.abs(x - p[0]) > .04) still = false;
+                cp += (j ? 'L' : 'M') + (x + DC_PADX).toFixed(1) + ' ' + (y + DC_PADY).toFixed(1);
+                if (ringOn) rd += (j ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(2);
             }
             bg.style.webkitClipPath = bg.style.clipPath = 'path("' + cp + 'Z")';
             if (ringOn) ring.setAttribute('d', rd + 'Z');
@@ -803,60 +838,144 @@ window.cleverDesk = function (A) {
         ct.classList.add('is-wave');
         frame(performance.now());
     }
+    // живые баллистические брызги жидкости из точки удара на 5 часах (единый SVG-слой на z-index:0)
+    function homeCartSplash(ct, ix, iy) {
+        if (!ct || fxOff()) return;
+        var NS = 'http://www.w3.org/2000/svg';
+        var st = ct._dsp || (ct._dsp = { list: [], raf: 0, last: 0 });
+        var sv = ct.querySelector(':scope > .dcart-sp');
+        if (!sv) {
+            sv = document.createElementNS(NS, 'svg');
+            sv.setAttribute('class', 'dcart-sp');
+            sv.setAttribute('aria-hidden', 'true');
+            sv.innerHTML = '<path/>';
+            ct.insertBefore(sv, ct.firstChild);
+        }
+        var path = sv.firstChild, now = performance.now(), W = ct.offsetWidth || 150, H = ct.offsetHeight || 48;
+        var R = function (a, b) { return a + Math.random() * (b - a); };
+        var spawn = function (degMin, degMax, spMin, spMax, rMin, rMax, sx, sy) {
+            var a = R(degMin, degMax) * Math.PI / 180, sp = R(spMin, spMax);
+            st.list.push({
+                x: sx, y: sy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+                r: R(rMin, rMax), t0: now, life: R(340, 520)
+            });
+        };
+        // 3 веера брызг: отбой вниз-вправо от 5 часов, скользящие вниз-влево под дном и перелив через верхний правый край
+        spawn(16, 56, 135, 225, 3.6, 5.6, ix + 4, iy);
+        spawn(48, 86, 115, 195, 2.8, 4.6, ix + 2, iy + 2);
+        spawn(116, 152, 110, 195, 3.2, 5.0, ix - 8, iy + 2);
+        spawn(132, 168, 165, 250, 1.8, 3.0, ix - 14, iy + 1);
+        spawn(-76, -24, 135, 215, 3.0, 4.8, Math.min(W - 4, ix + 8), 4);
+        spawn(-52, -8, 175, 265, 1.7, 2.8, W - 2, H * .22);
+        spawn(4, 42, 185, 275, 1.6, 2.7, ix + 8, iy - 4);
+        if (Math.random() < .75) spawn(-118, -76, 115, 185, 2.0, 3.4, ix - 6, 2);
+        if (st.raf) return;
+        st.last = now;
+        (function tick(t) {
+            if (!sv.isConnected || !ct.isConnected) { st.raf = 0; st.list = []; return; }
+            var dt = Math.min(.04, Math.max(.004, (t - st.last) / 1000));
+            st.last = t;
+            var drag = Math.exp(-2.1 * dt), d = '', alive = [];
+            for (var i = 0; i < st.list.length; i++) {
+                var p = st.list[i], age = (t - p.t0) / p.life;
+                if (age >= 1) continue;
+                p.vx *= drag;
+                p.vy = p.vy * drag + 480 * dt;
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                var pop = age < .12 ? .55 + .45 * (age / .12) : 1;
+                var rad = p.r * pop * Math.pow(1 - age, .72);
+                if (rad < .3) continue;
+                var spd = Math.hypot(p.vx, p.vy), ang = Math.atan2(p.vy, p.vx);
+                var k = 1 + Math.min(1.15, spd / 205), rx = rad * k, ry = rad / Math.sqrt(k);
+                var dx = rx * Math.cos(ang), dy = rx * Math.sin(ang), deg = (ang * 180 / Math.PI).toFixed(1);
+                d += 'M' + (p.x - dx).toFixed(1) + ' ' + (p.y - dy).toFixed(1) +
+                    'A' + rx.toFixed(1) + ' ' + ry.toFixed(1) + ' ' + deg + ' 1 0 ' + (p.x + dx).toFixed(1) + ' ' + (p.y + dy).toFixed(1) +
+                    'A' + rx.toFixed(1) + ' ' + ry.toFixed(1) + ' ' + deg + ' 1 0 ' + (p.x - dx).toFixed(1) + ' ' + (p.y - dy).toFixed(1) + 'Z';
+                alive.push(p);
+            }
+            st.list = alive;
+            if (!alive.length) {
+                st.raf = 0;
+                sv.remove();
+                return;
+            }
+            path.setAttribute('d', d);
+            st.raf = requestAnimationFrame(tick);
+        })(now);
+    }
     function homeFloatLaunchMagnet(ct) {
         if (!homeFloatEl || homeFloatDocking) return;
         if (fxOff() || !ct) { homeFloatHide(true); return; }
         homeDropStop();
+        homeFloatFlyClear();
         homeFloatDocking = true;
-        var el = homeFloatEl, bag = el.querySelector('.dfcart__bag'), cnt = el.querySelector('.dfcart__n');
-        el.classList.add('is-morphing');
-        var er = el.getBoundingClientRect(), ar = app.getBoundingClientRect();
-        var cx0 = er.left - ar.left + er.width / 2, cy0 = er.top - ar.top + er.height / 2;
-        el.style.right = 'auto';
-        el.style.left = (cx0 - 29).toFixed(1) + 'px';
-        el.style.top = (cy0 - 29).toFixed(1) + 'px';
-        el.style.transform = '';
-        var t0 = performance.now(), D = 380, absorbed = false;
+        var el = homeFloatEl;
+        var er = el.getBoundingClientRect(), cr0 = ct.getBoundingClientRect();
+        var tw0 = cr0.width || 150, th0 = cr0.height || 48;
+        // стартовые координаты центра капли в системе координат #cartTab
+        var p0x = (er.left + er.width / 2) - cr0.left;
+        var p0y = (er.top + er.height / 2) - cr0.top;
+        // переносим живую массу в <span class="dcart-fly"> на z-index:0 внутри #cartTab —
+        // масса врезается на полной непрозрачности 100%, а белая цена #cartLabel остаётся строго сверху
+        var fly = document.createElement('span');
+        fly.className = 'dcart-fly';
+        fly.setAttribute('aria-hidden', 'true');
+        var cntSrc = el.querySelector('.dfcart__n');
+        var cntText = cntSrc && !cntSrc.hidden ? cntSrc.textContent : '';
+        fly.innerHTML =
+            '<svg class="dfcart__svg" viewBox="-26 -26 110 110" aria-hidden="true"><path class="dfcart__p" d="' + (el.querySelector('.dfcart__p').getAttribute('d') || DROP_CIRC) + '"/></svg>' +
+            '<span class="dfcart__bag" aria-hidden="true">' + ic('i-bag') + '</span>' +
+            (cntText ? '<span class="dfcart__n num">' + cntText + '</span>' : '');
+        fly.style.left = (p0x - 29).toFixed(1) + 'px';
+        fly.style.top = (p0y - 29).toFixed(1) + 'px';
+        ct.insertBefore(fly, ct.firstChild);
+        homeFloatFly = fly;
+        el.hidden = true;
+        el.classList.remove('is-on', 'is-morphing');
+        var flyPath = fly.querySelector('.dfcart__p'), bag = fly.querySelector('.dfcart__bag'), cnt = fly.querySelector('.dfcart__n');
+        // траектория Безье: заходим с 5 часов (снизу-справа) и быстро врезаемся вверх-влево прямо внутрь #cartTab
+        var p2x = tw0 * .62, p2y = th0 * .50;
+        var p1x = Math.min(tw0 + 22, Math.max(tw0 * .88, (p0x + tw0 * .74) * .5 + 10));
+        var p1y = Math.min(p0y + 44, Math.max(p0y + 16, th0 + 32));
+        var t0 = performance.now(), D = Math.min(340, Math.max(235, 205 + Math.hypot(p0x - p2x, p0y - p2y) * .32));
+        var absorbed = false, uHit = 1;
         (function step(now) {
-            if (!homeFloatDocking) return;
+            if (!homeFloatDocking || !fly.isConnected) return;
             var u = Math.min(1, (now - t0) / D);
-            var cr = ct.getBoundingClientRect(), a2 = app.getBoundingClientRect();
-            var tx = cr.left - a2.left, ty = cr.top - a2.top, tw = cr.width || 150, th = cr.height || 48;
-            if (u < .4 && ty < -40) {
-                homeFloatDocking = false;
-                homeFloatRaf = 0;
-                el.classList.remove('is-morphing');
-                homeFloatResetStyle();
-                return;
-            }
-            // магнитное ускорение: живая волнистая капля срывается и влетает в правый край #cartTab
-            var e = Math.pow(u, 1.85);
-            var tcx = tx + tw - 18, tcy = ty + th / 2;
-            var arcY = Math.sin(u * Math.PI) * 10;
-            var cx = cx0 + (tcx - cx0) * e;
-            var cy = cy0 + (tcy - cy0) * e + arcY;
-            var ang = u < .88 ? Math.atan2(tcy - cy, tcx - cx) : Math.atan2(tcy - cy0, tcx - cx0);
-            var nose = 13 + Math.sin(u * Math.PI) * 9;
-            var sc = 1 - Math.max(0, u - .62) * 1.45;
-            el.style.left = (cx - 29).toFixed(1) + 'px';
-            el.style.top = (cy - 29).toFixed(1) + 'px';
-            homeDropRender(now, 1, ang, nose, 1.35, Math.max(.42, sc));
-            if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 1.9));
-            if (cnt) cnt.style.opacity = String(Math.max(0, 1 - u * 2.3));
-            if (u > .74) el.style.opacity = String(Math.max(0, 1 - (u - .74) / .26));
-            // момент касания — запускаем мягкую водную волну справа налево по контуру #cartTab
-            if (!absorbed && u >= .76) {
+            var e = Math.pow(u, 1.75), ie = 1 - e;
+            var cx = ie * ie * p0x + 2 * ie * e * p1x + e * e * p2x;
+            var cy = ie * ie * p0y + 2 * ie * e * p1y + e * e * p2y;
+            var vx = 2 * ie * (p1x - p0x) + 2 * e * (p2x - p1x);
+            var vy = 2 * ie * (p1y - p0y) + 2 * e * (p2y - p1y);
+            var ang = Math.atan2(vy, vx);
+            // точный момент касания 5-часовой кромки #cartTab на любой ширине окна (900–2560 px)
+            var distX = Math.max(0, cx - tw0), distY = Math.max(0, cy - th0);
+            if (!absorbed && (Math.hypot(distX, distY) <= 22 || u >= .82)) {
                 absorbed = true;
-                homeCartWaterImpact(ct);
+                uHit = Math.min(.9, u);
+                fly.classList.add('is-in');
+                var hitX = Math.max(tw0 * .54, Math.min(tw0 - 6, cx - 8));
+                var hitY = Math.max(th0 * .45, Math.min(th0, cy - 8));
+                homeCartWaterImpact(ct, hitX);
+                homeCartSplash(ct, hitX, hitY);
             }
+            var inP = absorbed ? Math.min(1, (u - uHit) / Math.max(.08, 1 - uHit)) : 0;
+            var nose = !absorbed ? (15 + Math.sin(Math.min(1, u / .75) * Math.PI) * 9) : Math.max(2, 16 * (1 - inP));
+            // никакой прозрачности (opacity: 1) — вся масса на 100% врезается и поглощается уже внутри кнопки
+            var sc = !absorbed ? 1.0 : Math.max(.26, 1.0 - Math.pow(inP, 1.15) * .74);
+            fly.style.left = (cx - 29).toFixed(1) + 'px';
+            fly.style.top = (cy - 29).toFixed(1) + 'px';
+            homeDropRender(now, 1, ang, nose, 1.45, sc, flyPath);
+            if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 2.1));
+            if (cnt) cnt.style.opacity = String(Math.max(0, 1 - u * 2.5));
+            if (flyPath && absorbed) flyPath.style.strokeOpacity = String(Math.max(0, 1 - inP * 2.4));
             if (u < 1) {
                 homeFloatRaf = requestAnimationFrame(step);
             } else {
                 homeFloatRaf = 0;
                 homeFloatOn = false;
                 homeFloatDocking = false;
-                el.classList.remove('is-on', 'is-morphing');
-                el.hidden = true;
                 homeFloatResetStyle();
             }
         })(t0);
@@ -902,26 +1021,26 @@ window.cleverDesk = function (A) {
         var n = A.cartCount ? A.cartCount() : homeFloatLast.n;
         // листаем вниз, а в корзине уже есть товары — плавно показываем кружок справа фейд-ином
         if (!homeFloatOn) {
-            if (n > 0 && hs.scrollTop > 88 && ctTop < -8) {
+            if (n > 0 && hs.scrollTop > 115 && ctTop < -44) {
                 homeFloatLast.n = n;
                 homeFloatShow('fade');
             }
             return;
         }
         if (homeFloatDocking || !homeFloatEl) return;
-        // подкатываем вверх: в зоне −110…+18 px кружок оживает водными волнами и вытягивается каплей к #cartTab, а затем влетает в неё
-        if (ctTop >= 18 || hs.scrollTop <= 48) {
+        // подкатываем вверх: уже на подлёте (ctTop ≥ −14 px) капля срывается с 5 часов и всей массой врезается в #cartTab
+        if (ctTop >= -14 || hs.scrollTop <= 85) {
             homeFloatLaunchMagnet(ct);
             return;
         }
-        if (ctTop > -110) {
-            var pull = Math.max(0, Math.min(1, (ctTop + 110) / 128));
-            var e = Math.pow(pull, 1.15);
+        if (ctTop > -145) {
+            var pull = Math.max(0, Math.min(1, (ctTop + 145) / 131));
+            var e = Math.pow(pull, 1.12);
             var cr = ct.getBoundingClientRect(), ar = app.getBoundingClientRect();
-            var tcx = cr.left - ar.left + cr.width - 18, tcy = cr.top - ar.top + cr.height / 2;
+            var tcx = cr.left - ar.left + cr.width * .76, tcy = cr.top - ar.top + cr.height * .88;
             var baseCx = ar.width - 24 - 29, baseCy = 22 + 29;
             var dx = tcx - baseCx, dy = tcy - baseCy, dist = Math.hypot(dx, dy) || 1;
-            var move = Math.min(26, dist * .15) * e;
+            var move = Math.min(26, dist * .16) * e;
             homeFloatEl.style.transform = 'translate(' + (dx / dist * move).toFixed(1) + 'px,' + (dy / dist * move).toFixed(1) + 'px)';
             homeDropSt.target = e;
             homeDropSt.ang = Math.atan2(dy, dx);
