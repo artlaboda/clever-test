@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '26.11 · 00:21';
+    var BUILD = '26.11 · 00:32';
 
     /* ── состояние ── */
     var S = {
@@ -7754,7 +7754,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         tip.innerHTML = typo('Заказ доставит партнёр Clever.by.' +   // без заголовка — сразу суть
             (sl ? ' Чем больше заказ, тем дешевле доставка: она плавно уменьшается с\u00a0каждым рублём — от\u00a0' + r.fee + '\u202f' + BYN + ', а\u00a0от\u00a0' + r.freeFrom + '\u202f' + BYN + ' бесплатна.' : ''));
         tip.hidden = false; tip.classList.remove('is-on');
-        var ar = a.getBoundingClientRect(), c = fxPt(ar.left + ar.width / 2, ar.top), cb = fxPt(ar.left, ar.bottom), W = app.offsetWidth;
+        var ar = a.getBoundingClientRect(); if (!ar.width && !ar.height) { tip.hidden = true; return; }
+        var c = fxPt(ar.left + ar.width / 2, ar.top), cb = fxPt(ar.left, ar.bottom), W = app.offsetWidth;
         var tw = tip.offsetWidth, th = tip.offsetHeight, up = c.y - th - 12 > 50;
         var x = Math.max(12, Math.min(W - 12 - tw, c.x - tw / 2)), y = up ? c.y - th - 8 : cb.y + 8;
         tip.dataset.side = up ? 'top' : 'bottom';

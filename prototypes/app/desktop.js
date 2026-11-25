@@ -388,13 +388,14 @@ window.cleverDesk = function (A) {
         var r = e.target.closest('.rest'), m = r && r.querySelector('.rest__meta > span:first-child');
         if (!m || r._dcr) return;
         r._dcr = 1;
-        var c = m.querySelector('.dcr');
+        var c = m.querySelector('.dcr'), cour = m.querySelector('.cour');
         if (!c) {
             c = document.createElement('i');
-            c.className = m.querySelector('.cour') ? 'dcr' : 'dcr dcr--own';
+            c.className = cour ? 'dcr' : 'dcr dcr--own';
             c.setAttribute('aria-hidden', 'true');
             c.innerHTML = deskRunSvg();
-            m.insertBefore(c, m.firstChild);
+            if (cour) cour.appendChild(c);
+            else m.insertBefore(c, m.firstChild);
             void c.offsetWidth;
         }
         var sv = c.querySelector('svg');
