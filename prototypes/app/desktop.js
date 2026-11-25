@@ -430,8 +430,8 @@ window.cleverDesk = function (A) {
         if (st.page === 'rest') {
             var r = A.rest && A.rest(st.id);
             document.title = r ? r.name + ' — clever.by' : BASE_TITLE;
-        } else if (st.tab === 'search') document.title = 'Поиск — clever.by';
-        else if (st.tab === 'profile') document.title = 'Профиль — clever.by';
+        } else if (st.tab === 'search') document.title = (A.tr ? A.tr('Поиск') : 'Поиск') + ' — clever.by';
+        else if (st.tab === 'profile') document.title = (A.tr ? A.tr('Профиль') : 'Профиль') + ' — clever.by';
         else document.title = BASE_TITLE;
     }
     function deskNavSync() {
