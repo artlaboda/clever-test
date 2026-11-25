@@ -576,7 +576,7 @@ window.cleverDesk = function (A) {
          поднимая брызги и несимметричную, долго стихающую волну по контуру — без transform на самой #cartTab,
          поэтому жирность цены остаётся идеально чёткой */
     var homeFloatEl = null, homeFloatFly = null, homeFloatOn = false, homeFloatDocking = false, homeFloatRaf = 0;
-    var homeDropSt = { pull: 0, target: 0, ang: Math.PI, raf: 0 };
+    var homeDropSt = { pull: 0, target: 0, ang: Math.PI, raf: 0, imp: [] };
     var homeFloatLast = (function () {
         var n = A.cartCount ? A.cartCount() : 0;
         var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
@@ -609,7 +609,6 @@ window.cleverDesk = function (A) {
         b.innerHTML =
             '<span class="dfcart__in">' +
                 '<svg class="dfcart__svg" viewBox="-26 -26 110 110" aria-hidden="true"><path class="dfcart__p" d="' + DROP_CIRC + '"/></svg>' +
-                '<span class="dfcart__ring" aria-hidden="true"></span>' +
                 '<span class="dfcart__bag" aria-hidden="true">' + ic('i-bag') + '</span>' +
                 '<span class="dfcart__n num" hidden>0</span>' +
             '</span>';
@@ -621,47 +620,103 @@ window.cleverDesk = function (A) {
         homeFloatEl = b;
         return b;
     }
+    // живой, каждый раз разный водяной всплеск по контуру круглой плашки .dfcart при прилёте товара (без красных волн)
+    function homeDropSplash() {
+        if (fxOff() || !homeFloatEl || !homeFloatOn || homeFloatDocking) return;
+        var R = function (a, b) { return a + Math.random() * (b - a); }, now = performance.now();
+        // удар преимущественно с левой/нижней стороны (откуда прилетает комета), но со случайным углом и фазами
+        var a0 = R(1.75, 3.55), dir = Math.random() < .5 ? 1 : -1;
+        homeDropSt.imp.push({
+            t0: now,
+            end: R(2150, 2650),
+            a0: a0,
+            dir: dir,
+            amp: R(3.0, 3.9),
+            f0: R(2.35, 3.05), tau0: R(460, 620),
+            f2: R(2.0, 2.65), tau2: R(680, 900), ph2: R(0, 6.28), k2: R(.52, .72),
+            f3: R(2.9, 3.7), tau3: R(580, 780), ph3: R(0, 6.28), k3: R(.38, .56),
+            f4: R(3.8, 4.7), tau4: R(420, 600), ph4: R(0, 6.28), k4: R(.18, .3),
+            spL: R(2.4, 3.3), spR: R(2.0, 2.9)
+        });
+        if (homeDropSt.imp.length > 4) homeDropSt.imp.shift();
+        homeDropWake();
+    }
     function homeFloatPaint(n, sum, pop) {
         if (!homeFloatEl) return;
         var cnt = homeFloatEl.querySelector('.dfcart__n');
-        var inn = homeFloatEl.querySelector('.dfcart__in'), ring = homeFloatEl.querySelector('.dfcart__ring');
         if (cnt) {
             cnt.hidden = !n;
             cnt.textContent = String(n);
             if (pop && n > 0 && !fxOff() && cnt.animate) cnt.animate([{ scale: .4 }, { scale: 1.28, offset: .52 }, { scale: 1 }], { duration: 400, easing: 'cubic-bezier(.22, 1.25, .36, 1)' });
         }
         if (pop && n > 0 && !fxOff() && homeFloatOn && !homeFloatDocking) {
-            if (inn && inn.animate) inn.animate(
-                [{ transform: 'scale(1)' }, { transform: 'scale(1.12, .89)', offset: .26 }, { transform: 'scale(.95, 1.06)', offset: .56 }, { transform: 'scale(1)' }],
-                { duration: 460, easing: 'cubic-bezier(.22, 1, .36, 1)' }
-            );
-            if (ring && ring.animate) ring.animate(
-                [{ transform: 'scale(.94)', opacity: .85 }, { transform: 'scale(1.48)', opacity: 0 }],
-                { duration: 540, easing: 'cubic-bezier(.16, .84, .32, 1)', fill: 'both' }
-            );
+            homeDropSplash();
         }
     }
-    // живой контур капли: замкнутый Catmull-Rom сплайн из 40 точек с вытянутым носиком в сторону #cartTab и бегущими волнами
+    // живой контур капли: замкнутый Catmull-Rom сплайн из 40 точек — вытягивание носика к #cartTab + водяные волны от попаданий
     function homeDropRender(now, pull, ang, noseBoost, waveBoost, scaleAll, pathEl) {
         var path = pathEl || (homeFloatEl && homeFloatEl.querySelector('.dfcart__p'));
         if (!path) return;
-        if (pull <= .004 && !waveBoost) { path.setAttribute('d', DROP_CIRC); return; }
+        var imps = !pathEl ? homeDropSt.imp : null;
+        if (imps && imps.length) {
+            homeDropSt.imp = imps = imps.filter(function (w) { return now - w.t0 < w.end; });
+        }
+        var hasImp = !!(imps && imps.length);
+        if (pull <= .004 && !waveBoost && !hasImp) { path.setAttribute('d', DROP_CIRC); return; }
         var M = 40, pts = [], t = now * .001, R0 = 29 * (scaleAll || 1);
         var nb = noseBoost != null ? noseBoost : 13.5;
         var wAmp = (.6 + 1.65 * Math.min(1, pull)) * (waveBoost != null ? waveBoost : 1) * Math.min(1, pull * 2.2);
+        var ss = function (u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+        // предвычисляем временные коэффициенты активных водяных всплесков один раз на кадр
+        var act = null;
+        if (hasImp) {
+            act = [];
+            for (var m = 0; m < imps.length; m++) {
+                var w = imps[m], dt = now - w.t0;
+                if (dt <= 0 || dt >= w.end) continue;
+                var q = dt / w.end, fade = 1 - ss((q - .68) / .32), rise = ss(dt / 45), s = dt * .001;
+                var c0 = fade * rise * w.amp * Math.exp(-dt / w.tau0) * -Math.sin(2 * Math.PI * w.f0 * s);
+                var c2 = fade * rise * w.amp * w.k2 * Math.exp(-dt / w.tau2);
+                var c3 = fade * rise * w.amp * w.k3 * Math.exp(-dt / w.tau3);
+                var c4 = fade * rise * w.amp * w.k4 * Math.exp(-dt / w.tau4);
+                var crest = fade * ss(dt / 60) * w.amp * .62 * Math.exp(-dt / 640);
+                act.push({
+                    a0: w.a0, dir: w.dir, c0: c0,
+                    c2: c2, om2: 2 * Math.PI * w.f2 * s + w.ph2,
+                    c3: c3, om3: 2 * Math.PI * w.f3 * s + w.ph3,
+                    c4: c4, om4: 2 * Math.PI * w.f4 * s + w.ph4,
+                    crest: crest, pL: w.spL * s, pR: w.spR * s
+                });
+            }
+        }
+        var wrap = function (a) { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; };
         for (var i = 0; i < M; i++) {
             var th = (i / M) * Math.PI * 2;
-            var d = th - ang;
-            while (d > Math.PI) d -= Math.PI * 2;
-            while (d < -Math.PI) d += Math.PI * 2;
+            var d = wrap(th - ang);
             var nose = pull * nb * Math.exp(-(d * d) / .29);
             var pinch = -pull * (3.2 * (scaleAll || 1)) * Math.sin(d) * Math.sin(d);
-            var w = wAmp * (
+            var ww = wAmp * (
                 Math.sin(3 * d - t * 6.6) * .52 +
                 Math.sin(4 * d + t * 9.1 + 1.3) * .30 +
                 Math.sin(2 * d - t * 4.5 + 2.7) * .36
             );
-            var r = Math.max(6, R0 + nose + pinch + w);
+            var impR = 0;
+            if (act) {
+                for (var k = 0; k < act.length; k++) {
+                    var a = act[k], da = wrap(th - a.a0);
+                    // локальное вмятие/выплеск в точке удара + два асинхронных бегущих гребня по ободу + мягкие капиллярные моды
+                    var loc = a.c0 * Math.exp(-(da * da) / .42);
+                    var dL = wrap(da - a.pL), dR = wrap(da + a.pR);
+                    var run = a.crest * (Math.exp(-(dL * dL) / .28) + .82 * Math.exp(-(dR * dR) / .34));
+                    var modes = a.c2 * Math.cos(2 * da - a.dir * a.om2)
+                        + a.c3 * Math.cos(3 * da + a.dir * a.om3)
+                        + a.c4 * Math.cos(4 * da - a.dir * a.om4);
+                    impR += loc + run + modes;
+                }
+                // мягкое насыщение, чтобы при серии быстрых кликов капля оставалась упругой и округлой
+                impR = 6.2 * Math.tanh(impR / 6.2);
+            }
+            var r = Math.max(6, R0 + nose + pinch + ww + impR);
             pts.push([29 + Math.cos(th) * r, 29 + Math.sin(th) * r]);
         }
         var dStr = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
@@ -677,13 +732,15 @@ window.cleverDesk = function (A) {
         if (homeDropSt.raf) { cancelAnimationFrame(homeDropSt.raf); homeDropSt.raf = 0; }
         homeDropSt.pull = 0;
         homeDropSt.target = 0;
+        homeDropSt.imp = [];
     }
     function homeDropWake() {
         if (homeDropSt.raf || fxOff()) return;
         (function tick(now) {
             if (!homeFloatOn || homeFloatDocking || !homeFloatEl) { homeDropSt.raf = 0; return; }
             homeDropSt.pull += (homeDropSt.target - homeDropSt.pull) * .22;
-            if (homeDropSt.target === 0 && homeDropSt.pull < .008) {
+            homeDropSt.imp = homeDropSt.imp.filter(function (w) { return now - w.t0 < w.end; });
+            if (homeDropSt.target === 0 && homeDropSt.pull < .008 && !homeDropSt.imp.length) {
                 homeDropSt.pull = 0;
                 homeDropSt.raf = 0;
                 homeDropRender(now, 0, homeDropSt.ang);
