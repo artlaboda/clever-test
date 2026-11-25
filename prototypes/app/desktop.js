@@ -370,24 +370,40 @@ window.cleverDesk = function (A) {
     });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
     (function () { var rs = document.getElementById('s-rest'); if (!rs || !window.MutationObserver) return; new MutationObserver(function () { if (deskOn()) { deskPlaceHead(); deskRestMount(); deskPop(); } }).observe(rs, { childList: true }); })();
-    // курьер в карточке заведения: при наведении сразу бежит (crGame('run')), уходит курсор — снова статичный значок;
-    // viewBox 19.2×19.2 выровнен по размеру и посадке под статичный #i-courier (17 px), keyTimes сглаживают паузы в цикле,
-    // у заведений со своими курьерами (без .cour) — .dcr--own (сумка в цвет фигуры и без логотипа Clever.by)
-    var RUN_KT = '0;0.0144;0.0418;0.0618;0.0767;0.0957;0.1227;0.158;0.198;0.2399;0.282;0.3232;0.3645;0.4074;0.4509;0.4926;0.5266;0.5491;0.5598;0.5704;0.5925;0.6262;0.67;0.7211;0.775;0.8259;0.8697;0.9087;0.9467;0.9759;1';
+    // курьер в карточке заведения: при наведении сразу бежит (crGame('run')) с той же ноги и позы, что статичная иконка #i-courier
+    // (сдвиг цикла на кадр 2, где передняя/задняя нога и руки совпадают с #i-courier); viewBox 19.2×19.2 выровнен под размер 17 px,
+    // keyTimes сглаживают паузы, а на mouseover/mouseout часы SMIL перематываются в 0 — при повторном наведении нет скачка
+    var RUN_KT = '0;0.02;0.0349;0.0539;0.0809;0.1162;0.1562;0.1981;0.2402;0.2814;0.3227;0.3656;0.4091;0.4508;0.4848;0.5073;0.518;0.5286;0.5507;0.5844;0.6282;0.6793;0.7332;0.7841;0.8279;0.8669;0.9049;0.9341;0.9582;0.9726;1';
     function deskRunSvg() {
         return A.crGame('run', { bag: 'red', rate: .86 })
             .replace('viewBox="0 0 21 21"', 'viewBox="1.6 0.4 19.2 19.2"')
-            .replace(/ repeatCount="indefinite"/g, ' keyTimes="' + RUN_KT + '" repeatCount="indefinite"');
+            .replace(/(<path\b[^>]*?\bd=")([^"]*)("[^>]*><animate\b[^>]*?) repeatCount="indefinite" values="([^"]+)"/g, function (m, p1, d0, p3, vals) {
+                var f = vals.split(';'); if (f.length !== 31) return m;
+                var r = f.slice(2, 30).concat(f.slice(0, 2)); r.push(r[0]);
+                return p1 + r[0] + p3 + ' keyTimes="' + RUN_KT + '" repeatCount="indefinite" values="' + r.join(';') + '"';
+            });
     }
     app.addEventListener('mouseover', function (e) {
         if (!deskOn() || !A.crGame) return;
         var r = e.target.closest('.rest'), m = r && r.querySelector('.rest__meta > span:first-child');
-        if (!m || m.querySelector('.dcr')) return;
-        var c = document.createElement('i');
-        c.className = m.querySelector('.cour') ? 'dcr' : 'dcr dcr--own';
-        c.setAttribute('aria-hidden', 'true');
-        c.innerHTML = deskRunSvg();
-        m.insertBefore(c, m.firstChild);
+        if (!m || r._dcr) return;
+        r._dcr = 1;
+        var c = m.querySelector('.dcr');
+        if (!c) {
+            c = document.createElement('i');
+            c.className = m.querySelector('.cour') ? 'dcr' : 'dcr dcr--own';
+            c.setAttribute('aria-hidden', 'true');
+            c.innerHTML = deskRunSvg();
+            m.insertBefore(c, m.firstChild);
+        }
+        var sv = c.querySelector('svg');
+        if (sv) { try { if (sv.setCurrentTime) sv.setCurrentTime(0); if (sv.unpauseAnimations) sv.unpauseAnimations(); } catch (er) {} }
+    });
+    app.addEventListener('mouseout', function (e) {
+        var r = e.target.closest('.rest'); if (!r || !r._dcr || (e.relatedTarget && r.contains(e.relatedTarget))) return;
+        r._dcr = 0;
+        var sv = r.querySelector('.dcr svg');
+        if (sv) { try { if (sv.pauseAnimations) sv.pauseAnimations(); if (sv.setCurrentTime) sv.setCurrentTime(0); } catch (er) {} }
     });
     /* 24.11: навигация браузера («Назад» / «Вперёд») на десктопе: переходы на страницу заведения и между вкладками
        пишутся в history.pushState, а нажатие кнопки «Назад» в браузере (или на странице заведения) возвращает обратно */
