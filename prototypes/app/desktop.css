@@ -152,12 +152,12 @@ html.desk .dfcart.is-morphing .dfcart__sh { opacity: 0; }
 /* тень круглой плашки — чистый radial-gradient без CSS filter:drop-shadow, т.к. Safari при перерисовке
    анимируемого SVG-path обрезает drop-shadow по квадратному dirty-rect */
 html.desk .dfcart__sh {
-    position: absolute; left: -30px; top: -20px; width: 118px; height: 118px;
+    position: absolute; left: -47px; top: -37px; width: 152px; height: 152px;
     border-radius: 50%; pointer-events: none;
-    background: radial-gradient(circle, rgba(20, 12, 8, .30) 0%, rgba(20, 12, 8, .18) 38%, rgba(20, 12, 8, .05) 56%, rgba(20, 12, 8, 0) 70%);
+    background: radial-gradient(circle, rgba(20, 12, 8, .20) 0%, rgba(20, 12, 8, .14) 28%, rgba(20, 12, 8, .075) 44%, rgba(20, 12, 8, .03) 56%, rgba(20, 12, 8, .008) 65%, rgba(20, 12, 8, 0) 72%);
     transition: transform .24s var(--dease), opacity .16s ease;
 }
-html.desk .dfcart:not(.is-morphing):hover .dfcart__sh { transform: translateY(3px) scale(1.08); }
+html.desk .dfcart:not(.is-morphing):hover .dfcart__sh { transform: translateY(3px) scale(1.06); }
 html.desk .dfcart__svg {
     position: absolute; left: -260px; top: -260px; width: 578px; height: 578px;
     overflow: visible; pointer-events: none;
@@ -176,12 +176,12 @@ html.desk .dfcart__n {
 }
 html.desk .dfcart__n[hidden] { display: none; }
 html.desk[data-theme="dark"] .dfcart__sh {
-    background: radial-gradient(circle, rgba(0, 0, 0, .62) 0%, rgba(0, 0, 0, .36) 40%, rgba(0, 0, 0, .09) 58%, rgba(0, 0, 0, 0) 72%);
+    background: radial-gradient(circle, rgba(0, 0, 0, .44) 0%, rgba(0, 0, 0, .28) 30%, rgba(0, 0, 0, .13) 46%, rgba(0, 0, 0, .045) 58%, rgba(0, 0, 0, .01) 66%, rgba(0, 0, 0, 0) 73%);
 }
 html.desk[data-theme="dark"] .dfcart__p { stroke: rgba(255, 255, 255, .2); stroke-width: 1px; }
 @media (prefers-color-scheme: dark) {
     html.desk:not([data-theme="light"]) .dfcart__sh {
-        background: radial-gradient(circle, rgba(0, 0, 0, .62) 0%, rgba(0, 0, 0, .36) 40%, rgba(0, 0, 0, .09) 58%, rgba(0, 0, 0, 0) 72%);
+        background: radial-gradient(circle, rgba(0, 0, 0, .44) 0%, rgba(0, 0, 0, .28) 30%, rgba(0, 0, 0, .13) 46%, rgba(0, 0, 0, .045) 58%, rgba(0, 0, 0, .01) 66%, rgba(0, 0, 0, 0) 73%);
     }
     html.desk:not([data-theme="light"]) .dfcart__p { stroke: rgba(255, 255, 255, .2); stroke-width: 1px; }
 }
