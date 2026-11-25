@@ -566,18 +566,22 @@ window.cleverDesk = function (A) {
         var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
         deskCartSync(n, sum, 0, 0);
     }
-    /* 25.11: плавающая круглая корзина на главной (.dfcart) в правом верхнем углу:
-       • при добавлении блюда со скроллом выпрыгивает сразу и ловит комету;
-       • если в корзине уже есть товары и пользователь листает главную вниз — плавно появляется справа фейд-ином;
-       • при подъезде вверх кружок постепенно превращается в настоящую каплю (вытягивает острый носик строго в сторону
-         #cartTab), затем срывается как капля к магниту и влетает в #cartTab — а чёрная плашка #cartTab каждый раз
-         по-разному откликается эффектом воды (асимметричная волна контура, внутренний блик-волна и микробрызги) и стабилизируется */
-    var homeFloatEl = null, homeFloatOn = false, homeFloatDocking = false, homeFloatRaf = 0, homeWaterSeed = 0;
+    /* 25.11: плавающая круглая корзина на главной (.dfcart) с живой водой:
+       • при добавлении блюда со скроллом выпрыгивает справа и ловит комету; при повторном скролле вниз с товарами
+         плавно появляется справа фейд-ином;
+       • при подъезде вверх (−110…+18 px) кружок оживает живыми капиллярными волнами по контуру (SVG-сплайн) и
+         вытягивает каплю носиком к #cartTab;
+       • в момент срыва волнистая капля влетает в правый край #cartTab, запуская мягкую водную волну по контуру
+         #cartTab справа налево (как у мобильной плашки barWave, каждый раз со случайными гребнями) — без transform
+         на самой #cartTab, поэтому жирность цены остаётся идеально чёткой */
+    var homeFloatEl = null, homeFloatOn = false, homeFloatDocking = false, homeFloatRaf = 0;
+    var homeDropSt = { pull: 0, target: 0, ang: Math.PI, raf: 0 };
     var homeFloatLast = (function () {
         var n = A.cartCount ? A.cartCount() : 0;
         var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
         return { n: n, sum: sum };
     })();
+    var DROP_CIRC = 'M58 29A29 29 0 1 0 0 29A29 29 0 1 0 58 29Z';
     function homeCanFloat() {
         return deskOn() && S.tab === 'home' && S.stack.indexOf('rest') < 0;
     }
@@ -600,7 +604,7 @@ window.cleverDesk = function (A) {
         b.setAttribute('aria-label', 'Открыть корзину');
         b.innerHTML =
             '<span class="dfcart__in">' +
-                '<span class="dfcart__drop" aria-hidden="true"></span>' +
+                '<svg class="dfcart__svg" viewBox="-26 -26 110 110" aria-hidden="true"><path class="dfcart__p" d="' + DROP_CIRC + '"/></svg>' +
                 '<span class="dfcart__ring" aria-hidden="true"></span>' +
                 '<span class="dfcart__bag" aria-hidden="true">' + ic('i-bag') + '</span>' +
                 '<span class="dfcart__n num" hidden>0</span>' +
@@ -633,24 +637,61 @@ window.cleverDesk = function (A) {
             );
         }
     }
-    function homeDropShape(pull, angDeg, stretchX, stretchY) {
+    // живой контур капли: замкнутый Catmull-Rom сплайн из 40 точек с вытянутым носиком в сторону #cartTab и бегущими волнами
+    function homeDropRender(now, pull, ang, noseBoost, waveBoost, scaleAll) {
         if (!homeFloatEl) return;
-        var drop = homeFloatEl.querySelector('.dfcart__drop');
-        if (!drop) return;
-        if (pull <= .005) {
-            drop.style.borderRadius = '50%';
-            drop.style.transform = '';
-            return;
+        var path = homeFloatEl.querySelector('.dfcart__p');
+        if (!path) return;
+        if (pull <= .004 && !waveBoost) { path.setAttribute('d', DROP_CIRC); return; }
+        var M = 40, pts = [], t = now * .001, R0 = 29 * (scaleAll || 1);
+        var nb = noseBoost != null ? noseBoost : 12.5;
+        var wAmp = (.55 + 1.55 * Math.min(1, pull)) * (waveBoost != null ? waveBoost : 1) * Math.min(1, pull * 2.2);
+        for (var i = 0; i < M; i++) {
+            var th = (i / M) * Math.PI * 2;
+            var d = th - ang;
+            while (d > Math.PI) d -= Math.PI * 2;
+            while (d < -Math.PI) d += Math.PI * 2;
+            var nose = pull * nb * Math.exp(-(d * d) / .29);
+            var pinch = -pull * (3.1 * (scaleAll || 1)) * Math.sin(d) * Math.sin(d);
+            var w = wAmp * (
+                Math.sin(3 * d - t * 6.4) * .52 +
+                Math.sin(4 * d + t * 8.9 + 1.3) * .30 +
+                Math.sin(2 * d - t * 4.3 + 2.7) * .36
+            );
+            var r = Math.max(8, R0 + nose + pinch + w);
+            pts.push([29 + Math.cos(th) * r, 29 + Math.sin(th) * r]);
         }
-        // верхний-левый угол сжимается с 50% до ~8%: повёрнутый на +135° + angDeg он превращает круг в каплю носиком к #cartTab
-        var nose = Math.max(6, 50 - 42 * pull);
-        var side = 50 - 6 * pull;
-        var sx = stretchX != null ? stretchX : (1 + .24 * pull);
-        var sy = stretchY != null ? stretchY : (1 - .11 * pull);
-        drop.style.borderRadius = nose.toFixed(1) + '% ' + side.toFixed(1) + '% 50% ' + side.toFixed(1) + '%';
-        drop.style.transform = 'rotate(' + angDeg.toFixed(1) + 'deg) scale(' + sx.toFixed(3) + ',' + sy.toFixed(3) + ') rotate(135deg)';
+        var dStr = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+        for (var j = 0; j < M; j++) {
+            var p0 = pts[(j - 1 + M) % M], p1 = pts[j], p2 = pts[(j + 1) % M], p3 = pts[(j + 2) % M];
+            var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+            var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+            dStr += 'C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) + ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+        }
+        path.setAttribute('d', dStr + 'Z');
+    }
+    function homeDropStop() {
+        if (homeDropSt.raf) { cancelAnimationFrame(homeDropSt.raf); homeDropSt.raf = 0; }
+        homeDropSt.pull = 0;
+        homeDropSt.target = 0;
+    }
+    function homeDropWake() {
+        if (homeDropSt.raf || fxOff()) return;
+        (function tick(now) {
+            if (!homeFloatOn || homeFloatDocking || !homeFloatEl) { homeDropSt.raf = 0; return; }
+            homeDropSt.pull += (homeDropSt.target - homeDropSt.pull) * .22;
+            if (homeDropSt.target === 0 && homeDropSt.pull < .008) {
+                homeDropSt.pull = 0;
+                homeDropSt.raf = 0;
+                homeDropRender(now, 0, homeDropSt.ang);
+                return;
+            }
+            homeDropRender(now, homeDropSt.pull, homeDropSt.ang);
+            homeDropSt.raf = requestAnimationFrame(tick);
+        })(performance.now());
     }
     function homeFloatResetStyle() {
+        homeDropStop();
         if (!homeFloatEl) return;
         homeFloatEl.style.top = '22px';
         homeFloatEl.style.right = '24px';
@@ -662,11 +703,12 @@ window.cleverDesk = function (A) {
         var bag = homeFloatEl.querySelector('.dfcart__bag'), cnt = homeFloatEl.querySelector('.dfcart__n');
         if (bag) bag.style.opacity = '';
         if (cnt) cnt.style.opacity = '';
-        homeDropShape(0, 0);
+        homeDropRender(0, 0, Math.PI);
     }
     function homeFloatHide(immediate) {
         homeFloatOn = false;
         homeFloatDocking = false;
+        homeDropStop();
         if (homeFloatRaf) { cancelAnimationFrame(homeFloatRaf); homeFloatRaf = 0; }
         if (!homeFloatEl || homeFloatEl.hidden) return;
         homeFloatEl.classList.remove('is-on', 'is-morphing');
@@ -680,85 +722,91 @@ window.cleverDesk = function (A) {
         if (anim) anim.onfinish = function () { if (!homeFloatOn) { el.hidden = true; homeFloatResetStyle(); inn.getAnimations().forEach(function (a) { a.cancel(); }); } };
         else { el.hidden = true; homeFloatResetStyle(); }
     }
-    // живой водный отклик на чёрной плашке #cartTab: каждый раз уникальные амплитуда, наклон, перекос углов и волна блика
+    /* мягкая водная волна по контуру #cartTab (как CB_WAVE.water у мобильного стики-бара, но справа налево от точки
+       влёта капли и чуть мягче; сама кнопка #cartTab не трансформируется — шрифт цены сохраняет идеальную жирность) */
+    var DC_PAD = 16;
+    var dcSS = function (u) { u = Math.max(0, Math.min(1, u)); return u * u * (3 - 2 * u); };
+    var dcHat = function (u) { return u > -4 && u < 4 ? (1 - u * u) * Math.exp(-u * u / 2) : 0; };
     function homeCartWaterImpact(ct) {
         if (!ct || fxOff()) return;
-        var R = Math.random, mode = (++homeWaterSeed + Math.floor(R() * 2)) % 3;
-        var dirY = R() < .5 ? 1 : -1;
-        var amp = .85 + R() * .45;           // случайная сила всплеска
-        var pushX = -(5 + R() * 4.5);        // импульс влево от удара справа
-        var tilt = (1.1 + R() * 1.5) * dirY; // лёгкий крен
-        var sk1 = -(2.4 + R() * 2.2), sk2 = 1.8 + R() * 1.6;
-        var rR = Math.round(22 + R() * 7), rL = Math.round(21 + R() * 6);
-        var br0 = '16px';
-        var br1 = mode === 0
-            ? '15px ' + rR + 'px ' + (rR - 3) + 'px 16px / 16px ' + (rR - 2) + 'px ' + (rR - 4) + 'px 15px'
-            : mode === 1
-                ? '18px ' + (rR - 2) + 'px ' + rR + 'px 14px / 15px ' + (rR - 4) + 'px ' + (rR - 1) + 'px 17px'
-                : '14px ' + (rR + 1) + 'px ' + (rR - 2) + 'px 17px / 17px ' + rR + 'px ' + (rR - 5) + 'px 14px';
-        var br2 = rL + 'px 14px 15px ' + (rL - 2) + 'px / ' + (rL - 3) + 'px 15px 14px ' + (rL - 1) + 'px';
-        var br3 = '15px ' + Math.round(18 + R() * 3) + 'px ' + Math.round(17 + R() * 3) + 'px 16px';
-        var br4 = Math.round(17 + R() * 2) + 'px 15px 16px ' + Math.round(17 + R() * 2) + 'px';
-        var dur = Math.round(760 + R() * 190);
-        if (ct.animate) {
-            ct.getAnimations().forEach(function (a) { a.cancel(); });
-            ct.animate([
-                { transform: 'none', borderRadius: br0 },
-                { transform: 'translate(' + pushX.toFixed(1) + 'px,' + (dirY * 1.8 * amp).toFixed(1) + 'px) scale(' + (1 + .075 * amp).toFixed(3) + ',' + (1 - .085 * amp).toFixed(3) + ') skewX(' + sk1.toFixed(1) + 'deg) rotate(' + tilt.toFixed(2) + 'deg)', borderRadius: br1, offset: .16 },
-                { transform: 'translate(' + (-pushX * .48).toFixed(1) + 'px,' + (-dirY * 1.4 * amp).toFixed(1) + 'px) scale(' + (1 - .048 * amp).toFixed(3) + ',' + (1 + .06 * amp).toFixed(3) + ') skewX(' + sk2.toFixed(1) + 'deg) rotate(' + (-tilt * .65).toFixed(2) + 'deg)', borderRadius: br2, offset: .38 },
-                { transform: 'translate(' + (pushX * .22).toFixed(1) + 'px,' + (dirY * .7 * amp).toFixed(1) + 'px) scale(' + (1 + .026 * amp).toFixed(3) + ',' + (1 - .028 * amp).toFixed(3) + ') skewX(' + (sk1 * .35).toFixed(1) + 'deg) rotate(' + (tilt * .32).toFixed(2) + 'deg)', borderRadius: br3, offset: .6 },
-                { transform: 'translate(' + (-pushX * .09).toFixed(1) + 'px,0px) scale(' + (1 - .012 * amp).toFixed(3) + ',' + (1 + .014 * amp).toFixed(3) + ') skewX(' + (sk2 * .2).toFixed(1) + 'deg)', borderRadius: br4, offset: .8 },
-                { transform: 'none', borderRadius: br0 }
-            ], { duration: dur, easing: 'cubic-bezier(.22, .68, .36, 1)' });
-        }
-        // внутренний блик-волна, пробегающий справа налево по поверхности плашки и отражающийся обратно
-        var wv = document.createElement('span');
-        wv.className = 'dcart-wave';
-        wv.setAttribute('aria-hidden', 'true');
-        wv.innerHTML = '<i class="dcart-wave__s"></i>';
-        ct.appendChild(wv);
-        var sh = wv.firstChild;
-        if (sh && sh.animate) {
-            var sl = (-18 - R() * 14).toFixed(0);
-            var wa = sh.animate([
-                { transform: 'translateX(88%) skewX(' + sl + 'deg) scaleX(.7)', opacity: 0 },
-                { transform: 'translateX(30%) skewX(' + sl + 'deg) scaleX(1.15)', opacity: .9, offset: .22 },
-                { transform: 'translateX(-85%) skewX(' + sl + 'deg) scaleX(.95)', opacity: .45, offset: .62 },
-                { transform: 'translateX(-15%) skewX(' + sl + 'deg) scaleX(.8)', opacity: .22, offset: .84 },
-                { transform: 'translateX(35%) skewX(' + sl + 'deg) scaleX(.6)', opacity: 0 }
-            ], { duration: dur - 40, easing: 'cubic-bezier(.22, .8, .34, 1)', fill: 'both' });
-            wa.onfinish = wa.oncancel = function () { wv.remove(); };
-        } else {
-            setTimeout(function () { wv.remove(); }, dur);
-        }
-        // 3 крошечные водяные капли-брызги у правого края плашки в случайных направлениях
-        var cr = ct.getBoundingClientRect(), ar = app.getBoundingClientRect();
-        var bx = cr.right - ar.left - 8, by = cr.top - ar.top + cr.height * (.35 + R() * .3);
-        for (var i = 0; i < 3; i++) {
-            var sp = document.createElement('i');
-            sp.className = 'dcart-splash';
-            sp.setAttribute('aria-hidden', 'true');
-            var sz = (4.5 + R() * 3.5).toFixed(1);
-            sp.style.width = sz + 'px'; sp.style.height = sz + 'px';
-            sp.style.left = (bx - sz / 2).toFixed(1) + 'px';
-            sp.style.top = (by - sz / 2).toFixed(1) + 'px';
-            app.appendChild(sp);
-            var a = (-75 + i * 70 + (R() - .5) * 32) * Math.PI / 180;
-            var dist = 16 + R() * 16;
-            var ex = Math.cos(a) * dist, ey = Math.sin(a) * dist;
-            if (sp.animate) {
-                var sa = sp.animate([
-                    { transform: 'translate(0,0) scale(.5)', opacity: .9 },
-                    { transform: 'translate(' + ex.toFixed(1) + 'px,' + ey.toFixed(1) + 'px) scale(1.1)', opacity: .85, offset: .45 },
-                    { transform: 'translate(' + (ex * .55).toFixed(1) + 'px,' + (ey * .55).toFixed(1) + 'px) scale(.15)', opacity: 0 }
-                ], { duration: 300 + Math.round(R() * 130), easing: 'cubic-bezier(.2, .85, .35, 1)', fill: 'both' });
-                sa.onfinish = sa.oncancel = (function (node) { return function () { node.remove(); }; })(sp);
-            } else sp.remove();
-        }
+        var W = ct.offsetWidth, H = ct.offsetHeight;
+        if (!W || !H) return;
+        var st = ct._dwv || (ct._dwv = { list: [], raf: 0 }), now = performance.now();
+        var R = function (a, b) { return a + Math.random() * (b - a); };
+        var A = H * .058 * R(.84, 1.16);
+        var s = Math.max(20, Math.min(34, W * .18)) * R(.86, 1.2);
+        var T = 1280 * R(.88, 1.15);
+        var lag = R(4, 11) * (Math.random() < .25 ? -1 : 1);
+        var kb = R(.78, .96);
+        var x0 = W - 10 + R(-5, 4), x1 = -26;
+        var d2 = R(170, 265), r2 = R(.5, .74);
+        var env = function (q) { return (q < .11 ? dcSS(q / .11) : 1 - .58 * dcSS((q - .11) / .72)) * (1 - dcSS((q - .8) / .2)); };
+        var crest = function (d, a, sw) {
+            return { t0: now, end: d + T, f: function (t) {
+                var q = (t - d) / T; if (q <= 0 || q >= 1) return null;
+                var c = x0 + (x1 - x0) * (1 - Math.pow(1 - q, 1.45)), w = sw * (1 + .45 * q), h = a * env(q);
+                return function (x) { return [h * dcHat((x - c) / w), kb * h * dcHat((x - c - lag) / w)]; };
+            } };
+        };
+        st.list.push(crest(0, A, s));
+        st.list.push(crest(d2, A * r2, s * R(1.06, 1.24)));
+        if (Math.random() < .55) st.list.push(crest(d2 + R(170, 240), A * R(.22, .34), s * R(1.18, 1.35)));
+        if (!st.raf) homeCartWaterRun(ct);
+    }
+    function homeCartWaterRun(ct) {
+        var st = ct._dwv, NS = 'http://www.w3.org/2000/svg';
+        var bg = ct.querySelector(':scope > .dcart-bg'), sv = ct.querySelector(':scope > .dcart-ring');
+        if (!bg) { bg = document.createElement('span'); bg.className = 'dcart-bg'; bg.setAttribute('aria-hidden', 'true'); ct.insertBefore(bg, ct.firstChild); }
+        if (!sv) { sv = document.createElementNS(NS, 'svg'); sv.setAttribute('class', 'dcart-ring'); sv.setAttribute('aria-hidden', 'true'); sv.innerHTML = '<path/>'; ct.insertBefore(sv, bg.nextSibling); }
+        var ring = sv.firstChild;
+        var ringCol = getComputedStyle(ct).getPropertyValue('--cta-ring-c');
+        var ringOn = !/^\s*$|transparent|rgba\(0, 0, 0, 0\)/.test(ringCol);
+        var W = ct.offsetWidth, H = ct.offsetHeight, R0 = Math.min(H / 2, parseFloat(getComputedStyle(ct).borderTopLeftRadius) || 16), E = Math.max(0, W - 2 * R0);
+        var pts = [], i, a, nx = Math.max(2, Math.round(E / 3)), nc = 14;
+        for (i = 0; i <= nx; i++) pts.push([R0 + E * i / nx, 0, -1]);
+        for (i = 1; i <= nc; i++) { a = -Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a)]); }
+        for (i = 1; i <= nc; i++) { a = Math.PI / 2 * i / nc; pts.push([W - R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a)]); }
+        for (i = 1; i <= nx; i++) pts.push([W - R0 - E * i / nx, H, 1]);
+        for (i = 1; i <= nc; i++) { a = Math.PI / 2 + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), H - R0 + R0 * Math.sin(a), Math.sin(a)]); }
+        for (i = 1; i < nc; i++) { a = Math.PI + Math.PI / 2 * i / nc; pts.push([R0 + R0 * Math.cos(a), R0 + R0 * Math.sin(a), Math.sin(a)]); }
+        var OM = .15 * H, IM = .1 * H;
+        var sat = function (v) { return v > 0 ? OM * Math.tanh(v / OM) : IM * Math.tanh(v / IM); };
+        var stop = function () {
+            cancelAnimationFrame(st.raf); st.raf = 0; st.list = [];
+            ct.classList.remove('is-wave');
+            bg.style.webkitClipPath = bg.style.clipPath = '';
+            if (ring) ring.removeAttribute('d');
+        };
+        var frame = function (now) {
+            if (!bg.isConnected || !ct.isConnected) { stop(); return; }
+            var fs = [], k, still = true;
+            st.list = st.list.filter(function (w) { return now - w.t0 < w.end; });
+            st.list.forEach(function (w) { var f = w.f(now - w.t0); if (f) fs.push(f); });
+            var edge = function (x) {
+                var t = 0, b = 0, v;
+                for (k = 0; k < fs.length; k++) { v = fs[k](x); t += v[0]; b += v[1]; }
+                return [sat(t), sat(b)];
+            };
+            var cp = '', rd = '', j, p, e, y, cache = {};
+            for (j = 0; j < pts.length; j++) {
+                p = pts[j]; e = cache[p[0]] || (cache[p[0]] = edge(p[0]));
+                y = p[2] < 0 ? p[1] + p[2] * e[0] : p[1] + p[2] * e[1];
+                if (Math.abs(y - p[1]) > .04) still = false;
+                cp += (j ? 'L' : 'M') + p[0].toFixed(1) + ' ' + (y + DC_PAD).toFixed(1);
+                if (ringOn) rd += (j ? 'L' : 'M') + p[0].toFixed(1) + ' ' + y.toFixed(2);
+            }
+            bg.style.webkitClipPath = bg.style.clipPath = 'path("' + cp + 'Z")';
+            if (ringOn) ring.setAttribute('d', rd + 'Z');
+            if (!st.list.length && still) { stop(); return; }
+            st.raf = requestAnimationFrame(frame);
+        };
+        ct.classList.add('is-wave');
+        frame(performance.now());
     }
     function homeFloatLaunchMagnet(ct) {
         if (!homeFloatEl || homeFloatDocking) return;
         if (fxOff() || !ct) { homeFloatHide(true); return; }
+        homeDropStop();
         homeFloatDocking = true;
         var el = homeFloatEl, bag = el.querySelector('.dfcart__bag'), cnt = el.querySelector('.dfcart__n');
         el.classList.add('is-morphing');
@@ -768,7 +816,7 @@ window.cleverDesk = function (A) {
         el.style.left = (cx0 - 29).toFixed(1) + 'px';
         el.style.top = (cy0 - 29).toFixed(1) + 'px';
         el.style.transform = '';
-        var t0 = performance.now(), D = 360, absorbed = false;
+        var t0 = performance.now(), D = 380, absorbed = false;
         (function step(now) {
             if (!homeFloatDocking) return;
             var u = Math.min(1, (now - t0) / D);
@@ -781,25 +829,22 @@ window.cleverDesk = function (A) {
                 homeFloatResetStyle();
                 return;
             }
-            // магнитное ускорение: капля срывается и разгоняется прямо в правый край чёрной плашки #cartTab
+            // магнитное ускорение: живая волнистая капля срывается и влетает в правый край #cartTab
             var e = Math.pow(u, 1.85);
-            var tcx = tx + tw - 24, tcy = ty + th / 2;
+            var tcx = tx + tw - 18, tcy = ty + th / 2;
             var arcY = Math.sin(u * Math.PI) * 10;
             var cx = cx0 + (tcx - cx0) * e;
             var cy = cy0 + (tcy - cy0) * e + arcY;
-            var angDeg = Math.atan2(tcy - cy, tcx - cx) * 180 / Math.PI;
-            if (u > .88) angDeg = Math.atan2(tcy - cy0, tcx - cx0) * 180 / Math.PI;
-            // в полёте капля вытягивается ещё сильнее и к моменту входа сужается в «струйку»
-            var spk = Math.sin(u * Math.PI);
-            var sx = 1.24 + spk * .34 - Math.max(0, u - .7) * 1.4;
-            var sy = .89 - spk * .24 - Math.max(0, u - .7) * .6;
+            var ang = u < .88 ? Math.atan2(tcy - cy, tcx - cx) : Math.atan2(tcy - cy0, tcx - cx0);
+            var nose = 13 + Math.sin(u * Math.PI) * 9;
+            var sc = 1 - Math.max(0, u - .62) * 1.45;
             el.style.left = (cx - 29).toFixed(1) + 'px';
             el.style.top = (cy - 29).toFixed(1) + 'px';
-            homeDropShape(1, angDeg, Math.max(.45, sx), Math.max(.38, sy));
-            if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 1.8));
-            if (cnt) cnt.style.opacity = String(Math.max(0, 1 - u * 2.2));
+            homeDropRender(now, 1, ang, nose, 1.35, Math.max(.42, sc));
+            if (bag) bag.style.opacity = String(Math.max(0, 1 - u * 1.9));
+            if (cnt) cnt.style.opacity = String(Math.max(0, 1 - u * 2.3));
             if (u > .74) el.style.opacity = String(Math.max(0, 1 - (u - .74) / .26));
-            // момент влёта в плашку — запускаем случайный эффект воды на #cartTab
+            // момент касания — запускаем мягкую водную волну справа налево по контуру #cartTab
             if (!absorbed && u >= .76) {
                 absorbed = true;
                 homeCartWaterImpact(ct);
@@ -864,25 +909,26 @@ window.cleverDesk = function (A) {
             return;
         }
         if (homeFloatDocking || !homeFloatEl) return;
-        // подкатываем вверх: в зоне −80…+18 px кружок постепенно превращается в каплю, нацеленную на #cartTab, а затем срывается в неё
+        // подкатываем вверх: в зоне −110…+18 px кружок оживает водными волнами и вытягивается каплей к #cartTab, а затем влетает в неё
         if (ctTop >= 18 || hs.scrollTop <= 48) {
             homeFloatLaunchMagnet(ct);
             return;
         }
-        if (ctTop > -80) {
-            var pull = Math.max(0, Math.min(1, (ctTop + 80) / 98));
-            var e = Math.pow(pull, 1.25);
+        if (ctTop > -110) {
+            var pull = Math.max(0, Math.min(1, (ctTop + 110) / 128));
+            var e = Math.pow(pull, 1.15);
             var cr = ct.getBoundingClientRect(), ar = app.getBoundingClientRect();
-            var tcx = cr.left - ar.left + cr.width - 24, tcy = cr.top - ar.top + cr.height / 2;
+            var tcx = cr.left - ar.left + cr.width - 18, tcy = cr.top - ar.top + cr.height / 2;
             var baseCx = ar.width - 24 - 29, baseCy = 22 + 29;
             var dx = tcx - baseCx, dy = tcy - baseCy, dist = Math.hypot(dx, dy) || 1;
-            var angDeg = Math.atan2(dy, dx) * 180 / Math.PI;
-            var move = Math.min(24, dist * .14) * e;
+            var move = Math.min(26, dist * .15) * e;
             homeFloatEl.style.transform = 'translate(' + (dx / dist * move).toFixed(1) + 'px,' + (dy / dist * move).toFixed(1) + 'px)';
-            homeDropShape(e, angDeg);
+            homeDropSt.target = e;
+            homeDropSt.ang = Math.atan2(dy, dx);
+            homeDropWake();
         } else {
             homeFloatEl.style.transform = '';
-            homeDropShape(0, 0);
+            homeDropSt.target = 0;
         }
     }
     var homeScrEl = document.getElementById('s-home');

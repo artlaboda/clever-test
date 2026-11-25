@@ -78,41 +78,55 @@ html.desk #cartTab .tab__badge { position: static; margin: 0 0 0 2px; order: 3; 
 /* 12.11, позже: «кнопка корзины стала очень большой, а цифра — очень далеко; даже пустая — несуразно большая». Кнопка снова
    компактная: пакет и сумма; число позиций — значком на пакете (не занимает места в строке). Ширина — не меньше, чем у
    «Мой заказ», поэтому от пустой корзины до сумм вида 999,99 Б кнопка одной ширины — шапка не сдвигается */
-html.desk #cartTab { position: relative; justify-content: flex-start; min-width: 150px; gap: 10px; padding: 0 18px 0 16px; }
+html.desk #cartTab { position: relative; justify-content: flex-start; min-width: 150px; gap: 10px; padding: 0 18px 0 16px; transition: color .2s, transform .2s var(--dease); }
 /* число позиций — у правого верхнего угла пакета, левее ручки не заходит (12.11: «при двойной цифре не видно ручки, даже
    кусочка»); двузначное растёт вправо — в промежуток до суммы (он шире, когда есть сумма) */
 html.desk #cartTab.has-sum { gap: 20px; }
 html.desk #cartTab .tab__badge { position: absolute; left: 31px; right: auto; top: 4px; margin: 0; min-width: 18px; height: 18px; padding: 0 5px;
     font: 750 10.5px/18px var(--font); box-shadow: 0 0 0 2px var(--cta); }
-html.desk #cartTab > span:last-child { white-space: nowrap; }
-/* 25.11: плавающая круглая корзина на главной (.dfcart) — при подъезде вверх .dfcart__drop вытягивается в каплю
-   носиком к #cartTab и влетает в неё; на #cartTab пробегает волна (.dcart-wave) и крошечные брызги (.dcart-splash) */
+html.desk #cartTab > span:last-child, html.desk #cartTab #cartLabel { white-space: nowrap; }
+html.desk #cartTab.has-sum #cartLabel { font-weight: 750; font-variant-numeric: proportional-nums; }
+html.desk #cartTab > :not(.dcart-bg):not(.dcart-ring):not(.tab__badge) { position: relative; z-index: 1; }
+html.desk #cartTab > .tab__badge { z-index: 2; }
+html.desk #cartTab.is-wave { background: transparent !important; box-shadow: none !important; }
+html.desk .dcart-bg {
+    position: absolute; left: 0; right: 0; top: -16px; bottom: -16px; z-index: 0;
+    display: none; pointer-events: none; background: var(--cta);
+}
+html.desk .dcart-ring {
+    position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 0;
+    overflow: visible; display: none; pointer-events: none;
+}
+html.desk .dcart-ring path { fill: none; stroke: var(--cta-ring-c, transparent); stroke-width: 1px; }
+html.desk #cartTab.is-wave > .dcart-bg,
+html.desk #cartTab.is-wave > .dcart-ring { display: block; }
+/* 25.11: плавающая круглая корзина на главной (.dfcart) — SVG-капля .dfcart__svg оживает волнами при подъезде вверх */
 html.desk .dfcart {
     position: absolute; top: 22px; right: 24px; z-index: 9;
     width: 58px; height: 58px; padding: 0; border: 0;
-    background: none; color: var(--on-cta);
+    background: none; color: var(--on-cta); overflow: visible;
     transition: opacity .22s ease;
     will-change: transform, left, top, opacity;
 }
 html.desk .dfcart[hidden] { display: none; }
 html.desk .app[data-dtop="drawer"] .dfcart { opacity: 0; pointer-events: none; }
 html.desk .dfcart__in {
-    position: relative; display: block; width: 100%; height: 100%;
+    position: relative; display: block; width: 100%; height: 100%; overflow: visible;
     transition: transform .24s var(--dease);
 }
 html.desk .dfcart:not(.is-morphing):hover .dfcart__in { transform: scale(1.07); }
 html.desk .dfcart:not(.is-morphing):active .dfcart__in { transform: scale(.94); }
 html.desk .dfcart.is-morphing { pointer-events: none; transition: none; }
-html.desk .dfcart__drop {
-    position: absolute; inset: 0; border-radius: 50%;
-    background: var(--cta);
-    box-shadow: var(--cta-ring, 0 0 #0000), 0 14px 30px -8px rgba(20, 12, 8, .45), 0 4px 12px -4px rgba(20, 12, 8, .22);
-    transition: box-shadow .24s var(--dease);
-    will-change: transform, border-radius;
+html.desk .dfcart__svg {
+    position: absolute; left: -26px; top: -26px; width: 110px; height: 110px;
+    overflow: visible; pointer-events: none;
+    filter: drop-shadow(0 12px 18px rgba(20, 12, 8, .32)) drop-shadow(0 3px 6px rgba(20, 12, 8, .18));
+    transition: filter .24s var(--dease);
 }
-html.desk .dfcart:not(.is-morphing):hover .dfcart__drop {
-    box-shadow: var(--cta-ring, 0 0 #0000), 0 18px 36px -8px rgba(20, 12, 8, .55), 0 6px 14px -4px rgba(20, 12, 8, .28);
+html.desk .dfcart:not(.is-morphing):hover .dfcart__svg {
+    filter: drop-shadow(0 16px 24px rgba(20, 12, 8, .42)) drop-shadow(0 4px 8px rgba(20, 12, 8, .22));
 }
+html.desk .dfcart__p { fill: var(--cta); stroke: none; }
 html.desk .dfcart__ring {
     position: absolute; inset: 0; border-radius: 50%; pointer-events: none; opacity: 0;
     box-shadow: inset 0 0 0 2px var(--brand), 0 0 0 2px rgba(255, 59, 59, .55);
@@ -129,33 +143,15 @@ html.desk .dfcart__n {
     box-shadow: 0 0 0 2px var(--cta); pointer-events: none;
 }
 html.desk .dfcart__n[hidden] { display: none; }
-/* внутренняя волна воды и брызги на #cartTab при влёте капли */
-html.desk .dcart-wave {
-    position: absolute; inset: 0; border-radius: inherit; overflow: hidden; pointer-events: none; z-index: 3;
+html.desk[data-theme="dark"] .dfcart__svg {
+    filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .65)) drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
 }
-html.desk .dcart-wave__s {
-    position: absolute; top: -18%; bottom: -18%; left: 0; width: 68%; display: block;
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .2) 48%, rgba(255, 255, 255, .06) 72%, transparent 100%);
-    will-change: transform, opacity;
-}
-html.desk .dcart-splash {
-    position: absolute; z-index: 9; border-radius: 50%; pointer-events: none;
-    background: var(--cta); box-shadow: var(--cta-ring, 0 0 #0000);
-    will-change: transform, opacity;
-}
-html.desk[data-theme="dark"] .dfcart__drop {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 16px 36px -8px rgba(0, 0, 0, .75), 0 2px 10px rgba(0, 0, 0, .45);
-}
-html.desk[data-theme="dark"] .dcart-wave__s {
-    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .16) 48%, rgba(255, 255, 255, .04) 72%, transparent 100%);
-}
+html.desk[data-theme="dark"] .dfcart__p { stroke: rgba(255, 255, 255, .2); stroke-width: 1px; }
 @media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) .dfcart__drop {
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 16px 36px -8px rgba(0, 0, 0, .75), 0 2px 10px rgba(0, 0, 0, .45);
+    html.desk:not([data-theme="light"]) .dfcart__svg {
+        filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .65)) drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
     }
-    html.desk:not([data-theme="light"]) .dcart-wave__s {
-        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .16) 48%, rgba(255, 255, 255, .04) 72%, transparent 100%);
-    }
+    html.desk:not([data-theme="light"]) .dfcart__p { stroke: rgba(255, 255, 255, .2); stroke-width: 1px; }
 }
 /* окно входа на десктопе: цифры номера, кода и «Отправили на …» — обычные, без разрядки (12.11: «сделай обычные цифры без
    разрядки на десктопе»). Маска номера — тем же шрифтом, набранная часть в ней прозрачная, поэтому совпадает с полем и так.
