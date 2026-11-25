@@ -2415,12 +2415,12 @@ test('«Поиск»: недавние, «Сейчас ищут», кухни; �
 test('таб-бар: значки по частям — касание вкладки играет эффект из «Вариантов» (по 5 на значок и «Как было»), частицы уходят; выбранная — заливкой или точкой', '07.11: «давай сделаем нижний бар на главной понаряднее: сейчас там просто иконки без эффектов, а весь сайт — с эффектами; хотя бы по 5 эффектов для каждой из иконок, в настройках; наведи красоту». В «Вариантах» — строки «Таб-бар: значок «Главная» / «Профиль» / «Поиск» / «Избранное» / «Мой заказ»» (по 5 эффектов и «Как было») и «Таб-бар: выбранная вкладка» (заливка, точка, как было). Для каждого из 25 эффектов: эффект значка — анимации у частей значка (или частицы в слое эффектов: пар, сердечки, искры, монетки — через 1,6 с их нет), в ключевых кадрах — только transform, opacity и прорисовка линии (композитор). «Как было» — ни одной анимации. Касание вкладки «Избранное» — тот же эффект (по умолчанию «Стук»). Выбранная «Избранное» с «Заливкой» — у сердца заливка (не прозрачная), у невыбранных — нет; «Точка» — точка под подписью', async () => {
     const bad = [], out = [];
     // 08.11: новые — «Точки», «Наклон», «Мерцание», «Подача», «Подмигивает», «По кругу», «Мягкое желе»
-    const V = { home: ['tbh', ['dots', 'tilt', 'twinkle', 'serve', 'slice', 'rain', 'stretch', 'spin', 'steam']], profile: ['tbp', ['wink', 'hello', 'nod', 'hop', 'ring', 'draw']], search: ['tbs', ['orbit', 'look', 'glint', 'zoom', 'wiggle', 'draw']], fav: ['tbf', ['soft', 'beat', 'burst', 'fill', 'jelly', 'sparks']], cart: ['tbc', ['shake', 'lift', 'hop', 'jelly', 'coins']] };
+    const V = { home: ['tbh', ['dots', 'tilt', 'twinkle', 'serve', 'slice', 'rain', 'stretch', 'spin', 'steam']], profile: ['tbp', ['wink', 'hello', 'nod', 'hop', 'ring', 'draw']], search: ['tbs', ['orbit', 'look', 'glint', 'zoom', 'wiggle', 'draw']], fav: ['tbf', ['soft', 'beat', 'burst', 'fill', 'jelly', 'sparks']], cart: ['tbc', ['bounce', 'shake', 'lift', 'hop', 'jelly', 'coins']] };
     const m = await open();
     await openDev(m);
     const rows = await m.evaluate(() => { const o = {}; ['tbh', 'tbp', 'tbs', 'tbf', 'tbc', 'tbsel'].forEach(k => { o[k] = document.querySelectorAll('#s-dev .appseg [data-act="fxv"][data-k="' + k + '"]').length; }); return o; });
-    if (rows.tbh !== 10 || ['tbp', 'tbs', 'tbf'].some(k => rows[k] !== 7) || rows.tbc !== 6 || rows.tbsel !== 4) bad.push('строки «Вариантов»: ' + JSON.stringify(rows));
-    out.push('строки: «Главная» — 10, профиль, поиск, избранное — по 7, заказ — 6, выбранная — 4');
+    if (rows.tbh !== 10 || ['tbp', 'tbs', 'tbf'].some(k => rows[k] !== 7) || rows.tbc !== 7 || rows.tbsel !== 4) bad.push('строки «Вариантов»: ' + JSON.stringify(rows));
+    out.push('строки: «Главная» — 10, профиль, поиск, избранное и заказ — по 7, выбранная — 4');
     const seen = [];
     for (let i = 0; i <= 9; i++) {
         const fxv = {}; for (const t in V) fxv[V[t][0]] = i < 9 ? V[t][1][i] || 'old' : 'old';
@@ -2445,8 +2445,8 @@ test('таб-бар: значки по частям — касание вкла�
             seen.push(t + ':' + v);
         }
     }
-    if (seen.length !== 32) bad.push('эффектов сыграло ' + seen.length + ' из 32');
-    out.push('эффектов сыграло ' + seen.length + ' из 32, «Как было» — тихо');
+    if (seen.length !== 33) bad.push('эффектов сыграло ' + seen.length + ' из 33');
+    out.push('эффектов сыграло ' + seen.length + ' из 33, «Как было» — тихо');
     // касание вкладки — тот же эффект; выбранная — заливка / точка
     await m.evaluate(() => localStorage.setItem('clever2-fxv', JSON.stringify({}))); await m.reload(); await m.waitForTimeout(1300);
     const tapA = await m.evaluate(() => { const tab = document.querySelector('.tab[data-tab="fav"]'), svg = tab.querySelector('svg.tbi'); tab.click(); return document.getAnimations().filter(a => a.effect && a.effect.target && svg.contains(a.effect.target)).length; });
@@ -2605,6 +2605,42 @@ test('шторка адреса: «Недавние адреса» раскры�
     out.push('подсказка погасла за ' + r.tipGone + ' мс, анимаций раскладки ' + r.layout.length + ', строки — одной записью, адресов ' + r.rows + ', высота на ходу ' + r.hMin + '–' + r.hEnd + ' px, строки не наложены');
     if (m._errs.length) bad.push('ошибки: ' + m._errs.join('; '));
     await m._close();
+    return { pass: !bad.length, detail: out.join('; ') + (bad.length ? '; ✗ ' + bad.join('; ') : '') };
+});
+test('«Мой заказ»: касание — мягкий подскок (ручка вверх, пакет подпрыгивает и приземляется), без качания; на десктопе панель выезжает после приземления; «Встряхнуть» — один раз на «Подскок»', '25.11: «Иконка в плашке с корзиной сверху (Мой заказ) ведёт себя некрасиво при клике. Трясётся, как будто это какое-то негативное действие… Ручка приподнимается немного, например, и корзина чуть-чуть подпрыгивает вверх и опускается с баунсом»', async () => {
+    const bad = [], out = [];
+    // пакет (.bag вместе с заливкой) и ручка — по кадрам: высота подскока, наклона нет
+    const hop = m => m.evaluate(() => new Promise(res => { const tab = document.getElementById('cartTab'), bag = tab.querySelector('.bag'), h = tab.querySelector('.tbi__handle'), o = { up: 0, hu: 0, rot: 0, land: 0, t: 0 }, t0 = performance.now();
+        const f = () => { const u = performance.now() - t0, a = new DOMMatrix(getComputedStyle(bag).transform), b = new DOMMatrix(getComputedStyle(h).transform);
+            o.up = Math.min(o.up, a.f); o.hu = Math.min(o.hu, b.f); o.rot = Math.max(o.rot, Math.abs(a.b), Math.abs(b.b)); if (a.f > -.6 && a.d < .985 && u > 150) o.land = 1; if (u < 1100) requestAnimationFrame(f); else { o.t = bag.getAnimations().length; res(o); } };
+        requestAnimationFrame(f); tab.click(); }));
+    const m = await open();
+    await m.evaluate(() => { localStorage.removeItem('clever2-tbc2511'); localStorage.setItem('clever2-fxv', JSON.stringify({ tbc: 'shake' })); }); await m.reload(); await m.waitForTimeout(1500);
+    const mig = await m.evaluate(() => JSON.parse(localStorage.getItem('clever2-fxv')).tbc);
+    if (mig !== 'bounce') bad.push('«Встряхнуть» не перевели: ' + mig);
+    await m.evaluate(() => { const o = JSON.parse(localStorage.getItem('clever2-fxv')); o.tbc = 'shake'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); }); await m.reload(); await m.waitForTimeout(1500);
+    const again = await m.evaluate(() => JSON.parse(localStorage.getItem('clever2-fxv')).tbc);
+    if (again !== 'shake') bad.push('выбранное вручную «Встряхнуть» перевели снова: ' + again);
+    await m.evaluate(() => localStorage.setItem('clever2-fxv', JSON.stringify({}))); await m.reload(); await m.waitForTimeout(1500);
+    const p = await hop(m);
+    if (p.up > -3.5 || p.up < -5 || p.hu > -1.4 || p.rot > .001 || !p.land || p.t) bad.push('телефон: ' + JSON.stringify(p));
+    out.push('перевели «Встряхнуть» → ' + mig + ', выбранное вручную — осталось; телефон: пакет вверх на ' + (-p.up).toFixed(1) + ' px, ручка ещё на ' + (-p.hu).toFixed(1) + ' px, наклона нет, приземлился со сплющиванием');
+    if (m._errs.length) bad.push('ошибки: ' + m._errs.join('; '));
+    await m._close();
+    // десктоп: панель наезжает на кнопку — выезжает через 0,3 с, когда пакет уже приземляется; второй щелчок в эти 0,3 с — не в счёт
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: 'ru-RU' }), d = await ctx.newPage(), errs = [];
+    d.on('pageerror', e => errs.push(e.message));
+    await d.goto(URL); await d.evaluate(() => { localStorage.clear(); localStorage.setItem('clever2-city', 'minsk'); localStorage.setItem('clever2-auth', '1'); }); await d.reload(); await d.waitForTimeout(900);
+    if (await d.isVisible('#splash')) await d.click('#splash'); await d.waitForTimeout(2600);
+    const r = await d.evaluate(() => new Promise(res => { const tab = document.getElementById('cartTab'), bag = tab.querySelector('.bag'), sc = document.getElementById('s-cart'), W = innerWidth, o = { up: 0, cover: 0, open: 0 }, t0 = performance.now();
+        const f = () => { const u = performance.now() - t0, a = new DOMMatrix(getComputedStyle(bag).transform), left = sc.getBoundingClientRect().left;
+            o.up = Math.min(o.up, a.f); if (!o.open && left < W - 1) o.open = Math.round(u); if (!o.cover && left < tab.getBoundingClientRect().right) o.cover = Math.round(u);
+            if (u < 1200) requestAnimationFrame(f); else { o.stack = __p.S.stack.slice(); res(o); } };
+        requestAnimationFrame(f); tab.click(); setTimeout(() => tab.click(), 120); }));
+    if (r.up > -3.5 || r.open < 260 || r.open > 420 || r.cover < 330 || JSON.stringify(r.stack) !== '["cart"]') bad.push('десктоп: ' + JSON.stringify(r));
+    out.push('десктоп: пакет вверх на ' + (-r.up).toFixed(1) + ' px, панель поехала через ' + r.open + ' мс, закрыла кнопку через ' + r.cover + ' мс; второй щелчок — не в счёт (' + r.stack.join(',') + ')');
+    if (errs.length) bad.push('ошибки: ' + errs.join('; '));
+    await ctx.close();
     return { pass: !bad.length, detail: out.join('; ') + (bad.length ? '; ✗ ' + bad.join('; ') : '') };
 });
 test('таб-бар: прежние значения по умолчанию (158) — один раз на новые: «Без заливки», «Точки», «Подмигивает», «По кругу», «Мягкое желе»; выбранное вручную — не трогаем', '08.11: «иконки в главном баре не надо заполнять серым; внеси это в настройки» и «давай ещё варианты… аккуратнее». Варианты хранятся целиком (clever2-fxv) — прежние значения по умолчанию сохранились у всех, кто что-то менял. Сохранено {tbsel: fill, tbh: slice, tbp: hello, tbs: look, tbf: beat, tbc: lift}: после загрузки — line, dots, wink, orbit, soft, а «Ручки» у пакета — как были; в хранилище — то же; второй раз не переводит (выбрали «Заливку» снова — остаётся). Выбранная вкладка без заливки: у сердца fill прозрачный, линия толще (2,25). Ошибок нет', async () => {
