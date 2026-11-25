@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '25.11 · 23:53';
+    var BUILD = '26.11 · 00:02';
 
     /* ── состояние ── */
     var S = {
@@ -19971,14 +19971,28 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
                 var a = tbA(p.g, [{ transform: 'rotate(0)' }, { transform: 'rotate(-14deg)', offset: .18 }, { transform: 'rotate(11deg)', offset: .38 }, { transform: 'rotate(-7deg)', offset: .58 }, { transform: 'rotate(3deg)', offset: .78 }, { transform: 'rotate(0)' }], { duration: 700, easing: 'ease-in-out' });
                 if (a) a.onfinish = a.oncancel = function () { p.g.style.transformOrigin = ''; };
             },
-            // ручки: пакет поднимают за ручки и ставят, он пружинит
-            lift: function (p, t) {   // 25.11: пакет движется вместе с заливкой (.bag), а не один контур
+            // ручки: пакет мягко приподнимают за ручки и бережно ставят обратно с плавным успокоением
+            lift: function (p, t) {   // 25.11: пакет движется вместе с заливкой (.bag), а не один контур; мягкие физические кривые без рывков
+                var D = deskOn() ? 780 : 860;
                 var bag = (t && t.querySelector('.bag')) || p.q('bagb')[0];
-                tbAll(p.q('handle'), [{ transform: 'none' }, { transform: 'translateY(-1.8px) scale(1, 1.175)', offset: .3 }, { transform: 'translateY(-.7px)', offset: .55 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
+                tbAll(p.q('handle'), [
+                    { transform: 'none', easing: 'cubic-bezier(.22, .82, .36, 1)' },
+                    { transform: 'translateY(-1.45px) scale(1, 1.11)', offset: .36, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+                    { transform: 'translateY(-.35px) scale(1, 1.02)', offset: .66, easing: 'cubic-bezier(.33, .65, .45, 1)' },
+                    { transform: 'translateY(.2px) scale(1, .985)', offset: .84, easing: 'ease-out' },
+                    { transform: 'none' }
+                ], { duration: D });
                 bag.style.transformOrigin = '50% 100%';
-                var a = tbA(bag, [{ transform: 'none' }, { transform: 'translateY(-1.6px)', offset: .3 }, { transform: 'translateY(.6px) scale(1.05, .94)', offset: .62 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
+                var a = tbA(bag, [
+                    { transform: 'none', easing: 'cubic-bezier(.33, 0, .5, 1)' },
+                    { transform: 'translateY(.35px) scale(1.022, .978)', offset: .14, easing: 'cubic-bezier(.22, .85, .36, 1)' },
+                    { transform: 'translateY(-1.35px) scale(.988, 1.015)', offset: .44, easing: 'cubic-bezier(.42, 0, .58, 1)' },
+                    { transform: 'translateY(.45px) scale(1.032, .966)', offset: .7, easing: 'cubic-bezier(.3, .7, .4, 1)' },
+                    { transform: 'translateY(-.2px) scale(.995, 1.006)', offset: .87, easing: 'ease-out' },
+                    { transform: 'none' }
+                ], { duration: D });
                 if (a) a.onfinish = a.oncancel = function () { bag.style.transformOrigin = ''; };
-                return deskOn() ? 300 : 0;
+                return deskOn() ? 320 : 0;
             },
             hop: function (p) { p.g.style.transformOrigin = '50% 100%'; var a = tbA(p.g, HOP, { duration: 640, easing: 'ease-in-out' }); if (a) a.onfinish = a.oncancel = function () { p.g.style.transformOrigin = ''; }; },
             jelly: function (p) { p.g.style.transformOrigin = '50% 100%'; var a = tbA(p.g, JEL, { duration: 640, easing: 'ease-in-out' }); if (a) a.onfinish = a.oncancel = function () { p.g.style.transformOrigin = ''; }; },
