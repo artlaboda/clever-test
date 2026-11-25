@@ -1247,18 +1247,23 @@ window.cleverDesk = function (A) {
         var p2x0 = (cr0.left - ar0.left) + tw0 * rx, p2y0 = (cr0.top - ar0.top) + th0 * ry;
         var dist0 = Math.hypot(p2x0 - p0x, p2y0 - p0y) || 1;
         var bend = (near ? R(22, 34) : R(12, 26)) * (Math.random() < .5 ? 1 : -1);
-        var t0 = performance.now(), D = Math.min(440, Math.max(300, 220 + dist0 * .45)), DRAIN = 150;
+        var t0 = null, D = Math.min(440, Math.max(300, 220 + dist0 * .45)), DRAIN = 150;
         var tailMs = 165, tailMax = Math.max(58, Math.min(280, dist0 * .9)), ph = R(0, 6.28);
         var initAng = pull0 > .05 ? ang0 : Math.atan2(p2y0 - p0y, p2x0 - p0x);
-        // кладём в историю заднюю кромку самой плашки (−29 px): хвост рождается прямо из её спины без отрезания
-        var hist = [
-            { x: p0x - Math.cos(initAng) * 29, y: p0y - Math.sin(initAng) * 29, t: t0 - 115 },
-            { x: p0x, y: p0y, t: t0 }
-        ];
+        var hist = null;
         var absorbed = false, uHit = 1, lastAng = initAng;
         var fly = null, flyPath = null;
         homeFloatRaf = requestAnimationFrame(function step(now) {
             if (!homeFloatDocking || !ct.isConnected) return;
+            // t0 берём строго из первого rAF-кадра: в Chrome now может быть меньше performance.now() из scroll,
+            // из-за чего раньше tt < 0 давало Math.pow(u, 1.85) === NaN и отравляло hist на 165 мс (кружок исчезал!)
+            if (t0 === null) {
+                t0 = now;
+                hist = [
+                    { x: p0x - Math.cos(initAng) * 29, y: p0y - Math.sin(initAng) * 29, t: t0 - 115 },
+                    { x: p0x, y: p0y, t: t0 }
+                ];
+            }
             var ar = app.getBoundingClientRect(), cr = ct.getBoundingClientRect();
             var offX = cr.left - ar.left, offY = cr.top - ar.top, tw = cr.width || tw0, th = cr.height || th0;
             // цель отслеживает живое положение #cartTab (скролл вверх не сдвигает плашку с места!)
@@ -1266,7 +1271,7 @@ window.cleverDesk = function (A) {
             var ddx = p2x - p0x, ddy = p2y - p0y, dist = Math.hypot(ddx, ddy) || 1;
             var p1x = (p0x + p2x) * .5 + (-ddy / dist) * bend;
             var p1y = (p0y + p2y) * .5 + (ddx / dist) * bend;
-            var tt = now - t0, u = Math.min(1, tt / D);
+            var tt = Math.max(0, now - t0), u = Math.max(0, Math.min(1, tt / D));
             // мягкий ненулевой старт: плашка трогается сразу с первого кадра и сама вытягивается в комету
             var e = .14 * u + .86 * Math.pow(u, 1.85), ie = 1 - e;
             var cx = u < 1 ? (ie * ie * p0x + 2 * ie * e * p1x + e * e * p2x) : p2x;
@@ -1274,7 +1279,7 @@ window.cleverDesk = function (A) {
             var vx = 2 * ie * (p1x - p0x) + 2 * e * (p2x - p1x);
             var vy = 2 * ie * (p1y - p0y) + 2 * e * (p2y - p1y);
             if (u < 1) lastAng = Math.atan2(vy, vx);
-            hist.push({ x: cx, y: cy, t: now });
+            if (tt > 0) hist.push({ x: cx, y: cy, t: now });
             while (hist.length > 2 && hist[0].t < now - 280) hist.shift();
             // локальные координаты головы относительно #cartTab; не срабатываем раньше u >= 0.42, чтобы на ноутбуках
             // (где #cartTab рядом с .dfcart) плашка сначала успела зримо превратиться в каплю, а не исчезла в 1-м кадре
@@ -1297,7 +1302,7 @@ window.cleverDesk = function (A) {
                 homeCartWaterImpact(ct, clX, clY, vx, vy);
                 homeCartSplash(ct, clX, clY, vx, vy);
             }
-            var inP = absorbed ? Math.min(1, (tt / D - uHit) / Math.max(.08, 1 - uHit + DRAIN / D)) : 0;
+            var inP = absorbed ? Math.max(0, Math.min(1, (tt / D - uHit) / Math.max(.08, 1 - uHit + DRAIN / D))) : 0;
             var sc = !absorbed ? 1.0 : Math.max(.22, 1.0 - Math.pow(inP, 1.1) * .78);
             var activePath = absorbed ? flyPath : elPath;
             if (absorbed && fly) {
