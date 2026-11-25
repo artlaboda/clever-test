@@ -370,17 +370,17 @@ window.cleverDesk = function (A) {
     });
     (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
     (function () { var rs = document.getElementById('s-rest'); if (!rs || !window.MutationObserver) return; new MutationObserver(function () { if (deskOn()) { deskPlaceHead(); deskRestMount(); deskPop(); } }).observe(rs, { childList: true }); })();
-    // курьер в карточке заведения: при наведении сразу бежит (crGame('run')) с той же ноги и позы, что статичная иконка #i-courier
-    // (сдвиг цикла на кадр 2, где передняя/задняя нога и руки совпадают с #i-courier); viewBox 19.2×19.2 выровнен под размер 17 px,
-    // keyTimes сглаживают паузы, а на mouseover/mouseout часы SMIL перематываются в 0 — при повторном наведении нет скачка
-    var RUN_KT = '0;0.02;0.0349;0.0539;0.0809;0.1162;0.1562;0.1981;0.2402;0.2814;0.3227;0.3656;0.4091;0.4508;0.4848;0.5073;0.518;0.5286;0.5507;0.5844;0.6282;0.6793;0.7332;0.7841;0.8279;0.8669;0.9049;0.9341;0.9582;0.9726;1';
+    // курьер в карточке заведения: при наведении сразу бежит (crGame('run')) ровно из позы статичной иконки #i-courier
+    // (кадр 22 — максимальное совпадение силуэта, головы, сумки, передней ноги и рук при viewBox 0.7 0.1 19.5 19.5);
+    // begin="indefinite" + beginElement() при каждом наведении гарантирует старт строго с кадра 22 без случайного сдвига фазы SMIL
+    var RUN_KT = '0;0.0511;0.105;0.1559;0.1997;0.2387;0.2767;0.3059;0.33;0.3444;0.3718;0.3918;0.4067;0.4257;0.4527;0.488;0.528;0.5699;0.612;0.6532;0.6945;0.7374;0.7809;0.8226;0.8566;0.8791;0.8898;0.9004;0.9225;0.9562;1';
     function deskRunSvg() {
         return A.crGame('run', { bag: 'red', rate: .86 })
-            .replace('viewBox="0 0 21 21"', 'viewBox="1.6 0.4 19.2 19.2"')
+            .replace('viewBox="0 0 21 21"', 'viewBox="0.7 0.1 19.5 19.5"')
             .replace(/(<path\b[^>]*?\bd=")([^"]*)("[^>]*><animate\b[^>]*?) repeatCount="indefinite" values="([^"]+)"/g, function (m, p1, d0, p3, vals) {
                 var f = vals.split(';'); if (f.length !== 31) return m;
-                var r = f.slice(2, 30).concat(f.slice(0, 2)); r.push(r[0]);
-                return p1 + r[0] + p3 + ' keyTimes="' + RUN_KT + '" repeatCount="indefinite" values="' + r.join(';') + '"';
+                var r = f.slice(22, 30).concat(f.slice(0, 22)); r.push(r[0]);
+                return p1 + r[0] + p3 + ' begin="indefinite" keyTimes="' + RUN_KT + '" repeatCount="indefinite" values="' + r.join(';') + '"';
             });
     }
     app.addEventListener('mouseover', function (e) {
@@ -395,15 +395,21 @@ window.cleverDesk = function (A) {
             c.setAttribute('aria-hidden', 'true');
             c.innerHTML = deskRunSvg();
             m.insertBefore(c, m.firstChild);
+            void c.offsetWidth;
         }
         var sv = c.querySelector('svg');
-        if (sv) { try { if (sv.setCurrentTime) sv.setCurrentTime(0); if (sv.unpauseAnimations) sv.unpauseAnimations(); } catch (er) {} }
+        if (sv) {
+            try {
+                if (sv.unpauseAnimations) sv.unpauseAnimations();
+                [].forEach.call(sv.querySelectorAll('animate'), function (a) { if (a.beginElement) a.beginElement(); });
+            } catch (er) {}
+        }
     });
     app.addEventListener('mouseout', function (e) {
         var r = e.target.closest('.rest'); if (!r || !r._dcr || (e.relatedTarget && r.contains(e.relatedTarget))) return;
         r._dcr = 0;
         var sv = r.querySelector('.dcr svg');
-        if (sv) { try { if (sv.pauseAnimations) sv.pauseAnimations(); if (sv.setCurrentTime) sv.setCurrentTime(0); } catch (er) {} }
+        if (sv) { try { if (sv.pauseAnimations) sv.pauseAnimations(); } catch (er) {} }
     });
     /* 24.11: навигация браузера («Назад» / «Вперёд») на десктопе: переходы на страницу заведения и между вкладками
        пишутся в history.pushState, а нажатие кнопки «Назад» в браузере (или на странице заведения) возвращает обратно */
