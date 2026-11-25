@@ -360,8 +360,9 @@ html.desk .hsnav.is-sm svg { width: 17px; height: 17px; }
 
 /* ── заведение — страница со статичной шапкой и верхней липкой панелью меню с корзиной ── */
 html.desk .screen:not(.is-tab) { --top: 0px; }
-html.desk #s-rest { top: 0; overflow: hidden; overflow: clip; transform: translateY(28px); opacity: 0; transition: transform .45s var(--dease), opacity .3s, visibility 0s linear .45s; }
-html.desk #s-rest.is-on, html.desk #s-rest.is-under { transform: none; opacity: 1; transition: transform .45s var(--dease), opacity .3s, visibility 0s; }
+/* 25.11: на вебе страница заведения открывается как страница сайта — без мобильного выезда справа/снизу и левой тени */
+html.desk #s-rest { top: 0; overflow: hidden; overflow: clip; transform: none !important; opacity: 1; box-shadow: none !important; transition: none !important; }
+html.desk #s-rest.is-on, html.desk #s-rest.is-under { transform: none !important; opacity: 1; transition: none !important; }
 html.desk #restScroll { padding: 0 0 80px; }
 html.desk #s-rest .rglass { display: none !important; }
 html.desk #s-rest .rhero > .rtop { position: absolute; left: 0; right: 0; top: 0; padding: 20px 20px 0 !important; translate: none; }
