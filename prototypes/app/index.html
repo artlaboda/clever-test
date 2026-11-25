@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '26.11 · 00:02';
+    var BUILD = '26.11 · 00:07';
 
     /* ── состояние ── */
     var S = {
@@ -19977,9 +19977,9 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
                 var bag = (t && t.querySelector('.bag')) || p.q('bagb')[0];
                 tbAll(p.q('handle'), [
                     { transform: 'none', easing: 'cubic-bezier(.22, .82, .36, 1)' },
-                    { transform: 'translateY(-1.45px) scale(1, 1.11)', offset: .36, easing: 'cubic-bezier(.45, 0, .55, 1)' },
-                    { transform: 'translateY(-.35px) scale(1, 1.02)', offset: .66, easing: 'cubic-bezier(.33, .65, .45, 1)' },
-                    { transform: 'translateY(.2px) scale(1, .985)', offset: .84, easing: 'ease-out' },
+                    { transform: 'translateY(-.3px) scale(1, 1.05)', offset: .36, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+                    { transform: 'translateY(-.08px) scale(1, 1.01)', offset: .66, easing: 'cubic-bezier(.33, .65, .45, 1)' },
+                    { transform: 'translateY(.08px) scale(1, .99)', offset: .84, easing: 'ease-out' },
                     { transform: 'none' }
                 ], { duration: D });
                 bag.style.transformOrigin = '50% 100%';
