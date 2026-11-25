@@ -88,7 +88,19 @@ html.desk #cartTab > span:last-child, html.desk #cartTab #cartLabel { white-spac
 html.desk #cartTab.has-sum #cartLabel { font-weight: 750; font-variant-numeric: proportional-nums; }
 html.desk #cartTab > :not(.dcart-bg):not(.dcart-ring):not(.dcart-fly):not(.dcart-sp):not(.tab__badge) { position: relative; z-index: 1; }
 html.desk #cartTab > .tab__badge { z-index: 2; }
+/* squircle в светлой теме ставит clip-path на саму #cartTab и обрезал бы вылет капли .dcart-fly, брызги .dcart-sp и гребни
+   волны .dcart-bg — переносим скругление на ::before (как у .nt__ic[data-sq="clip"]), а в тёмной прячем .sq-paint на время волны */
+html.desk #cartTab[data-sq="clip"] {
+    clip-path: none !important; -webkit-clip-path: none !important;
+    border-radius: 16px !important; background: transparent !important; isolation: isolate;
+}
+html.desk #cartTab[data-sq="clip"]::before {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: var(--cta); clip-path: var(--sq); pointer-events: none;
+}
 html.desk #cartTab.is-wave { background: transparent !important; box-shadow: none !important; }
+html.desk #cartTab.is-wave::before,
+html.desk #cartTab.is-wave > .sq-paint { display: none !important; }
 html.desk .dcart-bg {
     position: absolute; left: -12px; right: -12px; top: -22px; bottom: -22px; z-index: 0;
     display: none; pointer-events: none; background: var(--cta);

@@ -937,8 +937,8 @@ window.cleverDesk = function (A) {
         // траектория Безье: заходим с 5 часов (снизу-справа) и быстро врезаемся вверх-влево прямо внутрь #cartTab
         var p2x = tw0 * .62, p2y = th0 * .50;
         var p1x = Math.min(tw0 + 22, Math.max(tw0 * .88, (p0x + tw0 * .74) * .5 + 10));
-        var p1y = Math.min(p0y + 44, Math.max(p0y + 16, th0 + 32));
-        var t0 = performance.now(), D = Math.min(340, Math.max(235, 205 + Math.hypot(p0x - p2x, p0y - p2y) * .32));
+        var p1y = Math.min(th0 + 58, Math.max(p0y + 16, th0 + 30));
+        var t0 = performance.now(), D = Math.min(340, Math.max(245, 215 + Math.hypot(p0x - p2x, p0y - p2y) * .32));
         var absorbed = false, uHit = 1;
         (function step(now) {
             if (!homeFloatDocking || !fly.isConnected) return;
@@ -1028,13 +1028,13 @@ window.cleverDesk = function (A) {
             return;
         }
         if (homeFloatDocking || !homeFloatEl) return;
-        // подкатываем вверх: уже на подлёте (ctTop ≥ −14 px) капля срывается с 5 часов и всей массой врезается в #cartTab
-        if (ctTop >= -14 || hs.scrollTop <= 85) {
+        // подкатываем вверх: как только #cartTab выехала целиком (ctTop ≥ 2 px), капля срывается с 5 часов и всей массой врезается в неё
+        if (ctTop >= 2 || hs.scrollTop <= 69) {
             homeFloatLaunchMagnet(ct);
             return;
         }
-        if (ctTop > -145) {
-            var pull = Math.max(0, Math.min(1, (ctTop + 145) / 131));
+        if (ctTop > -135) {
+            var pull = Math.max(0, Math.min(1, (ctTop + 135) / 137));
             var e = Math.pow(pull, 1.12);
             var cr = ct.getBoundingClientRect(), ar = app.getBoundingClientRect();
             var tcx = cr.left - ar.left + cr.width * .76, tcy = cr.top - ar.top + cr.height * .88;
