@@ -576,7 +576,7 @@ window.cleverDesk = function (A) {
          поднимая брызги и несимметричную, долго стихающую волну по контуру — без transform на самой #cartTab,
          поэтому жирность цены остаётся идеально чёткой */
     var homeFloatEl = null, homeFloatFly = null, homeFloatOn = false, homeFloatDocking = false, homeFloatRaf = 0;
-    var homeDropSt = { pull: 0, target: 0, ang: Math.PI, raf: 0, imp: [] };
+    var homeDropSt = { pull: 0, target: 0, ang: Math.PI, raf: 0, imp: [], E: 0, lastImp: -1e9 };
     var homeFloatLast = (function () {
         var n = A.cartCount ? A.cartCount() : 0;
         var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
@@ -620,25 +620,29 @@ window.cleverDesk = function (A) {
         homeFloatEl = b;
         return b;
     }
-    // живой, каждый раз разный водяной всплеск по контуру круглой плашки .dfcart при прилёте товара (без красных волн)
+    // живой, каждый раз разный водяной всплеск по контуру круглой плашки .dfcart при прилёте товара (без красных волн;
+    // при серии добавлений волны складываются и энергия копится — капля волнуется сильнее)
     function homeDropSplash() {
         if (fxOff() || !homeFloatEl || !homeFloatOn || homeFloatDocking) return;
         var R = function (a, b) { return a + Math.random() * (b - a); }, now = performance.now();
+        homeDropSt.E = homeDropSt.E * Math.exp(-(now - homeDropSt.lastImp) / 1400) + 1;
+        homeDropSt.lastImp = now;
+        var boost = Math.min(1.55, 1 + .25 * (homeDropSt.E - 1));
         // удар преимущественно с левой/нижней стороны (откуда прилетает комета), но со случайным углом и фазами
         var a0 = R(1.75, 3.55), dir = Math.random() < .5 ? 1 : -1;
         homeDropSt.imp.push({
             t0: now,
-            end: R(2150, 2650),
+            end: R(2250, 2750) * Math.min(1.2, .96 + .08 * homeDropSt.E),
             a0: a0,
             dir: dir,
-            amp: R(3.0, 3.9),
-            f0: R(2.35, 3.05), tau0: R(460, 620),
-            f2: R(2.0, 2.65), tau2: R(680, 900), ph2: R(0, 6.28), k2: R(.52, .72),
-            f3: R(2.9, 3.7), tau3: R(580, 780), ph3: R(0, 6.28), k3: R(.38, .56),
-            f4: R(3.8, 4.7), tau4: R(420, 600), ph4: R(0, 6.28), k4: R(.18, .3),
+            amp: R(3.0, 3.9) * boost,
+            f0: R(2.35, 3.05), tau0: R(480, 650),
+            f2: R(2.0, 2.65), tau2: R(700, 940), ph2: R(0, 6.28), k2: R(.52, .72),
+            f3: R(2.9, 3.7), tau3: R(600, 820), ph3: R(0, 6.28), k3: R(.38, .56),
+            f4: R(3.8, 4.7), tau4: R(440, 620), ph4: R(0, 6.28), k4: R(.18, .3),
             spL: R(2.4, 3.3), spR: R(2.0, 2.9)
         });
-        if (homeDropSt.imp.length > 4) homeDropSt.imp.shift();
+        if (homeDropSt.imp.length > 6) homeDropSt.imp.shift();
         homeDropWake();
     }
     function homeFloatPaint(n, sum, pop) {
@@ -713,8 +717,8 @@ window.cleverDesk = function (A) {
                         + a.c4 * Math.cos(4 * da - a.dir * a.om4);
                     impR += loc + run + modes;
                 }
-                // мягкое насыщение, чтобы при серии быстрых кликов капля оставалась упругой и округлой
-                impR = 6.2 * Math.tanh(impR / 6.2);
+                // мягкое насыщение, чтобы при серии быстрых кликов волнение заметно нарастало, но оставалось округлым
+                impR = 8.2 * Math.tanh(impR / 8.2);
             }
             var r = Math.max(6, R0 + nose + pinch + ww + impR);
             pts.push([29 + Math.cos(th) * r, 29 + Math.sin(th) * r]);
@@ -733,6 +737,7 @@ window.cleverDesk = function (A) {
         homeDropSt.pull = 0;
         homeDropSt.target = 0;
         homeDropSt.imp = [];
+        homeDropSt.E = 0;
     }
     function homeDropWake() {
         if (homeDropSt.raf || fxOff()) return;
@@ -1270,8 +1275,8 @@ window.cleverDesk = function (A) {
     }
     function homeFloatShow(mode) {
         if (!homeCanFloat() || !homeCartHidden()) return null;
-        var el = homeFloatEnsure(), wasOn = homeFloatOn;
-        if (homeFloatDocking) {
+        var el = homeFloatEnsure(), wasOn = homeFloatOn, wasDocking = homeFloatDocking;
+        if (wasDocking) {
             homeFloatDocking = false;
             if (homeFloatRaf) { cancelAnimationFrame(homeFloatRaf); homeFloatRaf = 0; }
         }
@@ -1279,7 +1284,7 @@ window.cleverDesk = function (A) {
         el.hidden = false;
         el.classList.remove('is-morphing');
         el.classList.add('is-on');
-        homeFloatResetStyle();
+        if (!wasOn || wasDocking) homeFloatResetStyle();
         if (!wasOn) {
             var inn = el.querySelector('.dfcart__in');
             if (inn) inn.getAnimations().forEach(function (a) { a.cancel(); });
