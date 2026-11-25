@@ -148,14 +148,19 @@ html.desk .dfcart:not(.is-morphing):hover .dfcart__in { transform: scale(1.07); 
 html.desk .dfcart:not(.is-morphing):active .dfcart__in { transform: scale(.94); }
 html.desk .dfcart.is-morphing { pointer-events: none; transition: none; }
 html.desk .dfcart.is-morphing .dfcart__n { display: none !important; }
+html.desk .dfcart.is-morphing .dfcart__sh { opacity: 0; }
+/* тень круглой плашки — чистый radial-gradient без CSS filter:drop-shadow, т.к. Safari при перерисовке
+   анимируемого SVG-path обрезает drop-shadow по квадратному dirty-rect */
+html.desk .dfcart__sh {
+    position: absolute; left: -30px; top: -20px; width: 118px; height: 118px;
+    border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(20, 12, 8, .30) 0%, rgba(20, 12, 8, .18) 38%, rgba(20, 12, 8, .05) 56%, rgba(20, 12, 8, 0) 70%);
+    transition: transform .24s var(--dease), opacity .16s ease;
+}
+html.desk .dfcart:not(.is-morphing):hover .dfcart__sh { transform: translateY(3px) scale(1.08); }
 html.desk .dfcart__svg {
     position: absolute; left: -260px; top: -260px; width: 578px; height: 578px;
     overflow: visible; pointer-events: none;
-    filter: drop-shadow(0 12px 18px rgba(20, 12, 8, .32)) drop-shadow(0 3px 6px rgba(20, 12, 8, .18));
-    transition: filter .24s var(--dease);
-}
-html.desk .dfcart:not(.is-morphing):hover .dfcart__svg {
-    filter: drop-shadow(0 16px 24px rgba(20, 12, 8, .42)) drop-shadow(0 4px 8px rgba(20, 12, 8, .22));
 }
 html.desk .dfcart__p { fill: var(--cta); stroke: none; }
 html.desk .dfcart__bag {
@@ -170,13 +175,13 @@ html.desk .dfcart__n {
     box-shadow: 0 0 0 2px var(--cta); pointer-events: none;
 }
 html.desk .dfcart__n[hidden] { display: none; }
-html.desk[data-theme="dark"] .dfcart__svg {
-    filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .65)) drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
+html.desk[data-theme="dark"] .dfcart__sh {
+    background: radial-gradient(circle, rgba(0, 0, 0, .62) 0%, rgba(0, 0, 0, .36) 40%, rgba(0, 0, 0, .09) 58%, rgba(0, 0, 0, 0) 72%);
 }
 html.desk[data-theme="dark"] .dfcart__p { stroke: rgba(255, 255, 255, .2); stroke-width: 1px; }
 @media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) .dfcart__svg {
-        filter: drop-shadow(0 14px 22px rgba(0, 0, 0, .65)) drop-shadow(0 2px 6px rgba(0, 0, 0, .4));
+    html.desk:not([data-theme="light"]) .dfcart__sh {
+        background: radial-gradient(circle, rgba(0, 0, 0, .62) 0%, rgba(0, 0, 0, .36) 40%, rgba(0, 0, 0, .09) 58%, rgba(0, 0, 0, 0) 72%);
     }
     html.desk:not([data-theme="light"]) .dfcart__p { stroke: rgba(255, 255, 255, .2); stroke-width: 1px; }
 }

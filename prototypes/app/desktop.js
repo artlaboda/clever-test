@@ -608,6 +608,7 @@ window.cleverDesk = function (A) {
         b.setAttribute('aria-label', 'Открыть корзину');
         b.innerHTML =
             '<span class="dfcart__in">' +
+                '<span class="dfcart__sh" aria-hidden="true"></span>' +
                 '<svg class="dfcart__svg" viewBox="-260 -260 578 578" aria-hidden="true"><path class="dfcart__p" d="' + DROP_CIRC + '"/></svg>' +
                 '<span class="dfcart__bag" aria-hidden="true">' + ic('i-bag') + '</span>' +
                 '<span class="dfcart__n num" hidden>0</span>' +
