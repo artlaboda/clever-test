@@ -6561,7 +6561,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '25.11 · 23:34';
+    var BUILD = '25.11 · 23:50';
 
     /* ── состояние ── */
     var S = {
@@ -6594,7 +6594,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
     /* 10.11: «коллеги видят не то, что я — у меня другие настройки; сделай мой выбор у всех по умолчанию» — по строке «Мои настройки →
        Скопировать» владельца. Было иначе: ups embed, hit cup, rmenu glass, dtags old, pcode field, dfoot even, co clean, seg lens, tbh dots,
        tbp wink, dcar deck */
-    var FXV_DEF = { dico: 'facet', deal: 'live', cbar: 'water', tab: 'stack', tail: 'line', num: 'rubber', promo: 'top', fav: 'ya', press: 'grad', ups: 'confetti', dlv: 'sum', rbtn: 'group', rinfo: 'simple', back: 'soft', fwd: 'soft', drate: 'photo', hit: 'medal', tgnew: 'spark', tghot: 'flame', tgchef: 'chef', tgveg: 'leaf', tglean: 'sprout', tggf: 'wheat', tgsale: 'none', rnew: 'none', rsale: 'auto', rgift: 'gift', rmenu: 'flow', dtags: 'one', pcode: 'ticket', cstrike: 'flick', dfoot: 'pill', co: 'bento', seg: 'spring', smoke: 'wisp', pick: 'isles', tbh: 'serve', tbp: 'hello', tbs: 'orbit', tbf: 'soft', tbc: 'bounce', tbsel: 'line', dcar: 'stack', auth: 'dots', akbk: 'sys', akb: 'wave', akbv: 'clean', dcart: 'x', cnum: 'dodo', authcc: 'menu', authhd: 'free', authbot: 'auto', authic: 'none', agnbg: 'warm', lock: 'shield', lockfx: 'ring', hbrk: 'boltash' }, FXV = {};
+    var FXV_DEF = { dico: 'facet', deal: 'live', cbar: 'water', tab: 'stack', tail: 'line', num: 'rubber', promo: 'top', fav: 'ya', press: 'grad', ups: 'confetti', dlv: 'sum', rbtn: 'group', rinfo: 'simple', back: 'soft', fwd: 'soft', drate: 'photo', hit: 'medal', tgnew: 'spark', tghot: 'flame', tgchef: 'chef', tgveg: 'leaf', tglean: 'sprout', tggf: 'wheat', tgsale: 'none', rnew: 'none', rsale: 'auto', rgift: 'gift', rmenu: 'flow', dtags: 'one', pcode: 'ticket', cstrike: 'flick', dfoot: 'pill', co: 'bento', seg: 'spring', smoke: 'wisp', pick: 'isles', tbh: 'serve', tbp: 'hello', tbs: 'orbit', tbf: 'soft', tbc: 'lift', tbsel: 'line', dcar: 'stack', auth: 'dots', akbk: 'sys', akb: 'wave', akbv: 'clean', dcart: 'x', cnum: 'dodo', authcc: 'menu', authhd: 'free', authbot: 'auto', authic: 'none', agnbg: 'warm', lock: 'shield', lockfx: 'ring', hbrk: 'boltash' }, FXV = {};
     (function () { var o = {}; try { o = JSON.parse(localStorage.getItem('clever2-fxv') || '{}') || {}; } catch (e) {} for (var k in FXV_DEF) FXV[k] = o[k] || FXV_DEF[k];
         // меню категорий — одна строка (04.11): раньше «Меню категорий» (стекло / как было) и отдельно «Выбор категории» (как
         // переезжает плашка) — второй выбор при «Стекле» ничего не менял. Сохранённое «как было» — это выбранный там переезд
@@ -6635,7 +6635,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
         try { if (!localStorage.getItem('clever2-ri185')) { if (FXV.rinfo === 'card') { FXV.rinfo = 'simple'; if (o.rinfo) { o.rinfo = 'simple'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } } localStorage.setItem('clever2-ri185', '1'); } } catch (e) {}
         try { if (!localStorage.getItem('clever2-tbsel2')) { if (FXV.tbsel === 'fill') { FXV.tbsel = 'line'; if (o.tbsel) { o.tbsel = 'line'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } } localStorage.setItem('clever2-tbsel2', '1'); } } catch (e) {}
         // 25.11: «трясётся, как будто это какое-то негативное действие» — «Встряхнуть» сохранилась вместе с вариантами: один раз ставим «Подскок»
-        try { if (!localStorage.getItem('clever2-tbc2511')) { if (FXV.tbc === 'shake') { FXV.tbc = 'bounce'; if (o.tbc) { o.tbc = 'bounce'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } } localStorage.setItem('clever2-tbc2511', '1'); } } catch (e) {}
+        try { if (!localStorage.getItem('clever2-tbc2511b')) { if (FXV.tbc === 'shake' || FXV.tbc === 'bounce') { FXV.tbc = 'lift'; if (o.tbc) { o.tbc = 'lift'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } } localStorage.setItem('clever2-tbc2511b', '1'); } } catch (e) {}
         fxvData(); })();
     // варианты, которые стили читают с атрибутов приложения: при загрузке и после починки сохранённого (fxvFix)
     // плашки акций: шрифт варианта — только когда он выбран (Lora, Caveat; Golos, Unbounded и Montserrat уже есть)
@@ -19972,9 +19972,13 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
                 if (a) a.onfinish = a.oncancel = function () { p.g.style.transformOrigin = ''; };
             },
             // ручки: пакет поднимают за ручки и ставят, он пружинит
-            lift: function (p) {
+            lift: function (p, t) {   // 25.11: пакет движется вместе с заливкой (.bag), а не один контур
+                var bag = (t && t.querySelector('.bag')) || p.q('bagb')[0];
                 tbAll(p.q('handle'), [{ transform: 'none' }, { transform: 'translateY(-2.6px) scale(1, 1.25)', offset: .3 }, { transform: 'translateY(-1px)', offset: .55 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
-                tbAll(p.q('bagb'), [{ transform: 'none' }, { transform: 'translateY(-1.6px)', offset: .3 }, { transform: 'translateY(.6px) scale(1.05, .94)', offset: .62 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
+                bag.style.transformOrigin = '50% 100%';
+                var a = tbA(bag, [{ transform: 'none' }, { transform: 'translateY(-1.6px)', offset: .3 }, { transform: 'translateY(.6px) scale(1.05, .94)', offset: .62 }, { transform: 'none' }], { duration: 640, easing: 'ease-in-out' });
+                if (a) a.onfinish = a.oncancel = function () { bag.style.transformOrigin = ''; };
+                return deskOn() ? 300 : 0;
             },
             hop: function (p) { p.g.style.transformOrigin = '50% 100%'; var a = tbA(p.g, HOP, { duration: 640, easing: 'ease-in-out' }); if (a) a.onfinish = a.oncancel = function () { p.g.style.transformOrigin = ''; }; },
             jelly: function (p) { p.g.style.transformOrigin = '50% 100%'; var a = tbA(p.g, JEL, { duration: 640, easing: 'ease-in-out' }); if (a) a.onfinish = a.oncancel = function () { p.g.style.transformOrigin = ''; }; },
@@ -20696,7 +20700,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow) { display: none; }
             'Касание вкладки «Поиск». По кругу (по умолчанию) — линза плавно, едва заметно обводит маленький круг и встаёт на место; Осмотр — линза обходит небольшой круг, как будто ищет; Блик — по стеклу пробегает блик; Зум — линза приближается и пружинит; Покачивание — качается на ручке; Рисуется — стекло и ручка прорисовываются заново; Как было — без эффекта'],
         ['tbf', 'i-heart', 'Таб-бар: значок «Избранное»', [['soft', 'Мягкое желе'], ['beat', 'Стук'], ['burst', 'Сердечки'], ['fill', 'Наполнение'], ['jelly', 'Желе'], ['sparks', 'Искры'], ['old', 'Как было']],
             'Касание вкладки «Избранное». Мягкое желе (по умолчанию) — то же желе, но амплитуда втрое меньше, без лишних колебаний; Стук — два удара, на пике сердце краснеет; Сердечки — маленькие сердца вылетают веером; Наполнение — снизу поднимается красное и тает; Желе — сплющивается и пружинит; Искры — разлетаются искры; Как было — без эффекта'],
-        ['tbc', 'i-bag', 'Таб-бар: значок «Мой заказ»', [['bounce', 'Подскок'], ['shake', 'Встряхнуть'], ['lift', 'Ручки'], ['hop', 'Прыжок'], ['jelly', 'Желе'], ['coins', 'Монетки'], ['old', 'Как было']],
+        ['tbc', 'i-bag', 'Таб-бар: значок «Мой заказ»', [['lift', 'Ручки'], ['bounce', 'Подскок'], ['shake', 'Встряхнуть'], ['hop', 'Прыжок'], ['jelly', 'Желе'], ['coins', 'Монетки'], ['old', 'Как было']],
             'Касание вкладки «Мой заказ» (пока корзина открывается). Подскок (по умолчанию, 25.11) — ручка приподнимается, пакет мягко подпрыгивает и опускается с отскоком; Встряхнуть — пакет качается на ручках; Ручки — пакет поднимают за ручки и ставят; Прыжок — подпрыгивает; Желе — сплющивается и пружинит; Монетки — в пакет падают три монетки; Как было — без эффекта'],
         ['tbsel', 'i-check', 'Таб-бар: выбранная вкладка', [['line', 'Без заливки'], ['fill', 'Заливка'], ['dot', 'Точка'], ['old', 'Как было']],
             'Без заливки (по умолчанию) — значок не заполняется: тёмный, линия чуть толще, переход плавный; Заливка — значок выбранной вкладки с лёгкой серой заливкой (как в iOS); Точка — под подписью выпрыгивает точка; Как было — только цвет'],
