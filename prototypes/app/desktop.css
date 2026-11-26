@@ -823,7 +823,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__wwrap[hidden] { display:
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__w { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
 /* капсульный переключатель «На 100 г / На порцию» на движке .cseg — с линзой, стеклом и перетягиванием */
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
-    --seg-bg: color-mix(in srgb, var(--ink) 6%, var(--surface));
+    --seg-bg: color-mix(in srgb, #d4c3aa 36%, var(--surface));
     flex: none; height: 34px; padding: 4px; border-radius: 999px; box-sizing: border-box;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > :is(.cseg__th, .cseg__lens) {
@@ -1076,7 +1076,7 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
     --ring-c: rgba(255, 255, 255, .08);
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
-    --seg-bg: color-mix(in srgb, #fff 8%, var(--card));
+    --seg-bg: color-mix(in srgb, #e8d8c4 9%, var(--card));
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > .cseg__th {
     background: color-mix(in srgb, var(--ink) 18%, var(--card));
@@ -1102,7 +1102,7 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-pnav:hover 
         --ring-c: rgba(255, 255, 255, .08);
     }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
-        --seg-bg: color-mix(in srgb, #fff 8%, var(--card));
+        --seg-bg: color-mix(in srgb, #e8d8c4 9%, var(--card));
     }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > .cseg__th {
         background: color-mix(in srgb, var(--ink) 18%, var(--card));
