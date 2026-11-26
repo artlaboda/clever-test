@@ -242,19 +242,28 @@ html.desk #s-home .promo {
 html.desk #s-home .promo__banner { padding-block: 20px 22px; container-type: inline-size; }
 html.desk #s-home .promo .rest__name { min-width: 0; overflow-wrap: anywhere; }
 @media (hover: hover) {
-    html.desk #s-home .promo__banner { transition: transform .35s var(--dease); }
+    html.desk #s-home .promo__banner { transition: transform .52s cubic-bezier(.28, .52, .32, 1); will-change: transform; }
     /* Слой тени стоит рядом с лентой, где её не обрезают края прокрутки. */
     html.desk #s-home .dpromo-shadow {
         position: absolute; z-index: 0;
         border-radius: var(--r-card); pointer-events: none; opacity: 0;
-        box-shadow: 0 22px 38px -22px rgba(36, 23, 17, .52), 0 8px 18px -12px rgba(36, 23, 17, .32);
-        transition: transform .35s var(--dease), opacity .35s var(--dease);
+        box-shadow: 0 18px 40px -10px rgba(36, 23, 17, .14), 0 8px 20px -6px rgba(36, 23, 17, .09), 0 2px 8px -2px rgba(36, 23, 17, .05);
+        transition: transform .52s cubic-bezier(.28, .52, .32, 1), opacity .56s cubic-bezier(.28, .52, .32, 1);
+        will-change: transform, opacity;
+    }
+    html.desk[data-theme="dark"] #s-home .dpromo-shadow {
+        box-shadow: 0 20px 44px -10px rgba(0, 0, 0, .42), 0 8px 20px -6px rgba(0, 0, 0, .24), 0 2px 8px -2px rgba(0, 0, 0, .14);
     }
     html.desk #s-home .promo:hover .promo__banner,
-    html.desk #s-home .dpromo-shadow.is-on { transform: translateY(-5px); }
+    html.desk #s-home .dpromo-shadow.is-on { transform: translateY(-2px); }
     html.desk #s-home .dpromo-shadow.is-on { opacity: 1; }
 }
-html.desk #s-home .promo .promo__cut { transition: scale .5s var(--dease), rotate .5s var(--dease); scale: 1.16; transform-origin: 70% 50%; }
+@media (hover: hover) and (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #s-home .dpromo-shadow {
+        box-shadow: 0 20px 44px -10px rgba(0, 0, 0, .42), 0 8px 20px -6px rgba(0, 0, 0, .24), 0 2px 8px -2px rgba(0, 0, 0, .14);
+    }
+}
+html.desk #s-home .promo .promo__cut { transition: scale .6s cubic-bezier(.28, .52, .32, 1), rotate .6s cubic-bezier(.28, .52, .32, 1); scale: 1.16; transform-origin: 70% 50%; }
 html.desk #s-home .promo:hover .promo__cut { scale: 1.24; }
 html.desk #s-home .promo__title { font-size: clamp(17px, 11cqi, 28px); }
 html.desk #s-home .promo__text { width: 61%; max-width: none; overflow-wrap: anywhere; }
@@ -979,4 +988,5 @@ html.desk[data-theme="dark"] .daddr-ask__tip { background: #2e2824; border-color
 }
 @media (prefers-reduced-motion: reduce) {
     html.desk .daddr-ask, html.desk .daddr-ask__ic { transition: opacity .15s; animation: none !important; transform: none; }
+    html.desk #s-home .promo__banner, html.desk #s-home .dpromo-shadow { transition-duration: .15s; transform: none; }
 }

@@ -289,10 +289,7 @@ window.cleverDesk = function (A) {
             '<button type="button" aria-label="Назад" aria-controls="promoRow">' + ic('i-right') + '</button>' +
             '<button type="button" aria-label="Вперёд" aria-controls="promoRow">' + ic('i-right') + '</button></span>';
         sec.insertBefore(hd, row);
-        var shadow = document.createElement('div');
-        shadow.className = 'dpromo-shadow';
-        shadow.setAttribute('aria-hidden', 'true');
-        sec.insertBefore(shadow, row);
+        promoShadows(sec, row);
         var buttons = hd.querySelectorAll('button');
         function sync() {
             buttons[0].disabled = row.scrollLeft < 1;
@@ -309,22 +306,43 @@ window.cleverDesk = function (A) {
         });
         row.addEventListener('scroll', sync, { passive: true });
         row.addEventListener('mouseover', function () { placePromoShadow(row); });
-        row.addEventListener('mouseleave', function () { shadow.classList.remove('is-on'); });
+        row.addEventListener('mouseleave', function () {
+            promoShadows(sec, row).forEach(function (s) { s.classList.remove('is-on'); });
+        });
         sync();
     }
+    function promoShadows(sec, row) {
+        var list = sec.querySelectorAll(':scope > .dpromo-shadow'), n = row.children.length;
+        if (list.length !== n) {
+            for (var i = list.length; i < n; i++) {
+                var sh = document.createElement('div');
+                sh.className = 'dpromo-shadow';
+                sh.setAttribute('aria-hidden', 'true');
+                sec.insertBefore(sh, row);
+            }
+            for (var j = list.length - 1; j >= n; j--) list[j].remove();
+            list = sec.querySelectorAll(':scope > .dpromo-shadow');
+        }
+        return list;
+    }
     function placePromoShadow(row) {
-        var card = row.querySelector('.promo:hover'), sec = row.parentElement;
-        var shadow = sec.querySelector('.dpromo-shadow');
-        if (!shadow) return;
-        if (!card) { shadow.classList.remove('is-on'); return; }
-        var box = card.getBoundingClientRect(), track = row.getBoundingClientRect();
-        if (box.left < track.left - 1 || box.right > track.right + 1) { shadow.classList.remove('is-on'); return; }
-        var host = sec.getBoundingClientRect();
-        shadow.style.left = (box.left - host.left) + 'px';
-        shadow.style.top = (box.top - host.top) + 'px';
-        shadow.style.width = box.width + 'px';
-        shadow.style.height = card.querySelector('.promo__banner').offsetHeight + 'px';
-        shadow.classList.add('is-on');
+        var sec = row.parentElement; if (!sec) return;
+        var cards = row.children, shadows = promoShadows(sec, row);
+        var hovered = row.querySelector('.promo:hover');
+        var track = row.getBoundingClientRect(), host = sec.getBoundingClientRect();
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i], sh = shadows[i];
+            var box = card.getBoundingClientRect();
+            var inView = box.left >= track.left - 1 && box.right <= track.right + 1;
+            var banner = card.querySelector('.promo__banner');
+            if (inView && banner) {
+                sh.style.left = (box.left - host.left) + 'px';
+                sh.style.top = (box.top - host.top) + 'px';
+                sh.style.width = box.width + 'px';
+                sh.style.height = banner.offsetHeight + 'px';
+            }
+            sh.classList.toggle('is-on', card === hovered && inView && !!banner);
+        }
     }
     /* 24.11: карусель «Популярное» на странице заведения — ровно 3 (или 2) целых карточки и стрелки в шапке секции, как у «Акций» */
     function deskPop() {
