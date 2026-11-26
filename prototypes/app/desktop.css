@@ -792,13 +792,13 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dish__name {
     font-size: 34px; line-height: 1.08; letter-spacing: -.02em; padding-right: 48px; text-wrap: balance;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__name { font-size: 30px; }
-html.desk :is(#sheet, #sheetUnder).is-dish .dish__line { margin-top: 8px; font-size: 15px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .dish__line { margin-top: 5px; font-size: 15px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__desc {
-    margin: -4px 0 0; font-size: 16px; line-height: 1.5;
+    margin: -11px 0 0; font-size: 16px; line-height: 1.5;
     color: color-mix(in srgb, var(--ink) 78%, var(--muted)); text-wrap: pretty;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__desc { font-size: 14.5px; line-height: 1.44; }
-/* КБЖУ: в шапке калорийность на 100 г/мл и общий калораж порции, ниже 3 колонки БЖУ со своей цветной полосой под каждой */
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__desc { margin-top: -7px; font-size: 14.5px; line-height: 1.44; }
+/* КБЖУ: в шапке калорийность на 100 г/мл и общий калораж порции, ниже 3 колонки БЖУ со своей цветной полосой по % компонента */
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
     padding: 15px 18px 15px; border-radius: 18px;
     background: var(--surface);
@@ -807,14 +807,12 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 12px 16px 12px; gap: 10px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__top {
-    display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px;
-    font: 600 13px/1.25 var(--font); color: var(--muted);
+    font: 500 13px/1.35 var(--font); color: var(--muted);
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__title { color: color-mix(in srgb, var(--ink) 72%, var(--muted)); }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__kcal { font-weight: 700; color: var(--ink); white-space: nowrap; }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__serv {
-    margin-left: auto; font-weight: 500; color: var(--muted); white-space: nowrap;
-}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__title { color: color-mix(in srgb, var(--ink) 68%, var(--muted)); }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__dot { margin-inline: 5px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__b { font-weight: 700; color: var(--ink); white-space: nowrap; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__serv[hidden] { display: none; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__cols {
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
 }
@@ -835,6 +833,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__track {
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__track > b {
     display: block; height: 100%; border-radius: 99px;
 }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__track > b.has-v { min-width: 3px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c.is-p .ddish-nutr__track > b { background: #2f9e66; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c.is-f .ddish-nutr__track > b { background: #e59a24; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c.is-c .ddish-nutr__track > b { background: #e05a47; }

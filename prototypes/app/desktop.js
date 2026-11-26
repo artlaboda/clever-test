@@ -1642,30 +1642,27 @@ window.cleverDesk = function (A) {
                     var ey = document.createElement('div'); ey.className = 'ddish-eyebrow'; ey.textContent = r.name;
                     head.insertBefore(ey, head.firstChild);
                 }
-                // красиво оформленный блок КБЖУ: в шапке калорийность на 100 г/мл и общий калораж порции, ниже 3 колонки БЖУ со своей полосой под каждой
+                // красиво оформленный блок КБЖУ: в шапке «Пищевая ценность на 100 г · N ккал. В порции ~M ккал», ниже 3 колонки БЖУ с полоской по % от 100 г
                 if (nutr) {
-                    var pK = nutr[1] * 4, fK = nutr[2] * 9, cK = nutr[3] * 4, totK = pK + fK + cK;
-                    var pPct = totK > .5 ? Math.round(pK / totK * 100) : 0;
-                    var fPct = totK > .5 ? Math.round(fK / totK * 100) : 0;
-                    var cPct = totK > .5 ? Math.max(0, 100 - pPct - fPct) : 0;
-                    var headTitle = d.ml ? 'Пищевая ценность на 100 мл' : 'Пищевая ценность на 100 г';
+                    var perUnit = d.ml ? '100 мл' : '100 г';
                     var unitG = ' г';
-                    var barHtml = function (pct, val) {
-                        var w = val > 0 ? Math.max(6, pct) : 0;
-                        return '<i class="ddish-nutr__track" aria-hidden="true"><b style="width:' + w + '%"></b></i>';
+                    var barHtml = function (val) {
+                        var pct = Math.min(100, Math.max(0, Math.round(val * 10) / 10));
+                        return '<i class="ddish-nutr__track" aria-hidden="true"><b' + (val > 0 ? ' class="has-v"' : '') + ' style="width:' + pct + '%"></b></i>';
                     };
                     var nEl = document.createElement('div'); nEl.className = 'ddish-nutr';
                     nEl.innerHTML =
                         '<div class="ddish-nutr__top">' +
-                            '<span class="ddish-nutr__title">' + headTitle + '</span>' +
+                            '<span class="ddish-nutr__title">Пищевая ценность на</span> ' +
+                            '<b class="ddish-nutr__b num">' + perUnit + '</b>' +
                             '<span class="ddish-nutr__dot" aria-hidden="true">·</span>' +
-                            '<b class="ddish-nutr__kcal num">' + Math.round(nutr[0]) + ' ккал</b>' +
-                            '<span class="ddish-nutr__serv num"></span>' +
+                            '<b class="ddish-nutr__b num">' + Math.round(nutr[0]) + ' ккал</b>' +
+                            '<span class="ddish-nutr__serv" hidden><span class="ddish-nutr__p" aria-hidden="true">.</span> <span>В порции</span> <b class="ddish-nutr__b ddish-nutr__sv num"></b></span>' +
                         '</div>' +
                         '<div class="ddish-nutr__cols">' +
-                            '<div class="ddish-nutr__c is-p"><b class="num">' + deskDishFmt(nutr[1]) + unitG + '</b><span>Белки</span>' + barHtml(pPct, nutr[1]) + '</div>' +
-                            '<div class="ddish-nutr__c is-f"><b class="num">' + deskDishFmt(nutr[2]) + unitG + '</b><span>Жиры</span>' + barHtml(fPct, nutr[2]) + '</div>' +
-                            '<div class="ddish-nutr__c is-c"><b class="num">' + deskDishFmt(nutr[3]) + unitG + '</b><span>Углеводы</span>' + barHtml(cPct, nutr[3]) + '</div>' +
+                            '<div class="ddish-nutr__c is-p"><b class="num">' + deskDishFmt(nutr[1]) + unitG + '</b><span>Белки</span>' + barHtml(nutr[1]) + '</div>' +
+                            '<div class="ddish-nutr__c is-f"><b class="num">' + deskDishFmt(nutr[2]) + unitG + '</b><span>Жиры</span>' + barHtml(nutr[2]) + '</div>' +
+                            '<div class="ddish-nutr__c is-c"><b class="num">' + deskDishFmt(nutr[3]) + unitG + '</b><span>Углеводы</span>' + barHtml(nutr[3]) + '</div>' +
                         '</div>';
                     var descEl = body.querySelector('.dish__desc');
                     if (descEl && descEl.nextSibling) body.insertBefore(nEl, descEl.nextSibling);
@@ -1716,15 +1713,16 @@ window.cleverDesk = function (A) {
             }
         }
         // живые обновления: калорийность порции (меняется с размером пиццы), активный борт и добавки
-        var servEl = body.querySelector('.ddish-nutr__serv');
-        if (servEl && nutr) {
+        var servEl = body.querySelector('.ddish-nutr__serv'), servVal = body.querySelector('.ddish-nutr__sv');
+        if (servEl && servVal && nutr) {
             var w = d.w;
             if (d.pizza && A.SIZES) {
                 var sz = A.SIZES.filter(function (s) { return s.k === ds.size; })[0] || A.SIZES[0];
                 w = Math.round(d.w * sz.mul / 5) * 5;
             }
             var servKcal = Math.round(nutr[0] * w / 100);
-            servEl.textContent = servKcal > 0 ? 'В порции ~' + servKcal + ' ккал' : '';
+            servEl.hidden = servKcal <= 0;
+            if (servKcal > 0) servVal.textContent = '~' + servKcal + ' ккал';
         }
         $$('.ddish-crust .opt', body).forEach(function (opt) {
             var inp = opt.querySelector('input[type="radio"]');
