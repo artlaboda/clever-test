@@ -1643,30 +1643,61 @@ window.cleverDesk = function (A) {
                     var ey = document.createElement('div'); ey.className = 'ddish-eyebrow'; ey.textContent = r.name;
                     head.insertBefore(ey, head.firstChild);
                 }
-                // красиво оформленный блок КБЖУ в плашке: в шапке «Пищевая ценность на 100 г · N ккал. В порции ~M ккал»,
-                // ниже 3 колонки БЖУ, где зелёная + жёлтая + красная полосы в сумме дают 100% (доли Б, Ж и У среди БЖУ на 100 г)
+                // блок КБЖУ в плашке с переключателем «На 100 г / На порцию (На N шт)»:
+                // учитывает размер, борт, добавки и количество позиций; полосы БЖУ всегда дают 100% в сумме
                 if (nutr) {
-                    var perUnit = d.ml ? '100 мл' : '100 г';
-                    var unitG = ' г';
-                    var m0 = nutr[1] + nutr[2] + nutr[3];
-                    var barHtml = function (val) {
-                        var pct = m0 > 0 ? Math.min(100, Math.max(0, Math.round(val / m0 * 1000) / 10)) : 0;
-                        return '<i class="ddish-nutr__track" aria-hidden="true"><b' + (val > 0 ? ' class="has-v"' : '') + ' style="width:' + pct + '%"></b></i>';
-                    };
-                    var nEl = document.createElement('div'); nEl.className = 'ddish-nutr';
+                    var perUnit = d.ml ? 'На 100 мл' : 'На 100 г';
+                    var nEl = document.createElement('div');
+                    nEl.className = 'ddish-nutr';
+                    nEl.dataset.mode = 'total';
                     nEl.innerHTML =
                         '<div class="ddish-nutr__top">' +
-                            '<span class="ddish-nutr__title">Пищевая ценность на</span> ' +
-                            '<b class="ddish-nutr__b num">' + perUnit + '</b>' +
-                            '<span class="ddish-nutr__dot" aria-hidden="true">·</span>' +
-                            '<b class="ddish-nutr__b ddish-nutr__kcal num">' + Math.round(nutr[0]) + ' ккал</b>' +
-                            '<span class="ddish-nutr__serv" hidden><span class="ddish-nutr__p" aria-hidden="true">.</span> <span>В порции</span> <b class="ddish-nutr__b ddish-nutr__sv num"></b></span>' +
+                            '<div class="ddish-nutr__info">' +
+                                '<span class="ddish-nutr__title">Пищевая ценность</span>' +
+                                '<span class="ddish-nutr__dot" aria-hidden="true">·</span>' +
+                                '<b class="ddish-nutr__b ddish-nutr__kcal num"></b>' +
+                                '<span class="ddish-nutr__wwrap"><span class="ddish-nutr__dot" aria-hidden="true">·</span><span class="ddish-nutr__w num"></span></span>' +
+                            '</div>' +
+                            '<div class="ddish-nutr__seg" role="group" aria-label="Режим расчёта пищевой ценности">' +
+                                '<i class="ddish-nutr__th" aria-hidden="true"></i>' +
+                                '<button type="button" class="ddish-nutr__tab" data-mode="100" aria-pressed="false">' + perUnit + '</button>' +
+                                '<button type="button" class="ddish-nutr__tab" data-mode="total" aria-pressed="true">На порцию</button>' +
+                            '</div>' +
                         '</div>' +
                         '<div class="ddish-nutr__cols">' +
-                            '<div class="ddish-nutr__c is-p"><b class="num">' + deskDishFmt(nutr[1]) + unitG + '</b><span>Белки</span>' + barHtml(nutr[1]) + '</div>' +
-                            '<div class="ddish-nutr__c is-f"><b class="num">' + deskDishFmt(nutr[2]) + unitG + '</b><span>Жиры</span>' + barHtml(nutr[2]) + '</div>' +
-                            '<div class="ddish-nutr__c is-c"><b class="num">' + deskDishFmt(nutr[3]) + unitG + '</b><span>Углеводы</span>' + barHtml(nutr[3]) + '</div>' +
+                            '<div class="ddish-nutr__c is-p"><b class="num"></b><div class="ddish-nutr__lbl"><span>Белки</span><em class="ddish-nutr__pct num"></em></div><i class="ddish-nutr__track" aria-hidden="true"><b></b></i></div>' +
+                            '<div class="ddish-nutr__c is-f"><b class="num"></b><div class="ddish-nutr__lbl"><span>Жиры</span><em class="ddish-nutr__pct num"></em></div><i class="ddish-nutr__track" aria-hidden="true"><b></b></i></div>' +
+                            '<div class="ddish-nutr__c is-c"><b class="num"></b><div class="ddish-nutr__lbl"><span>Углеводы</span><em class="ddish-nutr__pct num"></em></div><i class="ddish-nutr__track" aria-hidden="true"><b></b></i></div>' +
                         '</div>';
+                    var segBox = nEl.querySelector('.ddish-nutr__seg');
+                    nEl._syncThumb = function (snap) {
+                        var th = nEl.querySelector('.ddish-nutr__th');
+                        var m = nEl.dataset.mode === '100' ? '100' : 'total';
+                        var act = nEl.querySelector('.ddish-nutr__tab[data-mode="' + m + '"]');
+                        if (!th || !act || !act.offsetWidth) return;
+                        if (snap) th.style.transition = 'none';
+                        th.style.width = act.offsetWidth + 'px';
+                        th.style.transform = 'translateX(' + (act.offsetLeft - 2) + 'px)';
+                        if (snap) { void th.offsetWidth; th.style.transition = ''; }
+                        nEl._thReady = true;
+                    };
+                    if (segBox) {
+                        segBox.addEventListener('click', function (ev) {
+                            var btn = ev.target.closest('.ddish-nutr__tab');
+                            if (!btn || !btn.dataset.mode || nEl.dataset.mode === btn.dataset.mode) return;
+                            nEl.dataset.mode = btn.dataset.mode;
+                            deskDishSync();
+                        });
+                        if (window.ResizeObserver) {
+                            var ro = new ResizeObserver(function () {
+                                if (!nEl.isConnected || !nEl._syncThumb) return;
+                                var tot = nEl.querySelector('.ddish-nutr__tab[data-mode="total"]');
+                                nEl._syncThumb(!nEl._thReady || !!(tot && tot._dd));
+                            });
+                            $$('.ddish-nutr__tab', segBox).forEach(function (b) { ro.observe(b); });
+                            nEl._ro = ro;
+                        }
+                    }
                     var descEl = body.querySelector('.dish__desc');
                     if (descEl && descEl.nextSibling) body.insertBefore(nEl, descEl.nextSibling);
                     else body.appendChild(nEl);
@@ -1722,18 +1753,33 @@ window.cleverDesk = function (A) {
             }
         }
         // плавная прокрутка цифр (как в корзине — «Перекат») при изменении значения; при первом открытии — сразу текст
+        var loc = function (s) { return A.tr ? A.tr(s) : s; };
         var rollVal = function (el, txt, numVal) {
             if (!el) return;
-            var prev = el._nv;
-            el._nv = numVal;
-            if (first || prev == null || !A.odoQ) { el.textContent = txt; return; }
-            if (prev === numVal) return;
-            A.odoQ(el, txt, numVal >= prev ? 1 : -1);
+            var t = loc(txt), prevTxt = el._tx, prevNum = el._nv;
+            el._tx = t; el._nv = numVal;
+            if (first || prevTxt == null || !A.odoQ) { el.textContent = t; return; }
+            if (prevTxt === t) return;
+            A.odoQ(el, t, numVal >= prevNum ? 1 : -1);
         };
-        // живые обновления: пересчёт веса и КБЖУ с учётом размера, борта и количества порций добавок
+        // формат граммов БЖУ: до 100 г — с десятыми («12,6 г»), от 100 г — целые («168 г»)
+        var fmtMacro = function (v) { return v >= 100 ? String(Math.round(v)) : deskDishFmt(v); };
+        // доли Б, Ж и У методом наибольших остатков — сумма всегда ровно 100%
+        var macroPcts = function (p, f, c) {
+            var s = p + f + c;
+            if (s <= 0) return [0, 0, 0];
+            var raw = [p / s * 100, f / s * 100, c / s * 100];
+            var fl = [Math.floor(raw[0]), Math.floor(raw[1]), Math.floor(raw[2])];
+            var rem = 100 - (fl[0] + fl[1] + fl[2]);
+            var ord = [0, 1, 2].sort(function (a, b) { return (raw[b] - fl[b]) - (raw[a] - fl[a]); });
+            for (var i = 0; i < rem; i++) fl[ord[i]]++;
+            return fl;
+        };
+        // живые обновления: пересчёт веса и КБЖУ с учётом размера, борта, добавок и количества позиций (ds.qty)
         var selAds = ds.addons || [];
         var adCnt = {};
         selAds.forEach(function (k) { adCnt[k] = (adCnt[k] || 0) + 1; });
+        var qty = Math.max(1, Number(ds.qty) || 1);
         var nutrBox = body.querySelector('.ddish-nutr');
         var metaEl = body.querySelector('#dishMeta');
         if (nutrBox && nutr) {
@@ -1759,38 +1805,77 @@ window.cleverDesk = function (A) {
                     addW += a.w || 0; addP += a.p || 0; addF += a.f || 0; addC += a.c || 0;
                 });
             }
-            var totW = baseW + addW;
-            var totP = nutr[1] * baseW / 100 + addP;
-            var totF = nutr[2] * baseW / 100 + addF;
-            var totC = nutr[3] * baseW / 100 + addC;
-            var p100 = totW > 0 ? totP * 100 / totW : nutr[1];
-            var f100 = totW > 0 ? totF * 100 / totW : nutr[2];
-            var c100 = totW > 0 ? totC * 100 / totW : nutr[3];
+            // на 1 собранную позицию
+            var oneW = baseW + addW;
+            var oneP = nutr[1] * baseW / 100 + addP;
+            var oneF = nutr[2] * baseW / 100 + addF;
+            var oneC = nutr[3] * baseW / 100 + addC;
+            var oneKcal = (addW > 0) ? (4 * oneP + 9 * oneF + 4 * oneC) : (nutr[0] * baseW / 100);
+            // на 100 г / 100 мл собранной позиции
+            var p100 = oneW > 0 ? oneP * 100 / oneW : nutr[1];
+            var f100 = oneW > 0 ? oneF * 100 / oneW : nutr[2];
+            var c100 = oneW > 0 ? oneC * 100 / oneW : nutr[3];
             var k100 = (addW > 0) ? Math.round(4 * p100 + 9 * f100 + 4 * c100) : Math.round(nutr[0]);
-            var servKcal = (addW > 0) ? Math.round(4 * totP + 9 * totF + 4 * totC) : Math.round(nutr[0] * baseW / 100);
-            rollVal(nutrBox.querySelector('.ddish-nutr__kcal'), k100 + ' ккал', k100);
-            var servEl = nutrBox.querySelector('.ddish-nutr__serv'), servVal = nutrBox.querySelector('.ddish-nutr__sv');
-            if (servEl && servVal) {
-                servEl.hidden = servKcal <= 0;
-                if (servKcal > 0) rollVal(servVal, '~' + servKcal + ' ккал', servKcal);
+            // на всё выбранное количество (qty)
+            var allW = oneW * qty;
+            var allP = oneP * qty;
+            var allF = oneF * qty;
+            var allC = oneC * qty;
+            var allKcal = Math.round(oneKcal * qty);
+
+            var mode = nutrBox.dataset.mode === '100' ? '100' : 'total';
+            var is100 = mode === '100';
+            var showKcal = is100 ? k100 : allKcal;
+            var showP = is100 ? p100 : allP;
+            var showF = is100 ? f100 : allF;
+            var showC = is100 ? c100 : allC;
+
+            // подпись второй вкладки: «На порцию» при 1 шт, «На N шт» при qty > 1
+            var totTab = nutrBox.querySelector('.ddish-nutr__tab[data-mode="total"]');
+            if (totTab) {
+                var prevQ = totTab._nQty || 0;
+                totTab._nQty = qty;
+                var tabTxt = loc(qty > 1 ? ('На ' + qty + ' шт') : 'На порцию');
+                if (first || (prevQ <= 1) !== (qty <= 1) || !A.odoQ) {
+                    if (totTab._dd) { totTab._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(totTab._dd.t); totTab._dd = null; }
+                    totTab.textContent = tabTxt;
+                } else if (prevQ !== qty) {
+                    A.odoQ(totTab, tabTxt, qty >= prevQ ? 1 : -1);
+                }
             }
-            // доли Б, Ж и У от их суммы (Б + Ж + У = 100%): сумма трёх цветных полос всегда 100%
-            var mSum = p100 + f100 + c100;
-            var setCol = function (cls, v) {
+            $$('.ddish-nutr__tab', nutrBox).forEach(function (b) {
+                b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+            });
+            // плавный ползунок под активной вкладкой
+            if (nutrBox._syncThumb) {
+                nutrBox._syncThumb(first);
+                requestAnimationFrame(function () { if (nutrBox._syncThumb) nutrBox._syncThumb(first); });
+            }
+
+            rollVal(nutrBox.querySelector('.ddish-nutr__kcal'), (is100 ? '' : '~') + showKcal + ' ккал', showKcal);
+            var wWrap = nutrBox.querySelector('.ddish-nutr__wwrap'), wEl = nutrBox.querySelector('.ddish-nutr__w');
+            if (wWrap && wEl) {
+                wWrap.hidden = is100 || allW <= 0;
+                if (!is100 && allW > 0) rollVal(wEl, allW + (d.ml ? ' мл' : ' г'), allW);
+            }
+            var pcts = macroPcts(p100, f100, c100);
+            var setCol = function (cls, v, pct) {
                 var c = nutrBox.querySelector('.ddish-nutr__c.' + cls); if (!c) return;
-                var b = c.querySelector(':scope > b'), bar = c.querySelector('.ddish-nutr__track > b');
-                var r1 = Math.round(v * 10) / 10;
-                rollVal(b, deskDishFmt(r1) + ' г', r1);
+                var b = c.querySelector(':scope > b'), pEl = c.querySelector('.ddish-nutr__pct'), bar = c.querySelector('.ddish-nutr__track > b');
+                var rv = v >= 100 ? Math.round(v) : Math.round(v * 10) / 10;
+                rollVal(b, fmtMacro(rv) + ' г', rv);
+                if (pEl) rollVal(pEl, pct + '%', pct);
                 if (bar) {
-                    var pct = mSum > 0 ? Math.min(100, Math.max(0, Math.round(v / mSum * 1000) / 10)) : 0;
                     bar.style.width = pct + '%';
                     bar.classList.toggle('has-v', v > 0);
                 }
             };
-            setCol('is-p', p100); setCol('is-f', f100); setCol('is-c', c100);
-            // вес блюда в шапке тоже учитывает борт и добавки (правим #dishMeta, не трогая обёртку .dish__line)
+            setCol('is-p', showP, pcts[0]);
+            setCol('is-f', showF, pcts[1]);
+            setCol('is-c', showC, pcts[2]);
+            // вес одной собранной позиции в шапке под названием (правим #dishMeta, не трогая обёртку .dish__line)
             if (metaEl && !d.unit) {
-                rollVal(metaEl, d.pizza && szObj ? (totW + ' г · ' + szObj.label) : (totW + (d.ml ? ' мл' : ' г')), totW);
+                rollVal(metaEl, d.pizza && szObj ? (oneW + ' г · ' + szObj.label) : (oneW + (d.ml ? ' мл' : ' г')), oneW);
             }
         } else if (metaEl && A.dishWeight) {
             metaEl.textContent = A.dishWeight(d, ds.size);
