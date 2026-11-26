@@ -1642,30 +1642,31 @@ window.cleverDesk = function (A) {
                     var ey = document.createElement('div'); ey.className = 'ddish-eyebrow'; ey.textContent = r.name;
                     head.insertBefore(ey, head.firstChild);
                 }
-                // красиво оформленный блок КБЖУ
+                // красиво оформленный блок КБЖУ: в шапке калорийность на 100 г/мл и общий калораж порции, ниже 3 колонки БЖУ со своей полосой под каждой
                 if (nutr) {
                     var pK = nutr[1] * 4, fK = nutr[2] * 9, cK = nutr[3] * 4, totK = pK + fK + cK;
-                    var perLabel = d.ml ? 'на 100 мл' : 'на 100 г';
+                    var pPct = totK > .5 ? Math.round(pK / totK * 100) : 0;
+                    var fPct = totK > .5 ? Math.round(fK / totK * 100) : 0;
+                    var cPct = totK > .5 ? Math.max(0, 100 - pPct - fPct) : 0;
+                    var headTitle = d.ml ? 'Пищевая ценность на 100 мл' : 'Пищевая ценность на 100 г';
                     var unitG = ' г';
+                    var barHtml = function (pct, val) {
+                        var w = val > 0 ? Math.max(6, pct) : 0;
+                        return '<i class="ddish-nutr__track" aria-hidden="true"><b style="width:' + w + '%"></b></i>';
+                    };
                     var nEl = document.createElement('div'); nEl.className = 'ddish-nutr';
                     nEl.innerHTML =
                         '<div class="ddish-nutr__top">' +
-                            '<span class="ddish-nutr__title">Пищевая ценность</span>' +
+                            '<span class="ddish-nutr__title">' + headTitle + '</span>' +
                             '<span class="ddish-nutr__dot" aria-hidden="true">·</span>' +
-                            '<span class="ddish-nutr__per">' + perLabel + '</span>' +
+                            '<b class="ddish-nutr__kcal num">' + Math.round(nutr[0]) + ' ккал</b>' +
                             '<span class="ddish-nutr__serv num"></span>' +
                         '</div>' +
                         '<div class="ddish-nutr__cols">' +
-                            '<div class="ddish-nutr__c is-kcal"><b class="num">' + Math.round(nutr[0]) + '</b><span>ккал</span></div>' +
-                            '<div class="ddish-nutr__c is-p"><b class="num">' + deskDishFmt(nutr[1]) + unitG + '</b><span>Белки</span></div>' +
-                            '<div class="ddish-nutr__c is-f"><b class="num">' + deskDishFmt(nutr[2]) + unitG + '</b><span>Жиры</span></div>' +
-                            '<div class="ddish-nutr__c is-c"><b class="num">' + deskDishFmt(nutr[3]) + unitG + '</b><span>Углеводы</span></div>' +
-                        '</div>' +
-                        (totK > .5 ? '<div class="ddish-nutr__bar" aria-hidden="true">' +
-                            '<i class="is-p" style="flex:' + pK.toFixed(1) + '"></i>' +
-                            '<i class="is-f" style="flex:' + fK.toFixed(1) + '"></i>' +
-                            '<i class="is-c" style="flex:' + cK.toFixed(1) + '"></i>' +
-                        '</div>' : '');
+                            '<div class="ddish-nutr__c is-p"><b class="num">' + deskDishFmt(nutr[1]) + unitG + '</b><span>Белки</span>' + barHtml(pPct, nutr[1]) + '</div>' +
+                            '<div class="ddish-nutr__c is-f"><b class="num">' + deskDishFmt(nutr[2]) + unitG + '</b><span>Жиры</span>' + barHtml(fPct, nutr[2]) + '</div>' +
+                            '<div class="ddish-nutr__c is-c"><b class="num">' + deskDishFmt(nutr[3]) + unitG + '</b><span>Углеводы</span>' + barHtml(cPct, nutr[3]) + '</div>' +
+                        '</div>';
                     var descEl = body.querySelector('.dish__desc');
                     if (descEl && descEl.nextSibling) body.insertBefore(nEl, descEl.nextSibling);
                     else body.appendChild(nEl);
