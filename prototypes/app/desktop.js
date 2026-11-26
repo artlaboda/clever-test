@@ -1687,7 +1687,7 @@ window.cleverDesk = function (A) {
                             '<h3>' + (sweet ? 'Топпинги' : 'Добавки') + '</h3>' +
                             '<span class="ddish-addons__cnt" hidden><span class="ddish-addons__dot" aria-hidden="true">·</span><span class="ddish-addons__val num"></span></span>' +
                         '</div>' +
-                        '<div class="ddish-addons__grid ' + (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3') + '">' +
+                        '<div class="ddish-addons__grid ' + (adPicOn ? ('ddish-addons__grid--v' + (adKeys.length <= 4 ? '4' : '6')) : (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3')) + '">' +
                         adKeys.map(function (k) {
                             var a = A.ADDONS[k]; if (!a) return '';
                             var hasPic = adPicOn && !!adPics[k];
@@ -1704,8 +1704,8 @@ window.cleverDesk = function (A) {
                             if (hasPic) {
                                 return '<div class="ddish-addon has-pic" data-id="' + k + '" data-qty="0">' +
                                     '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
-                                    '<span class="ddish-addon__top">' +
-                                        '<span class="ddish-addon__pic"><img src="img/addons/' + k + '.webp" alt="" loading="eager" decoding="async"></span>' +
+                                    '<span class="ddish-addon__pic">' +
+                                        '<img src="img/addons/' + k + '.webp" alt="" loading="eager" decoding="async">' +
                                         ctl +
                                     '</span>' +
                                     txt +

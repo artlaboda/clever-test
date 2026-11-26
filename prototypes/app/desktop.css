@@ -1032,27 +1032,52 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__q {
     transition: width .28s var(--dease), opacity .2s ease;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-on .ddish-addon__q { width: 20px; opacity: 1; overflow: visible; }
-/* превью-карточки добавок с аппетитными фото: сверху фото + степпер, снизу полное название и цена */
+/* вертикальные мини-карточки добавок с фото — в стиле кросс-селлинга корзины (.ups), но значительно мельче */
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--v6 { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--v4 { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic {
-    flex-direction: column; align-items: stretch; justify-content: space-between; gap: 7px;
-    padding: 9px 10px 9px var(--dish-in);
+    flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 6px;
+    padding: 5px 5px 8px; border-radius: 15px; text-align: center;
+    transition: background-color .22s ease, transform .26s var(--dease);
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__top {
-    position: relative; z-index: 2; display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
-}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic:hover { transform: translateY(-2px); }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic:active { transform: scale(.975); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__pic {
-    position: relative; flex: none; width: 44px; height: 44px; border-radius: 11px; overflow: hidden;
-    background: var(--surface); pointer-events: none;
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 6%, transparent);
+    position: relative; z-index: 2; width: 100%; aspect-ratio: 1.15 / 1; border-radius: 10px; overflow: hidden;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 5%, transparent);
 }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--v4 .ddish-addon__pic { aspect-ratio: 1.25 / 1; border-radius: 11px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__pic img {
-    width: 100%; height: 100%; object-fit: cover; display: block;
-    transition: transform .32s var(--dease);
+    width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
+    transition: transform .4s var(--dease);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic:hover .ddish-addon__pic img { transform: scale(1.07); }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__txt { gap: 1px; }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__txt b { font-size: 13px; }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__txt small { font-size: 12px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__ctl {
+    position: absolute; z-index: 3; top: 5px; right: 5px; height: 24px; min-width: 24px;
+    background: color-mix(in srgb, var(--card) 92%, transparent);
+    box-shadow: 0 2px 8px -2px rgba(20, 12, 8, .28), inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic:not(.is-on):hover .ddish-addon__ctl {
+    background: var(--card); color: var(--ink);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__btn { width: 24px; height: 24px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__btn svg { width: 11.5px; height: 11.5px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic.is-on .ddish-addon__btn,
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic.is-on .ddish-addon__dec { width: 22px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic.is-on .ddish-addon__q { width: 17px; font-size: 12px; line-height: 24px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__txt {
+    align-items: center; gap: 1px; padding: 0 2px;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__txt b {
+    max-width: 100%; font: 600 11.5px/1.22 var(--font);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.has-pic .ddish-addon__txt small {
+    font: 600 11.5px/1.2 var(--font);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--v4 .ddish-addon__txt b { font-size: 12.5px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--v4 .ddish-addon__txt small { font-size: 12px; }
 /* футер только в правой колонке */
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-side > .sheet__foot {
     position: static; left: auto; right: auto; bottom: auto; width: auto;
@@ -1087,8 +1112,8 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dfoot .cta {
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg[data-key="size"] { height: 46px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-crust .opt { padding: 8px var(--dish-in); }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon { padding: 8px 9px 8px var(--dish-in); }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon.has-pic { gap: 5px; padding: 7px 9px 7px var(--dish-in); }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon__pic { width: 34px; height: 34px; border-radius: 9px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon.has-pic { gap: 4px; padding: 4px 4px 7px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon.has-pic .ddish-addon__pic { aspect-ratio: 1.32 / 1; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-side > .sheet__foot { padding: 12px 24px 16px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dfoot :is(.stepper, .cta) { height: 48px; }
 }
