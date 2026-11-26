@@ -6621,7 +6621,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '26.11 · 19:30';
+    var BUILD = '26.11 · 20:02';
 
     /* ── состояние ── */
     var S = {
@@ -22466,7 +22466,9 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var list = root.matches && root.matches(SQ_SEL) ? [root] : [];
         (root.querySelectorAll ? [].slice.call(root.querySelectorAll(SQ_SEL)) : []).forEach(function (e) { list.push(e); });
         list.forEach(function (el) {
-            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava')) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него
+            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava') || el.classList.contains('ddish-addon')) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него
+            // .ddish-addon (26.11, добавки в карточке блюда на компьютере): фон и обводка плавно меняются при наведении, а слой «paint»
+            // перерисовывался не в такт — углы на миг пропадали. Обычный радиус 14 px, переход целиком у браузера
             el._sqX = el.matches(SQ_X); el._sqRing = el._sqX && el.matches(SQ_RING);
             if (el._sqX && el.closest('.ri-tk')) return;   // плашки акций: рисунки нарочно выходят за край
             el._sqOn = true; if (sqRO) sqRO.observe(el); else sqUpdate(el);

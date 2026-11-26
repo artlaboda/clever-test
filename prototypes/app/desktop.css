@@ -843,7 +843,9 @@ html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-size, .opts, .ddish-addons
 }
 /* размер — аккуратный сегмент */
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg[data-key="size"] { height: 52px; border-radius: 15px; }
-html.desk :is(#sheet, #sheetUnder).is-dish .cseg[data-key="size"] > .cseg__th { border-radius: 12px; }
+/* бегунок и линза (стекло при перетягивании) — одно скругление 12 px: у линзы оставалась капсула 999 px, и при
+   перетягивании её края не совпадали с углами бегунка */
+html.desk :is(#sheet, #sheetUnder).is-dish .cseg[data-key="size"] > :is(.cseg__th, .cseg__lens) { border-radius: 12px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg[data-key="size"] > button b { font-size: 14px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg[data-key="size"] > button small { font-size: 12.5px; }
 /* борт — компактная сетка 2×2 вместо длинного списка */
