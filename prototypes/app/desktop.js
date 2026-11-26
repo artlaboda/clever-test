@@ -1676,9 +1676,12 @@ window.cleverDesk = function (A) {
                     });
                     opts.appendChild(cg);
                 }
-                // добавки / топпинги — с выбором количества порций (1..5): кружок «+» плавно раскрывается в степпер «− N +»
+                // добавки / топпинги — с выбором количества порций (1..5): кружок «+» плавно раскрывается в степпер «− N +»;
+                // для демонстрации картинок добавок включены на выбранных блюдах: «Кантри» и «Панкейки с бананом»
                 if (adKeys.length && A.ADDONS) {
-                    var adBox = document.createElement('div'); adBox.className = 'ddish-addons';
+                    var adPicOn = ds.id === 'country' || ds.id === 'pancakes';
+                    var adPics = { mozzarella: 1, olives: 1, onion: 1, jalapeno: 1, mushrooms: 1, bacon: 1, icecream: 1, blueberry: 1, maple: 1, caramel: 1 };
+                    var adBox = document.createElement('div'); adBox.className = 'ddish-addons' + (adPicOn ? ' is-pics' : '');
                     adBox.innerHTML =
                         '<div class="ddish-addons__head">' +
                             '<h3>' + (sweet ? 'Топпинги' : 'Добавки') + '</h3>' +
@@ -1687,18 +1690,31 @@ window.cleverDesk = function (A) {
                         '<div class="ddish-addons__grid ' + (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3') + '">' +
                         adKeys.map(function (k) {
                             var a = A.ADDONS[k]; if (!a) return '';
+                            var hasPic = adPicOn && !!adPics[k];
+                            var ctl = '<span class="ddish-addon__ctl">' +
+                                '<button type="button" class="ddish-addon__btn ddish-addon__dec" data-act="addon" data-id="' + k + '" data-d="-1" aria-label="Убрать порцию" tabindex="-1">' +
+                                    '<svg class="i" viewBox="0 0 24 24"><path d="M6 12h12"/></svg>' +
+                                '</button>' +
+                                '<span class="ddish-addon__q num" aria-live="polite">1</span>' +
+                                '<button type="button" class="ddish-addon__btn ddish-addon__inc" data-act="addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию">' +
+                                    '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
+                                '</button>' +
+                            '</span>';
+                            var txt = '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅') + '</small></span>';
+                            if (hasPic) {
+                                return '<div class="ddish-addon has-pic" data-id="' + k + '" data-qty="0">' +
+                                    '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
+                                    '<span class="ddish-addon__top">' +
+                                        '<span class="ddish-addon__pic"><img src="img/addons/' + k + '.webp" alt="" loading="eager" decoding="async"></span>' +
+                                        ctl +
+                                    '</span>' +
+                                    txt +
+                                '</div>';
+                            }
                             return '<div class="ddish-addon" data-id="' + k + '" data-qty="0">' +
                                 '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
-                                '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅') + '</small></span>' +
-                                '<span class="ddish-addon__ctl">' +
-                                    '<button type="button" class="ddish-addon__btn ddish-addon__dec" data-act="addon" data-id="' + k + '" data-d="-1" aria-label="Убрать порцию" tabindex="-1">' +
-                                        '<svg class="i" viewBox="0 0 24 24"><path d="M6 12h12"/></svg>' +
-                                    '</button>' +
-                                    '<span class="ddish-addon__q num" aria-live="polite">1</span>' +
-                                    '<button type="button" class="ddish-addon__btn ddish-addon__inc" data-act="addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию">' +
-                                        '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
-                                    '</button>' +
-                                '</span></div>';
+                                txt + ctl +
+                            '</div>';
                         }).join('') +
                         '</div>';
                     body.appendChild(adBox);
