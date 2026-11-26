@@ -5624,7 +5624,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
 .press-grad--l { --pgd: to right; }
 .press-grad--c { background: color-mix(in srgb, var(--rc) 14%, transparent); }   /* одиночная кнопка «+» — ровно */
 /* палец на кнопке: продавлена, пока держат (отпустили — отжимается анимацией, pressUp) */
-.stepper button.is-held, .qty button.is-held { scale: .86; transition: scale .09s cubic-bezier(.3, 0, .4, 1); }
+.stepper button.is-held, .qty button.is-held, .ddish-addon__ctl button.is-held { scale: .86; transition: scale .09s cubic-bezier(.3, 0, .4, 1); }
 .qty .press-grad, .adder .press-grad, .plus .press-grad { --rc: #fff; }   /* на тёмной и красной плашке — высветление */
 .press-rip--glow { background: radial-gradient(closest-side, color-mix(in srgb, var(--rc) 26%, transparent), transparent 100%); }
 .qty .press-rip, .adder .press-rip, .plus .press-rip { --rc: #fff; }   /* на тёмной и красной плашке — светлая волна */
@@ -6652,7 +6652,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '26.11 · 21:02';
+    var BUILD = '26.11 · 21:33';
 
     /* ── состояние ── */
     var S = {
@@ -7246,8 +7246,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        раньше, по click — на скорости это не сказывается: новое касание сразу начинает своё нажатие, не дожидаясь, пока догорит
        прошлое. Строку заказа перерисовало (кнопка — уже другая) — отпускание доигрывается на новой (fxPress). Клик без пальца
        (клавиатура) — нажатие и отпускание подряд, как было */
-    var PRESS_SEL = '.stepper button, .qty button, .adder button, .plus', pressHeld = null, pressAt = -1e9;
-    function pressBoxOf(btn) { var pill = btn.closest('.stepper, .qty, .adder'); return pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') || pill : pill) : btn; }
+    var PRESS_SEL = '.stepper button, .qty button, .adder button, .plus, .ddish-addon__ctl button', pressHeld = null, pressAt = -1e9;
+    function pressBoxOf(btn) { var pill = btn.closest('.stepper, .qty, .adder, .ddish-addon__ctl'); return pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') || pill : pill) : btn; }
     function pressGrad(box, btn) {   // накладка-градиент со стороны кнопки (одна на плашку); у одиночной кнопки — ровная
         var old = box.querySelectorAll(':scope > .press-grad'), i, gr = document.createElement('i'), br = btn.getBoundingClientRect(), pr = box.getBoundingClientRect();
         for (i = 0; i < old.length; i++) old[i].remove();
@@ -7285,7 +7285,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function fxPress(btn, dir) {
         if (fxOff() || !btn || !btn.isConnected) return;
         if (FXV.press === 'old') { fxTap(btn, dir); return; }
-        var pill = btn.closest('.stepper, .qty, .adder'), box = pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') : pill) : btn;
+        var pill = btn.closest('.stepper, .qty, .adder, .ddish-addon__ctl'), box = pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') : pill) : btn;
         if (!(FXV.press === 'grad' && performance.now() - pressAt < 1200)) btn.animate([{ scale: 1 }, { scale: .84, offset: .25 }, { scale: 1.06, offset: .6 }, { scale: 1 }], { duration: 460, easing: 'ease-out' });
         var br = btn.getBoundingClientRect(), pr = box.getBoundingClientRect(), k = box.offsetWidth / (pr.width || 1) || 1, W = box.offsetWidth;
         var cx = (br.left + br.width / 2 - pr.left) * k, cy = (br.top + br.height / 2 - pr.top) * k;
@@ -7391,7 +7391,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        белую. Сумма на кнопке появляется так же по цифрам: что не меняется — стоит, меняющаяся въезжает позже и проявляется.
        Размытие по вертикали — SVG-фильтр (feGaussianBlur 0 × 1,1): обычный blur() размывает во все стороны. Быстрые касания:
        новый перекат начинается с того, что видно, прошлый сразу встаёт на место. Как это устроено теперь — у ddText */
-    function ddOn(el) { return FXV.cnum === 'dodo' && el && el.closest && !!el.closest('#s-cart'); }
+    function ddOn(el) { return FXV.cnum === 'dodo' && el && el.closest && !!(el.closest('#s-cart') || el.closest('#sheet.is-dish')); }
     function ddFilter() {
         if (document.getElementById('ddvb')) return;
         var d = document.createElement('div'); d.setAttribute('aria-hidden', 'true'); d.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
@@ -7662,6 +7662,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        в корзине, доставка и «Ещё на … руб.» у полосы, сумма на кнопке в шторке блюда). delay — тронуться позже (волна в корзине) */
     function odoQ(el, text, dir, delay) {
         if (!el) return;
+        if (ddOn(el)) { odoQStop(el); ddText(el, text, dir || 1, delay || 0); return; }
         if (FXV.num !== 'odo' && FXV.num !== 'odo1') { odoQStop(el); odo(el, text, dir, delay || 0); return; }
         if (el._qw) { clearTimeout(el._qw); el._qw = 0; }
         if (delay > 0 && !fxOff()) { el._qw = setTimeout(function () { el._qw = 0; odoQ(el, text, dir, 0); }, delay); return; }   // новое число до срока — заменит это
@@ -12048,7 +12049,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             var im = document.getElementById('dishImg');
             if (im && im.classList.contains('round')) im.style.transform = 'rotate(' + (si * 25) + 'deg) scale(' + [0.8, 0.9, 1][si] + ')';
         }
-        document.getElementById('dishMeta').textContent = meta;
+        if (!(deskOn() && Desk && Desk.syncDish)) document.getElementById('dishMeta').textContent = meta;
         if (deskOn() && Desk && Desk.syncDish) Desk.syncDish();
     }
 
@@ -21006,7 +21007,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     var Desk = null;
     function deskApi() {
         return { S: S, app: app, $$: $$, ic: ic, esc: esc, addr: addr, city: city, rest: rest, Splash: Splash, deskOn: deskOn, standOn: standOn,
-            popScreen: popScreen, pushScreen: pushScreen, setTab: setTab, resetStack: resetStack, renderHome: renderHome, syncChrome: syncChrome, syncDish: syncDish, cntSet: cntSet,
+            popScreen: popScreen, pushScreen: pushScreen, setTab: setTab, resetStack: resetStack, renderHome: renderHome, syncChrome: syncChrome, syncDish: syncDish, cntSet: cntSet, odoQ: odoQ, fxPress: fxPress,
             closeSheet: closeSheet, closeSheetNice: closeSheetNice, fxFly: fxFly, fxPt: fxPt, fxOff: fxOff, crGame: crGame,
             openSheet: openSheet, confirmAddr: confirmAddr, cartCount: cartCount, cartTotals: cartTotals, moneyShort: moneyShort, BYN: BYN, curRest: function () { return curRest; },
             segPlay: segPlay, segStart: segStart, tr: tr,
@@ -21282,6 +21283,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
                     if (idx >= 0) dishState.addons.splice(idx, 1); else if (ADDONS[id]) dishState.addons.push(id);
                 }
                 syncDish();
+                var fxBtn = t.classList.contains('ddish-addon__hit') ? (t.parentNode && t.parentNode.querySelector('.ddish-addon__inc')) : t;
+                if (fxBtn) fxPress(fxBtn, dlt < 0 ? -1 : 1);
                 break;
             }
             case 'dqty': dishState.qty = Math.max(1, dishState.qty + Number(t.dataset.d)); syncDish(); break;
@@ -22269,8 +22272,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        • обводка без фона (пунктир «Получатель — другой человек») — «line»: свою обводку прячем, слой рисует её по контуру.
        Мягкую тень (с размытием) так не повторить — у таких элементов она у обёртки: filter: drop-shadow идёт по контуру
        (.rcpt-w, .pticket). Что не подходит ни под один способ — по-старому («paint» или обычный радиус) */
-    var SQ_X = '.auth__ph, .cat__pic, .dcard, .item, .bcard, .list, .citem__pic, .dlv, .rcpt, .pticket__in, .cwho__card, .fgrp__cv, .tilecat img, .resrow__pic, .rev, .ostat, .oc, .oc__cover, .ocard__pics span, .nt, .nt__ic, .nt__pic, .cother, .bt__map, .auth__bot, .ccp--menu > .ccp__in, .ccp--unfold, .ccp--wheel, .dls__ph, .agn__list',   // .dls__ph — шторка акции (17.11): фото подарка;   // .agn__list — заказы блюда в шторке «Вы заказывали N раз» (17.11, «clip»); .auth__bot — макет капчи входа (17.11): обводка 1 px — «halo»; выбор страны: меню (стекло — «clip»), раскрытие и барабан («halo»)
-        SQ_RING = '.cat__pic';   // тонкая обводка поверх фото у ::after — по контуру изнутри (--sq-ring)
+    var SQ_X = '.auth__ph, .cat__pic, .dcard, .item, .bcard, .list, .citem__pic, .dlv, .rcpt, .pticket__in, .cwho__card, .fgrp__cv, .tilecat img, .resrow__pic, .rev, .ostat, .oc, .oc__cover, .ocard__pics span, .nt, .nt__ic, .nt__pic, .cother, .bt__map, .auth__bot, .ccp--menu > .ccp__in, .ccp--unfold, .ccp--wheel, .dls__ph, .agn__list, .ddish-nutr, .ddish-crust .opt, .ddish-addon',   // .dls__ph — шторка акции (17.11): фото подарка;   // .agn__list — заказы блюда в шторке «Вы заказывали N раз» (17.11, «clip»); .auth__bot — макет капчи входа (17.11): обводка 1 px — «halo»; выбор страны: меню (стекло — «clip»), раскрытие и барабан («halo»); .ddish-nutr / .ddish-crust .opt / .ddish-addon (26.11): гладкие углы через clip + ::after (--sq-ring / --sq-ring2) без мерцания при наведении
+        SQ_RING = '.cat__pic, .ddish-nutr, .ddish-crust .opt, .ddish-addon';   // тонкая обводка по контуру изнутри у ::after (--sq-ring 1 px, --sq-ring2 1.5 px)
     var SQ_SMOOTH = .6, SQ_SEL = 'button, .rest__pic, .sfield, .acard, .appseg, .slot, .field, .pay, .cchip, .ctile, .stepper, .qty, .btn2, .cta, .promo__banner, .tilecat, .rfact, .cartbar, .search, .adder__clip, .adder__slab, .cgrp, .bt, ' + SQ_X, sqN = 0;
     function sqCorner(r, budget) {
         if (r <= 0) return null;
@@ -22401,10 +22404,11 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         svg.setAttribute('width', w); svg.setAttribute('height', h); svg.setAttribute('viewBox', x + ' ' + y + ' ' + w + ' ' + h);
         svg.style.left = svg.style.top = '0px'; svg.style.width = w + 'px'; svg.style.height = h + 'px';
     }
-    // полоса в 1 px по контуру изнутри — для ::after с тонкой обводкой поверх фото (SQ_RING)
+    // полоса в 1 px (--sq-ring) и 1.5 px (--sq-ring2) по контуру изнутри — для ::after с обводкой без мерцания (SQ_RING)
     function sqRing(el, st) {
         if (!el._sqRing) return;
         el.style.setProperty('--sq-ring', 'path(evenodd, "' + sqPath(st.w, st.h, st.rr, 0, 0) + sqPath(st.w - 2, st.h - 2, st.rr.map(function (r) { return Math.max(0, r - 1); }), 1, 1) + '")');
+        el.style.setProperty('--sq-ring2', 'path(evenodd, "' + sqPath(st.w, st.h, st.rr, 0, 0) + sqPath(st.w - 3, st.h - 3, st.rr.map(function (r) { return Math.max(0, r - 1.5); }), 1.5, 1.5) + '")');
     }
     /* SQ_X с тенью или обводкой (у «clip» их нет — он раньше): «halo» — тени без размытия, «line» — обводка без фона. true — сделано.
        Иначе — как у кнопок («paint» или обычный радиус) */
@@ -22508,9 +22512,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var list = root.matches && root.matches(SQ_SEL) ? [root] : [];
         (root.querySelectorAll ? [].slice.call(root.querySelectorAll(SQ_SEL)) : []).forEach(function (e) { list.push(e); });
         list.forEach(function (el) {
-            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava') || el.closest('.ddish-addon')) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него
-            // .ddish-addon (26.11, добавки в карточке блюда на компьютере): фон и обводка плавно меняются при наведении, а слой «paint»
-            // перерисовывался не в такт — углы на миг пропадали. Обычный радиус 14 px, переход целиком у браузера
+            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava') || (el.closest('.ddish-addon') && !el.classList.contains('ddish-addon'))) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него; внутри .ddish-addon кнопки круглые/скрытые — гладкий угол на самой карточке (SQ_RING)
             el._sqX = el.matches(SQ_X); el._sqRing = el._sqX && el.matches(SQ_RING);
             if (el._sqX && el.closest('.ri-tk')) return;   // плашки акций: рисунки нарочно выходят за край
             el._sqOn = true; if (sqRO) sqRO.observe(el); else sqUpdate(el);
@@ -22547,10 +22549,10 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     /* 16.11: смена вкладки переписывает класс всем экранам-вкладкам тем же значением — это тоже пересчитывало контуры
        всех их элементов (карточек с гладким углом стало больше — первый кадр ухода пустой корзины опаздывал); класс не
        изменился — пересчёта нет. is-tabout (гаснущая вкладка) — только видимость и слой */
-    var SQ_SAME = { screen: ['is-on', 'is-under', 'is-tabout'], app: ['on-hero'], bar: ['is-hidden', 'is-low'] };
+    var SQ_SAME = { screen: ['is-on', 'is-under', 'is-tabout'], app: ['on-hero'], bar: ['is-hidden', 'is-low'], chip: ['is-on', 'is-multi'] };
     function sqSameLook(was, now, el) {
         var a = String(was || '').split(/\s+/), b = String(now || '').split(/\s+/), d = a.filter(function (x) { return x && b.indexOf(x) < 0; }).concat(b.filter(function (x) { return x && a.indexOf(x) < 0; }));
-        var own = !el || !el.classList ? null : el === app ? SQ_SAME.app : el.classList.contains('screen') ? SQ_SAME.screen : el.id === 'tabbar' || el.id === 'cartbar' ? SQ_SAME.bar : null;
+        var own = !el || !el.classList ? null : el === app ? SQ_SAME.app : el.classList.contains('screen') ? SQ_SAME.screen : el.id === 'tabbar' || el.id === 'cartbar' ? SQ_SAME.bar : (el.classList.contains('ddish-addon') || (el.classList.contains('opt') && el.closest('.ddish-crust'))) ? SQ_SAME.chip : null;
         return d.every(function (x) { return x === 'is-typing' || x === 'is-back' || x === 'is-fwd' || x === 'is-wave' || (!!own && own.indexOf(x) >= 0); });
     }
     new MutationObserver(function () { sqRefresh(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
