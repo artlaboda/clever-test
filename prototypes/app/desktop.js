@@ -1583,5 +1583,173 @@ window.cleverDesk = function (A) {
         app.addEventListener('scroll', function () { if (cur) put(); }, true);
     })();
 
-    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded, askAddr: askAddr, cartSync: deskCartSync, cartBag: deskCartBag };
+    /* 26.11: карточка товара на десктопе — двухколоночное окно без прокрутки и без скруглений у фото:
+       слева во всю высоту фото (с переключением кадров, если их несколько), справа — название, описание, КБЖУ,
+       размер / 2×2 борт / добавки и закреплённый в правой колонке футер со степпером и кнопкой добавления */
+    function deskDishFmt(n) { return String(Math.round(n * 10) / 10).replace('.', ','); }
+    function deskDishPhotos(stage) {
+        var track = stage && stage.querySelector('.dph');
+        var slides = track ? track.querySelectorAll('.dph__s') : null;
+        if (!slides || slides.length < 2 || stage.querySelector('.ddish-pnav')) return;
+        var dots = stage.querySelectorAll('.dph__dots i'), idx = 0, total = slides.length;
+        var prev = document.createElement('button');
+        prev.type = 'button'; prev.className = 'ddish-pnav ddish-pnav--prev'; prev.setAttribute('aria-label', 'Предыдущее фото');
+        prev.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+        var next = document.createElement('button');
+        next.type = 'button'; next.className = 'ddish-pnav ddish-pnav--next'; next.setAttribute('aria-label', 'Следующее фото');
+        next.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+        var go = function (k) {
+            idx = (k + total) % total;
+            track.style.transform = 'translateX(' + (-idx * 100) + '%)';
+            dots.forEach(function (dot, i) { dot.classList.toggle('is-on', i === idx); });
+        };
+        prev.addEventListener('click', function (e) { e.stopPropagation(); go(idx - 1); });
+        next.addEventListener('click', function (e) { e.stopPropagation(); go(idx + 1); });
+        dots.forEach(function (dot, i) { dot.addEventListener('click', function (e) { e.stopPropagation(); go(i); }); });
+        stage.appendChild(prev); stage.appendChild(next);
+    }
+    function deskDishSync() {
+        var sh = document.getElementById('sheet');
+        if (!sh || !deskOn() || A.sheetKind() !== 'dish') return;
+        var ds = A.dishState && A.dishState(), d = ds && A.DISHES && A.DISHES[ds.id];
+        if (!d) return;
+        var pg = sh.querySelector('.dpg.is-cur') || sh;
+        var body = pg.querySelector('.dish__body');
+        if (!body) return;
+        var adKeys = A.dishAddons ? A.dishAddons(ds.id) : [];
+        var nutr = A.dishNutr ? A.dishNutr(ds.id) : null;
+        var sweet = ds.id === 'cinnabon' || ds.id === 'pancakes' || ds.id === 'syrniki' || ds.id === 'bliny';
+        sh.classList.toggle('is-dish-cfg', !!d.pizza);
+        sh.classList.toggle('is-dish-add', !d.pizza && adKeys.length > 0);
+        if (!pg.querySelector('.ddish-grid')) {
+            var scr = pg.querySelector('.scroll'), stage = scr && scr.querySelector('.dish__stage'), foot = pg.querySelector('.sheet__foot.dfoot');
+            if (scr && stage && body) {
+                var grid = document.createElement('div'); grid.className = 'ddish-grid';
+                var side = document.createElement('div'); side.className = 'ddish-side';
+                grid.appendChild(stage);
+                side.appendChild(body);
+                if (foot) side.appendChild(foot);
+                grid.appendChild(side);
+                scr.parentNode.insertBefore(grid, scr);
+                scr.remove();
+                // убираем мобильную пустую распорку в конце .dish__body
+                var last = body.lastElementChild;
+                if (last && last.tagName === 'DIV' && !last.className && last.style.height) last.remove();
+                // название заведения тонкой подписью над заголовком
+                var r = ds.rest && A.rest ? A.rest(ds.rest) : null;
+                var head = body.firstElementChild;
+                if (r && head && !head.querySelector('.ddish-eyebrow')) {
+                    var ey = document.createElement('div'); ey.className = 'ddish-eyebrow'; ey.textContent = r.name;
+                    head.insertBefore(ey, head.firstChild);
+                }
+                // красиво оформленный блок КБЖУ
+                if (nutr) {
+                    var pK = nutr[1] * 4, fK = nutr[2] * 9, cK = nutr[3] * 4, totK = pK + fK + cK;
+                    var perLabel = d.ml ? 'на 100 мл' : 'на 100 г';
+                    var unitG = ' г';
+                    var nEl = document.createElement('div'); nEl.className = 'ddish-nutr';
+                    nEl.innerHTML =
+                        '<div class="ddish-nutr__top">' +
+                            '<span class="ddish-nutr__title">Пищевая ценность</span>' +
+                            '<span class="ddish-nutr__dot" aria-hidden="true">·</span>' +
+                            '<span class="ddish-nutr__per">' + perLabel + '</span>' +
+                            '<span class="ddish-nutr__serv num"></span>' +
+                        '</div>' +
+                        '<div class="ddish-nutr__cols">' +
+                            '<div class="ddish-nutr__c is-kcal"><b class="num">' + Math.round(nutr[0]) + '</b><span>ккал</span></div>' +
+                            '<div class="ddish-nutr__c is-p"><b class="num">' + deskDishFmt(nutr[1]) + unitG + '</b><span>Белки</span></div>' +
+                            '<div class="ddish-nutr__c is-f"><b class="num">' + deskDishFmt(nutr[2]) + unitG + '</b><span>Жиры</span></div>' +
+                            '<div class="ddish-nutr__c is-c"><b class="num">' + deskDishFmt(nutr[3]) + unitG + '</b><span>Углеводы</span></div>' +
+                        '</div>' +
+                        (totK > .5 ? '<div class="ddish-nutr__bar" aria-hidden="true">' +
+                            '<i class="is-p" style="flex:' + pK.toFixed(1) + '"></i>' +
+                            '<i class="is-f" style="flex:' + fK.toFixed(1) + '"></i>' +
+                            '<i class="is-c" style="flex:' + cK.toFixed(1) + '"></i>' +
+                        '</div>' : '');
+                    var descEl = body.querySelector('.dish__desc');
+                    if (descEl && descEl.nextSibling) body.insertBefore(nEl, descEl.nextSibling);
+                    else body.appendChild(nEl);
+                }
+                // размер — с общим заголовком секции, в ритм «Борта» и «Добавок»
+                var szSeg = body.querySelector('.cseg[data-key="size"]');
+                if (szSeg && !szSeg.parentElement.classList.contains('ddish-size')) {
+                    var szWrap = document.createElement('div'); szWrap.className = 'ddish-size';
+                    szWrap.innerHTML = '<h3>Размер</h3>';
+                    szSeg.parentNode.insertBefore(szWrap, szSeg);
+                    szWrap.appendChild(szSeg);
+                }
+                // борт — компактной сеткой 2×2 вместо длинного списка
+                var opts = body.querySelector('.opts');
+                if (opts && !opts.querySelector('.ddish-crust')) {
+                    var cg = document.createElement('div'); cg.className = 'ddish-crust';
+                    $$(':scope > .opt', opts).forEach(function (opt) {
+                        var inp = opt.querySelector('input[type="radio"]');
+                        var sm = opt.querySelector('small');
+                        if (inp && inp.value === 'classic' && sm) sm.textContent = 'Базовый';
+                        cg.appendChild(opt);
+                    });
+                    opts.appendChild(cg);
+                }
+                // добавки / топпинги
+                if (adKeys.length && A.ADDONS) {
+                    var adBox = document.createElement('div'); adBox.className = 'ddish-addons';
+                    adBox.innerHTML =
+                        '<div class="ddish-addons__head">' +
+                            '<h3>' + (sweet ? 'Топпинги' : 'Добавки') + '</h3>' +
+                            '<span class="ddish-addons__cnt num" hidden></span>' +
+                        '</div>' +
+                        '<div class="ddish-addons__grid ' + (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3') + '">' +
+                        adKeys.map(function (k) {
+                            var a = A.ADDONS[k]; if (!a) return '';
+                            return '<button type="button" class="ddish-addon" data-act="addon" data-id="' + k + '" aria-pressed="false">' +
+                                '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅') + '</small></span>' +
+                                '<span class="ddish-addon__ck" aria-hidden="true">' +
+                                    '<svg class="i ddish-addon__plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
+                                    '<svg class="i ddish-addon__ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' +
+                                '</span></button>';
+                        }).join('') +
+                        '</div>';
+                    body.appendChild(adBox);
+                }
+                deskDishPhotos(stage);
+            }
+        }
+        // живые обновления: калорийность порции (меняется с размером пиццы), активный борт и добавки
+        var servEl = body.querySelector('.ddish-nutr__serv');
+        if (servEl && nutr) {
+            var w = d.w;
+            if (d.pizza && A.SIZES) {
+                var sz = A.SIZES.filter(function (s) { return s.k === ds.size; })[0] || A.SIZES[0];
+                w = Math.round(d.w * sz.mul / 5) * 5;
+            }
+            var servKcal = Math.round(nutr[0] * w / 100);
+            servEl.textContent = servKcal > 0 ? 'В порции ~' + servKcal + ' ккал' : '';
+        }
+        $$('.ddish-crust .opt', body).forEach(function (opt) {
+            var inp = opt.querySelector('input[type="radio"]');
+            opt.classList.toggle('is-on', !!(inp && inp.value === ds.base));
+        });
+        var selAds = ds.addons || [];
+        $$('.ddish-addon', body).forEach(function (btn) {
+            var on = selAds.indexOf(btn.dataset.id) >= 0;
+            btn.classList.toggle('is-on', on);
+            btn.setAttribute('aria-pressed', String(on));
+        });
+        var cntEl = body.querySelector('.ddish-addons__cnt');
+        if (cntEl) {
+            cntEl.hidden = !selAds.length;
+            if (selAds.length) cntEl.textContent = 'Выбрано: ' + selAds.length;
+        }
+    }
+    (function () {
+        var sh = document.getElementById('sheet');
+        if (!sh || !window.MutationObserver) return;
+        new MutationObserver(function () {
+            if (!sh.classList.contains('is-dish') && (sh.classList.contains('is-dish-cfg') || sh.classList.contains('is-dish-add'))) {
+                sh.classList.remove('is-dish-cfg', 'is-dish-add');
+            }
+        }).observe(sh, { attributes: true, attributeFilter: ['class'] });
+    })();
+
+    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded, askAddr: askAddr, cartSync: deskCartSync, cartBag: deskCartBag, syncDish: deskDishSync };
 };
