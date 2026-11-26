@@ -1656,7 +1656,7 @@ window.cleverDesk = function (A) {
                             '<span class="ddish-nutr__title">Пищевая ценность на</span> ' +
                             '<b class="ddish-nutr__b num">' + perUnit + '</b>' +
                             '<span class="ddish-nutr__dot" aria-hidden="true">·</span>' +
-                            '<b class="ddish-nutr__b num">' + Math.round(nutr[0]) + ' ккал</b>' +
+                            '<b class="ddish-nutr__b ddish-nutr__kcal num">' + Math.round(nutr[0]) + ' ккал</b>' +
                             '<span class="ddish-nutr__serv" hidden><span class="ddish-nutr__p" aria-hidden="true">.</span> <span>В порции</span> <b class="ddish-nutr__b ddish-nutr__sv num"></b></span>' +
                         '</div>' +
                         '<div class="ddish-nutr__cols">' +
@@ -1688,7 +1688,7 @@ window.cleverDesk = function (A) {
                     });
                     opts.appendChild(cg);
                 }
-                // добавки / топпинги
+                // добавки / топпинги — с выбором количества порций (1..5): кружок «+» плавно раскрывается в капсулу «− N +»
                 if (adKeys.length && A.ADDONS) {
                     var adBox = document.createElement('div'); adBox.className = 'ddish-addons';
                     adBox.innerHTML =
@@ -1699,12 +1699,18 @@ window.cleverDesk = function (A) {
                         '<div class="ddish-addons__grid ' + (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3') + '">' +
                         adKeys.map(function (k) {
                             var a = A.ADDONS[k]; if (!a) return '';
-                            return '<button type="button" class="ddish-addon" data-act="addon" data-id="' + k + '" aria-pressed="false">' +
+                            return '<div class="ddish-addon" data-id="' + k + '" data-qty="0">' +
+                                '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
                                 '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅') + '</small></span>' +
-                                '<span class="ddish-addon__ck" aria-hidden="true">' +
-                                    '<svg class="i ddish-addon__plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
-                                    '<svg class="i ddish-addon__ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>' +
-                                '</span></button>';
+                                '<span class="ddish-addon__ctl">' +
+                                    '<button type="button" class="ddish-addon__btn ddish-addon__dec" data-act="addon" data-id="' + k + '" data-d="-1" aria-label="Убрать порцию" tabindex="-1">' +
+                                        '<svg class="i" viewBox="0 0 24 24"><path d="M6 12h12"/></svg>' +
+                                    '</button>' +
+                                    '<span class="ddish-addon__q num" aria-live="polite">0</span>' +
+                                    '<button type="button" class="ddish-addon__btn ddish-addon__inc" data-act="addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию">' +
+                                        '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
+                                    '</button>' +
+                                '</span></div>';
                         }).join('') +
                         '</div>';
                     body.appendChild(adBox);
@@ -1712,27 +1718,89 @@ window.cleverDesk = function (A) {
                 deskDishPhotos(stage);
             }
         }
-        // живые обновления: калорийность порции (меняется с размером пиццы), активный борт и добавки
-        var servEl = body.querySelector('.ddish-nutr__serv'), servVal = body.querySelector('.ddish-nutr__sv');
-        if (servEl && servVal && nutr) {
-            var w = d.w;
+        // живые обновления: пересчёт веса и КБЖУ с учётом размера, борта и количества порций добавок
+        var selAds = ds.addons || [];
+        var adCnt = {};
+        selAds.forEach(function (k) { adCnt[k] = (adCnt[k] || 0) + 1; });
+        var nutrBox = body.querySelector('.ddish-nutr');
+        if (nutrBox && nutr) {
+            var baseW = d.w, szObj = null;
             if (d.pizza && A.SIZES) {
-                var sz = A.SIZES.filter(function (s) { return s.k === ds.size; })[0] || A.SIZES[0];
-                w = Math.round(d.w * sz.mul / 5) * 5;
+                szObj = A.SIZES.filter(function (s) { return s.k === ds.size; })[0] || A.SIZES[0];
+                baseW = Math.round(d.w * szObj.mul / 5) * 5;
             }
-            var servKcal = Math.round(nutr[0] * w / 100);
-            servEl.hidden = servKcal <= 0;
-            if (servKcal > 0) servVal.textContent = '~' + servKcal + ' ккал';
+            var addW = 0, addP = 0, addF = 0, addC = 0;
+            if (d.pizza && A.BASES) {
+                var bsObj = A.BASES.filter(function (b) { return b.k === ds.base; })[0];
+                if (bsObj && bsObj.w) {
+                    var pMul = szObj && szObj.k === 'L' ? 1.4 : szObj && szObj.k === 'M' ? 1.2 : 1;
+                    addW += Math.round(bsObj.w * pMul / 5) * 5;
+                    addP += (bsObj.p || 0) * pMul;
+                    addF += (bsObj.f || 0) * pMul;
+                    addC += (bsObj.c || 0) * pMul;
+                }
+            }
+            if (A.ADDONS && selAds.length) {
+                selAds.forEach(function (k) {
+                    var a = A.ADDONS[k]; if (!a) return;
+                    addW += a.w || 0; addP += a.p || 0; addF += a.f || 0; addC += a.c || 0;
+                });
+            }
+            var totW = baseW + addW;
+            var totP = nutr[1] * baseW / 100 + addP;
+            var totF = nutr[2] * baseW / 100 + addF;
+            var totC = nutr[3] * baseW / 100 + addC;
+            var p100 = totW > 0 ? totP * 100 / totW : nutr[1];
+            var f100 = totW > 0 ? totF * 100 / totW : nutr[2];
+            var c100 = totW > 0 ? totC * 100 / totW : nutr[3];
+            var k100 = (addW > 0) ? Math.round(4 * p100 + 9 * f100 + 4 * c100) : Math.round(nutr[0]);
+            var servKcal = (addW > 0) ? Math.round(4 * totP + 9 * totF + 4 * totC) : Math.round(nutr[0] * baseW / 100);
+            var kcalEl = nutrBox.querySelector('.ddish-nutr__kcal');
+            if (kcalEl) kcalEl.textContent = k100 + ' ккал';
+            var servEl = nutrBox.querySelector('.ddish-nutr__serv'), servVal = nutrBox.querySelector('.ddish-nutr__sv');
+            if (servEl && servVal) {
+                servEl.hidden = servKcal <= 0;
+                if (servKcal > 0) servVal.textContent = '~' + servKcal + ' ккал';
+            }
+            var setCol = function (cls, v) {
+                var c = nutrBox.querySelector('.ddish-nutr__c.' + cls); if (!c) return;
+                var b = c.querySelector(':scope > b'), bar = c.querySelector('.ddish-nutr__track > b');
+                if (b) b.textContent = deskDishFmt(v) + ' г';
+                if (bar) {
+                    bar.style.width = Math.min(100, Math.max(0, Math.round(v * 10) / 10)) + '%';
+                    bar.classList.toggle('has-v', v > 0);
+                }
+            };
+            setCol('is-p', p100); setCol('is-f', f100); setCol('is-c', c100);
+            // вес блюда в шапке тоже учитывает борт и добавки (правим #dishMeta, не трогая обёртку .dish__line)
+            var metaEl = body.querySelector('#dishMeta');
+            if (metaEl && !d.unit) {
+                metaEl.textContent = d.pizza && szObj ? (totW + ' г · ' + szObj.label) : (totW + (d.ml ? ' мл' : ' г'));
+            }
         }
         $$('.ddish-crust .opt', body).forEach(function (opt) {
             var inp = opt.querySelector('input[type="radio"]');
             opt.classList.toggle('is-on', !!(inp && inp.value === ds.base));
         });
-        var selAds = ds.addons || [];
-        $$('.ddish-addon', body).forEach(function (btn) {
-            var on = selAds.indexOf(btn.dataset.id) >= 0;
-            btn.classList.toggle('is-on', on);
-            btn.setAttribute('aria-pressed', String(on));
+        $$('.ddish-addon', body).forEach(function (card) {
+            var k = card.dataset.id, q = adCnt[k] || 0, prev = Number(card.dataset.qty || 0);
+            var on = q > 0;
+            card.dataset.qty = String(q);
+            card.classList.toggle('is-on', on);
+            card.classList.toggle('is-multi', q > 1);
+            var qEl = card.querySelector('.ddish-addon__q');
+            if (qEl) {
+                qEl.textContent = String(q);
+                if (q !== prev && q > 0) {
+                    qEl.classList.remove('is-pop'); void qEl.offsetWidth; qEl.classList.add('is-pop');
+                }
+            }
+            var dec = card.querySelector('.ddish-addon__dec'), inc = card.querySelector('.ddish-addon__inc'), hit = card.querySelector('.ddish-addon__hit');
+            if (dec) dec.tabIndex = on ? 0 : -1;
+            if (inc) inc.disabled = q >= 5;
+            if (hit) hit.disabled = q >= 5;
+            var sm = card.querySelector('.ddish-addon__txt small'), a = A.ADDONS && A.ADDONS[k];
+            if (sm && a) sm.textContent = '+' + A.moneyShort(a.add * Math.max(1, q)) + '\u00a0' + (A.BYN || '⃅');
         });
         var cntEl = body.querySelector('.ddish-addons__cnt');
         if (cntEl) {
