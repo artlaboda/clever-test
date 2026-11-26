@@ -311,9 +311,9 @@ html.desk .dcard:hover img, html.desk .item:hover .item__pic img { transform: sc
 html.desk .dcard img, html.desk .item__pic img { transition: transform .45s var(--dease); }
 html.desk .ups:hover { transform: translateY(-3px); }
 /* кнопки, плашки, строки */
-html.desk .cta { transition: transform .2s var(--dease), box-shadow .2s, filter .2s; }
-html.desk .cta:hover:not(:disabled):not(.is-off) { transform: translateY(-1px); box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -12px rgba(20, 12, 8, .6); }
-html.desk .cta:active { transform: scale(.985); }
+html.desk .cta { transition: translate .2s var(--dease), scale .16s var(--dease), box-shadow .2s, filter .2s; }
+html.desk .cta:hover:not(:disabled):not(.is-off) { translate: 0 -1px; box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -12px rgba(20, 12, 8, .6); }
+html.desk .cta:active { transform: none; scale: .985; }
 html.desk .chip, html.desk .link, html.desk .lrow, html.desk .me, html.desk .tilecat, html.desk .sq__top, html.desk .slot, html.desk .cday, html.desk .cpay, html.desk .opt, html.desk .citem, html.desk .fgrp__r, html.desk .fgrp__all, html.desk .bt__link, html.desk .cchg, html.desk .cother, html.desk .cwo { transition: background .2s, box-shadow .2s, color .2s, transform .2s var(--dease); }
 /* фильтры (20.11: «при ховере не выделять ни чёрным, ни коричневым — нужна красивая тень под ними; всё по центру по высоте»):
    под курсором рамка тает, плашка чуть приподнимается, под ней — мягкая тень. Высота 40 px, строка — 1: значок и буквы
@@ -775,40 +775,42 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-pnav:active { transform: trans
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-pnav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage .item__tags { top: 24px; left: 24px; right: 24px; gap: 7px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__rb--pic { left: 24px; bottom: 24px; top: auto; }
-/* правая колонка: контент + футер внизу без прокрутки */
+/* правая колонка: контент + футер внизу без прокрутки; --dish-in задаёт единую вертикаль текста (шапка, описание, заголовки секций и контент внутри карточек) */
+html.desk :is(#sheet, #sheetUnder).is-dish { --dish-in: 15px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-side {
     display: flex; flex-direction: column; justify-content: space-between;
     min-width: 0; background: var(--app-bg);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__body {
-    padding: 36px 38px 28px; display: grid; gap: 20px; align-content: start;
+    padding: 34px 30px 26px; display: grid; gap: 20px; align-content: start;
     font-size: 16px;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__body { padding: 28px 34px 18px; gap: 15px; }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__body { padding: 26px 26px 16px; gap: 15px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .dish__body > :first-child { padding-inline: var(--dish-in); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-eyebrow {
     font: 600 13.5px/1.2 var(--font); color: var(--muted); letter-spacing: .01em; margin-bottom: 6px;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__name {
-    font-size: 34px; line-height: 1.08; letter-spacing: -.02em; padding-right: 48px; text-wrap: balance;
+    font-size: 34px; line-height: 1.08; letter-spacing: -.02em; padding-right: 40px; text-wrap: balance;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__name { font-size: 30px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__line { margin-top: 5px; font-size: 15px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__desc {
-    margin: -11px 0 0; font-size: 16px; line-height: 1.5;
+    margin: -11px 0 0; padding-inline: var(--dish-in); font-size: 16px; line-height: 1.5;
     color: color-mix(in srgb, var(--ink) 78%, var(--muted)); text-wrap: pretty;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__desc { margin-top: -7px; font-size: 14.5px; line-height: 1.44; }
-/* КБЖУ: мягкая плашка со smooth corners (SQ_RING), в шапке калорийность и переключатель «На 100 г / На порцию (На N шт)»,
-   ниже 3 колонки БЖУ с процентами и цветными полосами (в сумме всегда 100%) */
+/* КБЖУ: мягкая плашка со smooth corners (SQ_RING), в шапке калорийность и капсульный .cseg с эффектом линзы,
+   ниже с воздухом — 3 колонки БЖУ с процентами и цветными полосами (в сумме всегда 100%) */
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
-    position: relative; padding: 12px 16px 13px; border-radius: 16px;
+    position: relative; padding: 14px var(--dish-in) 15px; border-radius: 16px;
     background: var(--surface);
     --ring-c: color-mix(in srgb, var(--line) 80%, transparent);
-    display: grid; gap: 10px;
+    display: grid; gap: 16px;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 10px 15px 11px; gap: 8px; }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 12px var(--dish-in) 13px; gap: 13px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__top {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 28px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 32px;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__info {
     display: flex; align-items: baseline; flex-wrap: nowrap; min-width: 0;
@@ -819,26 +821,23 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__dot { margin-inline: 5px
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__b { font-weight: 700; color: var(--ink); white-space: nowrap; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__wwrap[hidden] { display: none; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__w { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
-/* компактный переключатель «На 100 г / На порцию» с плавным бегунком */
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__seg {
-    position: relative; flex: none; display: inline-flex; align-items: center;
-    height: 28px; padding: 2px; border-radius: 10px; box-sizing: border-box;
-    background: color-mix(in srgb, var(--ink) 6%, transparent);
+/* капсульный переключатель «На 100 г / На порцию» на движке .cseg — с линзой, стеклом и перетягиванием */
+html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
+    --seg-bg: color-mix(in srgb, var(--ink) 6%, var(--surface));
+    flex: none; height: 34px; padding: 4px; border-radius: 999px; box-sizing: border-box;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__th {
-    position: absolute; z-index: 0; top: 2px; bottom: 2px; left: 2px;
-    border-radius: 8px; background: var(--card); pointer-events: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, .06), 0 2px 6px rgba(0, 0, 0, .06);
-    transition: transform .32s var(--dease), width .32s var(--dease);
+html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > :is(.cseg__th, .cseg__lens) {
+    border-radius: 999px;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__tab {
-    position: relative; z-index: 1; flex: none; height: 24px; min-width: 74px;
-    padding: 0 9px; border: 0; border-radius: 8px; background: transparent;
-    font: 600 12px/1 var(--font); color: var(--muted); white-space: nowrap;
-    cursor: pointer; transition: color .2s ease;
+html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > button,
+html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg .cseg__c {
+    min-width: 82px; padding: 0 11px; border-radius: 999px;
+    font: 600 12px/1 var(--font); white-space: nowrap;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__tab:hover { color: var(--ink); }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__tab[aria-pressed="true"] { color: var(--ink); font-weight: 650; }
+html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > button[aria-pressed="true"],
+html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg .cseg__c.is-on {
+    color: var(--ink); font-weight: 650;
+}
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__cols {
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;
 }
@@ -888,9 +887,13 @@ html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-nutr, .ddish-crust .opt, .
 html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-crust .opt, .ddish-addon).is-on[data-sq="clip"]::after {
     clip-path: var(--sq-ring2, var(--sq-ring, inset(50%)));
 }
-/* заголовки секций опций (Размер / Борт / Добавки) */
-html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-size, .opts, .ddish-addons) h3 {
-    margin: 0 0 8px; font: 650 13.5px/1.2 var(--font); letter-spacing: .015em; color: var(--muted);
+/* заголовки секций опций (Размер / Борт / Добавки) — по общей оптической линии --dish-in */
+html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-size, .opts) > h3 {
+    margin: 0 0 8px; padding-inline: var(--dish-in);
+    font: 650 13.5px/1.2 var(--font); letter-spacing: .015em; color: var(--muted);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__head h3 {
+    margin: 0; font: 650 13.5px/1.2 var(--font); letter-spacing: .015em; color: var(--muted);
 }
 /* размер — аккуратный сегмент */
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg[data-key="size"] { height: 52px; border-radius: 15px; }
@@ -907,7 +910,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt {
     position: relative;
     display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto;
     gap: 2px 12px; align-items: center;
-    padding: 10px 14px; border: 0; border-radius: 14px;
+    padding: 10px var(--dish-in); border: 0; border-radius: 14px;
     background: var(--card); box-shadow: none;
     --ring-c: var(--line);
     transition: background-color .22s ease, transform .18s var(--dease);
@@ -935,20 +938,25 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt > .radio {
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt input:checked + .radio {
     box-shadow: inset 0 0 0 6px color-mix(in srgb, var(--ink) 80%, var(--muted));
 }
-/* добавки и топпинги — компактные тактильные чипы со smooth corners и мягкой рамкой */
+/* добавки и топпинги — компактные тактильные чипы со smooth corners и мягкой рамкой; счётчик выбранных — рядом через интерпункт тёплым серым */
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__head {
-    display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px;
+    display: flex; align-items: baseline; justify-content: flex-start;
+    margin-bottom: 8px; padding-inline: var(--dish-in);
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__head h3 { margin: 0; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__cnt {
-    font: 600 12.5px/1 var(--font); color: var(--brand);
+    display: inline-flex; align-items: baseline;
+    font: 500 13px/1.2 var(--font); color: var(--muted);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__cnt[hidden] { display: none; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__dot {
+    margin-inline: 6px; color: color-mix(in srgb, var(--muted) 72%, transparent);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid { display: grid; gap: 9px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon {
     position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    padding: 9px 9px 9px 12px; border: 0; border-radius: 14px; text-align: left;
+    padding: 9px 10px 9px var(--dish-in); border: 0; border-radius: 14px; text-align: left;
     background: var(--card); color: var(--ink); box-shadow: none;
     --ring-c: var(--line);
     transition: background-color .22s ease, transform .18s var(--dease);
@@ -1031,12 +1039,12 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-on .ddish-addon__q { 
 /* футер только в правой колонке */
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-side > .sheet__foot {
     position: static; left: auto; right: auto; bottom: auto; width: auto;
-    padding: 18px 38px 28px; gap: 14px;
+    padding: 18px 30px 26px; gap: 14px;
     background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none;
     border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     box-shadow: none;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-side > .sheet__foot { padding: 15px 34px 22px; }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-side > .sheet__foot { padding: 15px 26px 22px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-side > .sheet__foot::before { display: none; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dfoot .stepper {
     height: 54px; padding: 0 8px; border-radius: 16px;
@@ -1048,28 +1056,30 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dfoot .cta {
     height: 54px; border-radius: 16px; font-size: 16.5px; font-weight: 650;
 }
 @media (max-height: 820px) {
+    html.desk :is(#sheet, #sheetUnder).is-dish { --dish-in: 13px; }
     html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage { min-height: min(490px, calc(100vh - 72px)); }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__body { padding: 18px 30px 10px; gap: 9px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__body { padding: 18px 24px 10px; gap: 9px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__name { font-size: 26px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 8px 13px 9px; gap: 6px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__top { min-height: 26px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__seg { height: 26px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__tab { height: 22px; min-width: 70px; font-size: 11.5px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 9px var(--dish-in) 10px; gap: 10px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__top { min-height: 28px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg.ddish-nutr__seg { height: 30px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg.ddish-nutr__seg > button,
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg.ddish-nutr__seg .cseg__c { min-width: 76px; padding: 0 9px; font-size: 11.5px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg[data-key="size"] { height: 46px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-crust .opt,
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon { padding: 8px 11px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-side > .sheet__foot { padding: 12px 30px 16px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-crust .opt { padding: 8px var(--dish-in); }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon { padding: 8px 9px 8px var(--dish-in); }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-side > .sheet__foot { padding: 12px 24px 16px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dfoot :is(.stepper, .cta) { height: 48px; }
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
     background: rgba(255, 255, 255, .04);
     --ring-c: rgba(255, 255, 255, .08);
 }
-html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-nutr__seg {
-    background: rgba(255, 255, 255, .07);
+html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
+    --seg-bg: color-mix(in srgb, #fff 8%, var(--card));
 }
-html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-nutr__th {
-    background: color-mix(in srgb, var(--ink) 16%, var(--card));
+html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > .cseg__th {
+    background: color-mix(in srgb, var(--ink) 18%, var(--card));
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 6px rgba(0, 0, 0, .35);
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish :is(.ddish-crust .opt, .ddish-addon).is-on {
@@ -1091,11 +1101,11 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-pnav:hover 
         background: rgba(255, 255, 255, .04);
         --ring-c: rgba(255, 255, 255, .08);
     }
-    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .ddish-nutr__seg {
-        background: rgba(255, 255, 255, .07);
+    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
+        --seg-bg: color-mix(in srgb, #fff 8%, var(--card));
     }
-    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .ddish-nutr__th {
-        background: color-mix(in srgb, var(--ink) 16%, var(--card));
+    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > .cseg__th {
+        background: color-mix(in srgb, var(--ink) 18%, var(--card));
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 6px rgba(0, 0, 0, .35);
     }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish :is(.ddish-crust .opt, .ddish-addon).is-on {

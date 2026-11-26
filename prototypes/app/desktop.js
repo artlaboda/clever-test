@@ -1500,7 +1500,13 @@ window.cleverDesk = function (A) {
     var deskPortals = 0;
     function deskDishAdded(btn, q, from) {
         A.dishState().qty = 1; cntSet(document.getElementById('dqty'), 1); syncDish();
-        if (!fxOff() && btn && btn.isConnected) btn.animate([{ transform: 'none' }, { transform: 'scale(.92)', offset: .26, easing: 'cubic-bezier(.3, 0, .4, 1)' }, { transform: 'scale(1.025)', offset: .66 }, { transform: 'none' }], { duration: 480, easing: 'ease-out' });
+        if (!fxOff() && btn && btn.isConnected) {
+            if (btn._addAn) { try { btn._addAn.cancel(); } catch (e) {} }
+            btn._addAn = btn.animate(
+                [{ scale: '.985' }, { scale: '.94', offset: .24, easing: 'cubic-bezier(.3, 0, .4, 1)' }, { scale: '1.018', offset: .66 }, { scale: '1' }],
+                { duration: 460, easing: 'ease-out' }
+            );
+        }
         var bag = deskCartBag();
         var veilBtn = bag && (bag.closest('.drnav-cart__btn') || bag.closest('.dfcart')) || document.getElementById('cartTab');
         if (fxOff() || !from || !bag) return;
@@ -1658,10 +1664,10 @@ window.cleverDesk = function (A) {
                                 '<b class="ddish-nutr__b ddish-nutr__kcal num"></b>' +
                                 '<span class="ddish-nutr__wwrap"><span class="ddish-nutr__dot" aria-hidden="true">·</span><span class="ddish-nutr__w num"></span></span>' +
                             '</div>' +
-                            '<div class="ddish-nutr__seg" role="group" aria-label="Режим расчёта пищевой ценности">' +
-                                '<i class="ddish-nutr__th" aria-hidden="true"></i>' +
-                                '<button type="button" class="ddish-nutr__tab" data-mode="100" aria-pressed="false">' + perUnit + '</button>' +
-                                '<button type="button" class="ddish-nutr__tab" data-mode="total" aria-pressed="true">На порцию</button>' +
+                            '<div class="cseg ddish-nutr__seg" data-key="nutr" role="radiogroup" aria-label="Режим расчёта пищевой ценности" style="--n:2;--i:1">' +
+                                '<span class="cseg__th" aria-hidden="true"></span>' +
+                                '<button type="button" role="radio" class="ddish-nutr__tab" data-mode="100" aria-pressed="false" aria-checked="false">' + perUnit + '</button>' +
+                                '<button type="button" role="radio" class="ddish-nutr__tab" data-mode="total" aria-pressed="true" aria-checked="true">На порцию</button>' +
                             '</div>' +
                         '</div>' +
                         '<div class="ddish-nutr__cols">' +
@@ -1670,33 +1676,33 @@ window.cleverDesk = function (A) {
                             '<div class="ddish-nutr__c is-c"><b class="num"></b><div class="ddish-nutr__lbl"><span>Углеводы</span><em class="ddish-nutr__pct num"></em></div><i class="ddish-nutr__track" aria-hidden="true"><b></b></i></div>' +
                         '</div>';
                     var segBox = nEl.querySelector('.ddish-nutr__seg');
-                    nEl._syncThumb = function (snap) {
-                        var th = nEl.querySelector('.ddish-nutr__th');
-                        var m = nEl.dataset.mode === '100' ? '100' : 'total';
-                        var act = nEl.querySelector('.ddish-nutr__tab[data-mode="' + m + '"]');
-                        if (!th || !act || !act.offsetWidth) return;
-                        if (snap) th.style.transition = 'none';
-                        th.style.width = act.offsetWidth + 'px';
-                        th.style.transform = 'translateX(' + (act.offsetLeft - 2) + 'px)';
-                        if (snap) { void th.offsetWidth; th.style.transition = ''; }
-                        nEl._thReady = true;
-                    };
                     if (segBox) {
                         segBox.addEventListener('click', function (ev) {
                             var btn = ev.target.closest('.ddish-nutr__tab');
-                            if (!btn || !btn.dataset.mode || nEl.dataset.mode === btn.dataset.mode) return;
+                            if (!btn || !btn.dataset.mode) return;
+                            ev.stopPropagation();
+                            var prev = nEl.dataset.mode === '100' ? 0 : 1;
+                            var next = btn.dataset.mode === '100' ? 0 : 1;
+                            if (prev === next) return;
+                            // завершаем перекат текста на вкладке до копирования подписей в линзу
+                            var tot = segBox.querySelector('.ddish-nutr__tab[data-mode="total"]');
+                            if (tot && tot._dd) {
+                                var fin = tot._dd.to;
+                                tot._dd.a.forEach(function (a) { a.cancel(); });
+                                clearTimeout(tot._dd.t);
+                                tot._dd = null;
+                                tot.textContent = fin;
+                            }
                             nEl.dataset.mode = btn.dataset.mode;
+                            segBox.style.setProperty('--i', next);
+                            $$(':scope > button', segBox).forEach(function (b) {
+                                var on = b.dataset.mode === nEl.dataset.mode;
+                                b.setAttribute('aria-pressed', String(on));
+                                b.setAttribute('aria-checked', String(on));
+                            });
+                            if (A.segPlay && A.segStart) A.segPlay(segBox, A.segStart(prev), next);
                             deskDishSync();
                         });
-                        if (window.ResizeObserver) {
-                            var ro = new ResizeObserver(function () {
-                                if (!nEl.isConnected || !nEl._syncThumb) return;
-                                var tot = nEl.querySelector('.ddish-nutr__tab[data-mode="total"]');
-                                nEl._syncThumb(!nEl._thReady || !!(tot && tot._dd));
-                            });
-                            $$('.ddish-nutr__tab', segBox).forEach(function (b) { ro.observe(b); });
-                            nEl._ro = ro;
-                        }
                     }
                     var descEl = body.querySelector('.dish__desc');
                     if (descEl && descEl.nextSibling) body.insertBefore(nEl, descEl.nextSibling);
@@ -1728,7 +1734,7 @@ window.cleverDesk = function (A) {
                     adBox.innerHTML =
                         '<div class="ddish-addons__head">' +
                             '<h3>' + (sweet ? 'Топпинги' : 'Добавки') + '</h3>' +
-                            '<span class="ddish-addons__cnt num" hidden></span>' +
+                            '<span class="ddish-addons__cnt" hidden><span class="ddish-addons__dot" aria-hidden="true">·</span><span class="ddish-addons__val num"></span></span>' +
                         '</div>' +
                         '<div class="ddish-addons__grid ' + (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3') + '">' +
                         adKeys.map(function (k) {
@@ -1843,14 +1849,13 @@ window.cleverDesk = function (A) {
                     A.odoQ(totTab, tabTxt, qty >= prevQ ? 1 : -1);
                 }
             }
+            var segEl = nutrBox.querySelector('.ddish-nutr__seg');
+            if (segEl) segEl.style.setProperty('--i', is100 ? 0 : 1);
             $$('.ddish-nutr__tab', nutrBox).forEach(function (b) {
-                b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
+                var on = b.dataset.mode === mode;
+                b.setAttribute('aria-pressed', String(on));
+                b.setAttribute('aria-checked', String(on));
             });
-            // плавный ползунок под активной вкладкой
-            if (nutrBox._syncThumb) {
-                nutrBox._syncThumb(first);
-                requestAnimationFrame(function () { if (nutrBox._syncThumb) nutrBox._syncThumb(first); });
-            }
 
             rollVal(nutrBox.querySelector('.ddish-nutr__kcal'), (is100 ? '' : '~') + showKcal + ' ккал', showKcal);
             var wWrap = nutrBox.querySelector('.ddish-nutr__wwrap'), wEl = nutrBox.querySelector('.ddish-nutr__w');
@@ -1910,8 +1915,25 @@ window.cleverDesk = function (A) {
         });
         var cntEl = body.querySelector('.ddish-addons__cnt');
         if (cntEl) {
-            cntEl.hidden = !selAds.length;
-            if (selAds.length) cntEl.textContent = 'Выбрано: ' + selAds.length;
+            var nAds = selAds.length, prevAds = cntEl._nAds || 0;
+            cntEl._nAds = nAds;
+            cntEl.hidden = !nAds;
+            var valEl = cntEl.querySelector('.ddish-addons__val');
+            if (valEl && nAds > 0) {
+                var txtAds = loc('выбрано ' + nAds);
+                if (first || !A.odoQ) {
+                    valEl.textContent = txtAds;
+                } else if (prevAds === 0) {
+                    // первый выбор (0 → 1): сразу прокатываем цифру перекатом
+                    if (valEl._dd) { valEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(valEl._dd.t); valEl._dd = null; }
+                    valEl.textContent = loc('выбрано 0');
+                    A.odoQ(valEl, txtAds, 1);
+                } else if (prevAds !== nAds) {
+                    A.odoQ(valEl, txtAds, nAds >= prevAds ? 1 : -1);
+                }
+            } else if (valEl && !nAds && valEl._dd) {
+                valEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(valEl._dd.t); valEl._dd = null;
+            }
         }
     }
     (function () {
