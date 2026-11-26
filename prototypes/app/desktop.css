@@ -825,7 +825,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > :is(.cseg__th
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > button,
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg .cseg__c {
-    min-width: 82px; padding: 0 11px; border-radius: 999px;
+    gap: 0; min-width: 82px; padding: 0 11px; border-radius: 999px;
     font: 600 12px/1 var(--font); white-space: nowrap;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > button[aria-pressed="true"],

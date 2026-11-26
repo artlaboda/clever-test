@@ -1615,7 +1615,7 @@ window.cleverDesk = function (A) {
                             '<div class="cseg ddish-nutr__seg" data-key="nutr" role="radiogroup" aria-label="Режим расчёта пищевой ценности" style="--n:2;--i:1">' +
                                 '<span class="cseg__th" aria-hidden="true"></span>' +
                                 '<button type="button" role="radio" class="ddish-nutr__tab" data-mode="100" aria-pressed="false" aria-checked="false">' + perUnit + '</button>' +
-                                '<button type="button" role="radio" class="ddish-nutr__tab" data-mode="total" aria-pressed="true" aria-checked="true">На порцию</button>' +
+                                '<button type="button" role="radio" class="ddish-nutr__tab" data-mode="total" aria-pressed="true" aria-checked="true"><span class="ddish-nutr__t num">На порцию</span></button>' +
                             '</div>' +
                         '</div>' +
                         '<div class="ddish-nutr__cols">' +
@@ -1633,7 +1633,7 @@ window.cleverDesk = function (A) {
                             var next = btn.dataset.mode === '100' ? 0 : 1;
                             if (prev === next) return;
                             // завершаем перекат текста на вкладке до копирования подписей в линзу
-                            var tot = segBox.querySelector('.ddish-nutr__tab[data-mode="total"]');
+                            var tot = segBox.querySelector('.ddish-nutr__tab[data-mode="total"] .ddish-nutr__t');
                             if (tot && tot._dd) {
                                 var fin = tot._dd.to;
                                 tot._dd.a.forEach(function (a) { a.cancel(); });
@@ -1784,8 +1784,8 @@ window.cleverDesk = function (A) {
             var showF = is100 ? f100 : allF;
             var showC = is100 ? c100 : allC;
 
-            // подпись второй вкладки: «На порцию» при 1 шт, «На N шт» при qty > 1
-            var totTab = nutrBox.querySelector('.ddish-nutr__tab[data-mode="total"]');
+            // подпись второй вкладки: «На порцию» при 1 шт, «На N шт» при qty > 1 (внутри inline-span, чтобы flex-gap кнопки не раздвигал цифры при перекате)
+            var totTab = nutrBox.querySelector('.ddish-nutr__tab[data-mode="total"] .ddish-nutr__t');
             if (totTab) {
                 var prevQ = totTab._nQty || 0;
                 totTab._nQty = qty;
