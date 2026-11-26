@@ -343,12 +343,6 @@ html.desk .stepper button:hover { background: color-mix(in srgb, var(--ink) 9%, 
 html.desk .dcar__cart { display: none !important; }
 html.desk #dishAdd.is-added { background: var(--cta); color: var(--on-cta); }
 html.desk .dfoot .stepper button:is(:hover, :active) { background: none !important; }
-/* портал, через который комета ныряет под затемнение */
-.drift { position: absolute; z-index: 96; width: 0; height: 0; pointer-events: none; }
-.drift > i { position: absolute; left: -70px; top: -70px; width: 140px; height: 140px; border-radius: 50%; opacity: 0; will-change: transform, opacity; }
-.drift__flash { background: radial-gradient(circle, rgba(255, 255, 255, .95) 0, rgba(255, 120, 90, .7) 14%, rgba(255, 50, 40, .28) 34%, rgba(255, 40, 40, 0) 62%); }
-.drift__ring { box-shadow: 0 0 0 2px rgba(255, 92, 70, .95), 0 0 18px 4px rgba(255, 60, 40, .55), inset 0 0 14px 2px rgba(255, 140, 110, .5); }
-.drift__ring--2 { box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .85), 0 0 22px 3px rgba(255, 70, 50, .4); }
 
 html.desk .cseg button:not([aria-pressed="true"]):not(.is-on):hover { color: var(--ink); }
 html.desk .rbadge { transition: transform .2s var(--dease), filter .2s; }

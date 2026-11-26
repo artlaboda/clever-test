@@ -1489,15 +1489,8 @@ window.cleverDesk = function (A) {
             else if (S.stack.length) { if (canHistBack()) history.back(); else popScreen(); e.preventDefault(); }
         } else if (e.key === '/' && !ed && !A.sheetKind() && !e.ctrlKey && !e.metaKey) { e.preventDefault(); document.getElementById('dSearch').click(); }
     });
-    /* 12.11: окно блюда на десктопе. «Корзина сверху в этой форме лишняя. Комета должна лететь сразу в корзину родную, сверху
-       которая. Как бы ныряя через слой затемнения. Если сделаешь эффект такой, как переход кометы в другое измерение — будет
-       вообще пушка! Зелёная кнопка «Добавлено» не нужна. Просто красиво продавливай кнопку «Добавить»».
-       • Кнопка продавливается (сжимается и пружинит), количество снова 1, надпись не меняется.
-       • Комета летит в пакет в шапке. Там, где она пересекает край окна, — портал: вспышка и два кольца-ряби, сплюснутые вдоль
-         края, как круги на воде. Дальше комета идёт уже под затемнением — приглушённая, «по ту сторону».
-       • Долетела: затемнение над кнопкой корзины расступается (окно в вуали по форме кнопки), пакет ловит комету, сумма и число
-         докручиваются; вуаль смыкается. Без эффектов (fxOff) — всё сразу */
-    var deskPortals = 0;
+    /* 26.11: добавление из окна блюда на десктопе — кнопка мягко продавливается, комета летит прямо в корзину в шапке
+       (без портала на краю окна, ныряния под затемнение и прорезания вуали), пакет ловит комету лёгким отскоком */
     function deskDishAdded(btn, q, from) {
         A.dishState().qty = 1; cntSet(document.getElementById('dqty'), 1); syncDish();
         if (!fxOff() && btn && btn.isConnected) {
@@ -1508,59 +1501,14 @@ window.cleverDesk = function (A) {
             );
         }
         var bag = deskCartBag();
-        var veilBtn = bag && (bag.closest('.drnav-cart__btn') || bag.closest('.dfcart')) || document.getElementById('cartTab');
         if (fxOff() || !from || !bag) return;
-        var fxl = document.getElementById('fx'), sh = document.getElementById('sheet');
-        var under = function (on) { deskPortals = Math.max(0, deskPortals + (on ? 1 : -1)); fxl.style.zIndex = deskPortals ? '60' : ''; };   // 60 — над шапкой, под затемнением (70)
-        var dived = false;
         A.setFxTarget({ el: bag, kind: 'portal',
-            path: function (at, dur) {   // первая точка пути вне окна — место и время перехода
-                var r = sh.getBoundingClientRect(), a = fxPt(r.left, r.top), b = fxPt(r.right, r.bottom);
-                for (var s = 0; s <= dur; s += 6) {
-                    var p = at(s);
-                    if (p[0] < a.x || p[0] > b.x || p[1] < a.y || p[1] > b.y) {
-                        var edge = Math.abs(p[1] - a.y) < 14 || Math.abs(p[1] - b.y) < 14 ? 'h' : 'v';
-                        setTimeout(function () { dived = true; under(true); deskRift(p[0], p[1], edge); }, s);
-                        return;
-                    }
-                }
-            },
             land: function () {
-                if (dived) setTimeout(function () { under(false); }, 60);
-                deskVeil(veilBtn);
                 bag.animate([{ scale: 1 }, { scale: '1.12 .84', offset: .24 }, { scale: '.95 1.06', offset: .52 }, { scale: 1 }], { duration: 600, easing: 'ease-out' });
             } });
         var d = fxFly(from, q);
         if (!d) A.setFxTarget(null);
     }
-    // портал на краю окна: вспышка и две ряби, сплюснутые вдоль края (edge: h — верх или низ окна, v — бок)
-    function deskRift(x, y, edge) {
-        var box = document.createElement('div'); box.className = 'drift'; box.style.left = x + 'px'; box.style.top = y + 'px';
-        if (edge === 'v') box.style.rotate = '90deg';
-        box.innerHTML = '<i class="drift__flash"></i><i class="drift__ring"></i><i class="drift__ring drift__ring--2"></i>';
-        app.appendChild(box);
-        var k = box.children, R = Math.random, sx = (1 + R() * .25).toFixed(2);
-        k[0].animate([{ transform: 'scale(.2)', opacity: 0 }, { transform: 'scale(1)', opacity: 1, offset: .22 }, { transform: 'scale(1.6, .6)', opacity: 0 }], { duration: 520, easing: 'cubic-bezier(.2, .7, .3, 1)', fill: 'both' });
-        k[1].animate([{ transform: 'scale(.15, .05)', opacity: .95 }, { transform: 'scale(' + sx + ', .34)', opacity: 0 }], { duration: 640, easing: 'cubic-bezier(.15, .7, .3, 1)', fill: 'both' });
-        var last = k[2].animate([{ transform: 'scale(.1, .04)', opacity: .8 }, { transform: 'scale(' + (sx * 1.5).toFixed(2) + ', .46)', opacity: 0 }], { duration: 860, delay: 90, easing: 'cubic-bezier(.15, .7, .3, 1)', fill: 'both' });
-        last.onfinish = last.oncancel = function () { box.remove(); };
-    }
-    // вуаль расступается над кнопкой: окно в затемнении по форме кнопки, раскрывается и смыкается
-    function deskVeil(el) {
-        var sc = document.getElementById('scrim'); if (!el || !sc.classList.contains('is-on')) return;
-        var r = el.getBoundingClientRect(), a = app.getBoundingClientRect(), cx = r.left - a.left + r.width / 2, cy = r.top - a.top + r.height / 2;
-        if (cy < 0) return;
-        var rx = r.width / 2 + 18, ry = r.height / 2 + 16, t0 = performance.now(), D = 1150, my = ++deskVeil.n;
-        var f = function (now) {
-            if (my !== deskVeil.n) return;
-            var u = Math.min(1, (now - t0) / D), e = u < .22 ? 1 - Math.pow(1 - u / .22, 3) : u < .55 ? 1 : 1 - Math.pow((u - .55) / .45, 2), k = Math.max(0, e);
-            var g = k < .01 ? '' : 'radial-gradient(ellipse ' + (rx * k).toFixed(1) + 'px ' + (ry * k).toFixed(1) + 'px at ' + cx.toFixed(1) + 'px ' + cy.toFixed(1) + 'px, transparent 62%, #000 100%)';
-            sc.style.webkitMaskImage = sc.style.maskImage = g;
-            if (u < 1) requestAnimationFrame(f); else sc.style.webkitMaskImage = sc.style.maskImage = '';
-        };
-        requestAnimationFrame(f);
-    }
-    deskVeil.n = 0;
     /* стрелки у горизонтальных лент (мышью ленту не протянуть): две общие кнопки встают по краям ленты под курсором */
     (function () {
         var cur = null, B = [-1, 1].map(function (d) {
