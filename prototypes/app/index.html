@@ -6787,7 +6787,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 17:51';
+    var BUILD = '27.11 · 18:02';
 
     /* ── состояние ── */
     var S = {
@@ -21218,6 +21218,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             closeSheet: closeSheet, closeSheetNice: closeSheetNice, fxFly: fxFly, fxPt: fxPt, fxOff: fxOff, crGame: crGame,
             openSheet: openSheet, confirmAddr: confirmAddr, cartCount: cartCount, cartTotals: cartTotals, moneyShort: moneyShort, BYN: BYN, curRest: function () { return curRest; },
             segPlay: segPlay, segStart: segStart, selAdd: selAdd, selFit: selFitAll, tr: tr,
+            bagSet: function (n, delay, force, el) { bagSet(FXV.tab === 'glass' ? 0 : n, delay, force, el); },
             DISHES: DISHES, SIZES: SIZES, BASES: BASES, ADDONS: ADDONS, EXCLUDES: EXCLUDES, dishAddons: dishAddons, dishExcludes: dishExcludes, dishExtras: dishExtras, dishNutr: dishNutr, dishWeight: dishWeight, dishPrice: dishPrice, dishPics: dishPics,
             sheetKind: function () { return sheetKind; }, dishState: function () { return dishState; }, setFxTarget: function (v) { fxTargetOver = v; } };
     }

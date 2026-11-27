@@ -578,7 +578,11 @@ window.cleverDesk = function (A) {
        справа живая корзина; красной линии прогресса нет */
     function deskRestScroll() {
         var bar = document.getElementById('drnavBar');
-        if (!bar || !deskOn() || S.stack.indexOf('rest') < 0) return;
+        if (!bar) return;
+        if (!deskOn() || S.stack.indexOf('rest') < 0) {
+            if (bar.classList.contains('is-on')) { bar.classList.remove('is-on'); bar.setAttribute('aria-hidden', 'true'); }
+            return;
+        }
         var sc = document.getElementById('restScroll'), scr = document.getElementById('s-rest'), ct = document.getElementById('cartTab');
         if (!sc || !scr) return;
         var sr = scr.getBoundingClientRect();
@@ -589,6 +593,24 @@ window.cleverDesk = function (A) {
             bar.classList.toggle('is-on', on);
             bar.setAttribute('aria-hidden', on ? 'false' : 'true');
             if (on && A.selFit) requestAnimationFrame(A.selFit);
+        }
+    }
+    function deskBagHtml() {
+        return '<span class="bag" aria-hidden="true">' +
+            '<span class="bag__in"><i class="bag__liq"></i><i class="bag__lines"></i>' +
+            '<i class="bag__lay"></i><i class="bag__lay"></i><i class="bag__lay"></i><i class="bag__lay"></i><i class="bag__lay"></i></span>' +
+            '<svg class="i tbi" viewBox="0 0 24 24" aria-hidden="true"><g class="tbi__g">' +
+            '<path class="tbi__bagb tbi__fillable" d="M5 8h14l-1 12H6z"/>' +
+            '<path class="tbi__handle" d="M9 8V6.5a3 3 0 0 1 6 0V8"/></g></svg></span>';
+    }
+    function deskBagSync(bag, n, snap) {
+        if (!bag || !A.bagSet) return;
+        A.bagSet(n, 0, !!snap, bag);
+        if (snap) {
+            [].forEach.call(bag.querySelectorAll('.bag__liq, .bag__lay'), function (x) {
+                if (x._ly) { x._ly.cancel(); x._ly = null; }
+                if (x.getAnimations) x.getAnimations().forEach(function (a) { a.cancel(); });
+            });
         }
     }
     function deskRestMount() {
@@ -622,7 +644,7 @@ window.cleverDesk = function (A) {
             '</nav>' +
             '<div class="drnav-cart">' +
                 '<button type="button" class="drnav-cart__btn" aria-label="Открыть корзину">' +
-                    '<span class="drnav-cart__bag" aria-hidden="true">' + ic('i-bag') + '<span class="drnav-cart__n" hidden>0</span></span>' +
+                    '<span class="drnav-cart__bag" aria-hidden="true">' + deskBagHtml() + '<span class="drnav-cart__n" hidden>0</span></span>' +
                     '<span class="drnav-cart__sum">Корзина</span>' +
                 '</button>' +
             '</div>';
@@ -640,6 +662,7 @@ window.cleverDesk = function (A) {
         if (A.selFit) requestAnimationFrame(A.selFit);
         var n = A.cartCount ? A.cartCount() : 0;
         var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
+        deskBagSync(bar.querySelector('.drnav-cart__bag > .bag'), n, true);
         deskCartSync(n, sum, 0, 0);
         deskRestScroll();
     }
@@ -687,7 +710,7 @@ window.cleverDesk = function (A) {
             '<span class="dfcart__in">' +
                 '<span class="dfcart__sh" aria-hidden="true"></span>' +
                 '<svg class="dfcart__svg" viewBox="-260 -260 578 578" aria-hidden="true"><path class="dfcart__p" d="' + DROP_CIRC + '"/></svg>' +
-                '<span class="dfcart__bag" aria-hidden="true">' + ic('i-bag') + '</span>' +
+                '<span class="dfcart__bag" aria-hidden="true">' + deskBagHtml() + '</span>' +
                 '<span class="dfcart__n num" hidden>0</span>' +
             '</span>';
         b.addEventListener('click', function (e) {
@@ -723,7 +746,7 @@ window.cleverDesk = function (A) {
         if (homeDropSt.imp.length > 6) homeDropSt.imp.shift();
         homeDropWake();
     }
-    function homeFloatPaint(n, sum, pop) {
+    function homeFloatPaint(n, sum, pop, snap) {
         if (!homeFloatEl) return;
         var cnt = homeFloatEl.querySelector('.dfcart__n');
         if (cnt) {
@@ -731,6 +754,7 @@ window.cleverDesk = function (A) {
             cnt.textContent = String(n);
             if (pop && n > 0 && !fxOff() && cnt.animate) cnt.animate([{ scale: .4 }, { scale: 1.28, offset: .52 }, { scale: 1 }], { duration: 400, easing: 'cubic-bezier(.22, 1.25, .36, 1)' });
         }
+        deskBagSync(homeFloatEl.querySelector('.dfcart__bag > .bag'), n, !!snap);
         if (pop && n > 0 && !fxOff() && homeFloatOn && !homeFloatDocking) {
             homeDropSplash();
         }
@@ -1421,7 +1445,7 @@ window.cleverDesk = function (A) {
         if (!wasOn) {
             var inn = el.querySelector('.dfcart__in');
             if (inn) inn.getAnimations().forEach(function (a) { a.cancel(); });
-            homeFloatPaint(homeFloatLast.n, homeFloatLast.sum, false);
+            homeFloatPaint(homeFloatLast.n, homeFloatLast.sum, false, true);
             if (!fxOff() && inn && inn.animate) {
                 if (mode === 'fade') {
                     inn.animate([
@@ -1486,11 +1510,11 @@ window.cleverDesk = function (A) {
         if (dir > 0 && n > 0 && homeCanFloat() && homeCartHidden() && !homeFloatOn) homeFloatShow('pop');
         var run = function () {
             homeFloatLast = { n: n, sum: sum || '' };
-            if (n <= 0 && homeFloatOn) homeFloatHide(false);
-            else if (homeFloatEl) homeFloatPaint(n, sum, dir > 0);
+            if (n <= 0 && homeFloatOn) { homeFloatPaint(0, '', false, false); homeFloatHide(false); }
+            else if (homeFloatEl) homeFloatPaint(n, sum, dir > 0, false);
             var btn = document.querySelector('#s-rest .drnav-cart__btn');
             if (!btn || !btn.isConnected) return;
-            var cnt = btn.querySelector('.drnav-cart__n'), sm = btn.querySelector('.drnav-cart__sum');
+            var cnt = btn.querySelector('.drnav-cart__n'), sm = btn.querySelector('.drnav-cart__sum'), barBag = btn.querySelector('.drnav-cart__bag > .bag');
             btn.classList.toggle('has-sum', n > 0);
             if (cnt) {
                 cnt.hidden = !n;
@@ -1498,6 +1522,7 @@ window.cleverDesk = function (A) {
                 if (n > 0 && dir > 0 && !fxOff() && cnt.animate) cnt.animate([{ scale: .45 }, { scale: 1.24, offset: .55 }, { scale: 1 }], { duration: 380, easing: 'cubic-bezier(.22, 1.2, .36, 1)' });
             }
             if (sm) sm.textContent = n > 0 && sum ? sum : 'Корзина';
+            deskBagSync(barBag, n, false);
             if (dir > 0 && n > 0 && !fxOff() && btn.animate && btn.closest('.drnav-bar.is-on')) {
                 btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)', offset: .35 }, { transform: 'scale(.98)', offset: .72 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.22, 1, .36, 1)' });
             }

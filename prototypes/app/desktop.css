@@ -139,6 +139,7 @@ html.desk[data-theme="dark"] .dcart-sp path { stroke: var(--cta-ring-c, rgba(255
 }
 /* 25.11: плавающая круглая корзина на главной (.dfcart) — SVG-капля .dfcart__svg оживает волнами при подъезде вверх */
 html.desk .dfcart {
+    --ink: var(--on-cta); --app-bg: var(--cta);
     position: absolute; top: 22px; right: 24px; z-index: 9;
     width: 58px; height: 58px; padding: 0; border: 0;
     background: none; color: var(--on-cta); overflow: visible;
@@ -174,6 +175,7 @@ html.desk .dfcart__bag {
     position: absolute; left: 50%; top: 50%; translate: -50% -50%; z-index: 1;
     width: 25px; height: 25px; display: grid; place-items: center; color: var(--on-cta);
 }
+html.desk .dfcart__bag > .bag,
 html.desk .dfcart__bag svg.i { width: 25px; height: 25px; }
 html.desk .dfcart__n {
     position: absolute; left: 33px; top: 8px; z-index: 2;
@@ -566,30 +568,30 @@ html.desk #s-rest .drnav-bar {
     position: absolute; top: 0; left: 0; right: 0; z-index: 14;
     height: 68px; box-sizing: border-box;
     display: flex; align-items: center; padding: 0 clamp(24px, 2.5vw, 44px);
-    background: color-mix(in srgb, var(--app-bg) 86%, transparent);
+    background: color-mix(in srgb, var(--app-bg) 88%, transparent);
     -webkit-backdrop-filter: blur(22px) saturate(1.85); backdrop-filter: blur(22px) saturate(1.85);
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 85%, transparent), 0 12px 34px -20px rgba(40, 24, 12, .22);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 88%, transparent);
     opacity: 0; transform: translateY(-16px); pointer-events: none; visibility: hidden;
     transition: opacity .32s cubic-bezier(.22, 1, .36, 1), transform .44s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .44s;
 }
-html.desk #s-rest .drnav-bar.is-on {
+html.desk #s-rest:is(.is-on, .is-under) .drnav-bar.is-on {
     opacity: 1; transform: translateY(0); pointer-events: auto; visibility: visible;
     transition: opacity .34s cubic-bezier(.22, 1, .36, 1), transform .46s cubic-bezier(.22, 1, .36, 1), visibility 0s;
 }
 html.desk[data-theme="dark"] #s-rest .drnav-bar {
-    background: color-mix(in srgb, var(--app-bg) 84%, transparent);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 16px 40px -18px rgba(0, 0, 0, .7);
+    background: color-mix(in srgb, var(--app-bg) 86%, transparent);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .09);
 }
 @media (prefers-color-scheme: dark) {
     html.desk:not([data-theme="light"]) #s-rest .drnav-bar {
-        background: color-mix(in srgb, var(--app-bg) 84%, transparent);
-        box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 16px 40px -18px rgba(0, 0, 0, .7);
+        background: color-mix(in srgb, var(--app-bg) 86%, transparent);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, .09);
     }
 }
 /* левый блок: мини-обложка и название заведения (без стрелки «Назад») */
 html.desk #s-rest .drnav-id {
     flex: none; display: flex; align-items: center;
-    margin-right: 16px; padding-right: 18px; border-right: 1px solid var(--line);
+    margin-right: 0; padding-right: 18px; border-right: 1px solid var(--line);
 }
 html.desk #s-rest .drnav-who {
     min-width: 0; display: inline-flex; align-items: center; gap: 10px; padding: 4px 12px 4px 4px;
@@ -605,13 +607,13 @@ html.desk #s-rest .drnav-who span {
     min-width: 0; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     font: 700 15.5px/1.2 var(--font); letter-spacing: -.01em;
 }
-/* центр: разделы меню в верхней панели с эффектом «Капля» */
+/* центр: разделы меню в верхней панели с эффектом «Капля» — по 26 px свободного запаса слева/справа, чтобы при резком перелёте голова капли не срезалась и не наезжала на разделитель */
 html.desk #s-rest .drnav-tabs {
     flex: 1 1 auto; min-width: 0; overflow: hidden;
 }
 html.desk #s-rest .drnav-tabs .rtabs__row {
     position: relative; display: flex; align-items: center; gap: 4px;
-    padding: 12px 2px; overflow-x: auto; scrollbar-width: none;
+    padding: 12px 26px; overflow-x: auto; scrollbar-width: none;
 }
 html.desk #s-rest .drnav-tabs .rtabs__row::-webkit-scrollbar { display: none; }
 html.desk #s-rest .drnav-tabs button[data-act="rtab"] {
@@ -627,13 +629,14 @@ html.desk #s-rest .drnav-tabs .rtabs__th { border-radius: 999px; }
 html.desk #s-rest .drnav-tabs .rtabs__lit > span {
     font: 600 15px/19px var(--font);
 }
-/* правый блок: кнопка живой корзины */
+/* правый блок: кнопка живой наполняющейся корзины (как #cartTab на главной) */
 html.desk #s-rest .drnav-cart {
     flex: none; display: flex; align-items: center; margin-left: 16px;
 }
 html.desk #s-rest .drnav-cart__btn {
-    position: relative; height: 44px; min-width: 144px; padding: 0 18px 0 15px; border: 0; border-radius: 14px;
-    display: inline-flex; align-items: center; justify-content: center; gap: 11px;
+    --ink: var(--on-cta); --app-bg: var(--cta);
+    position: relative; height: 44px; min-width: 148px; padding: 0 18px 0 15px; border: 0; border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px;
     background: var(--cta); color: var(--on-cta); font: 650 14.5px/1 var(--font); white-space: nowrap;
     box-shadow: none;
     transition: transform .22s var(--dease), background .2s;
@@ -653,10 +656,11 @@ html.desk #s-rest .drnav-cart__btn[data-sq="clip"]:hover::before {
     filter: drop-shadow(0 12px 18px rgba(20, 12, 8, .38));
 }
 html.desk #s-rest .drnav-cart__btn:active { transform: scale(.97); }
-html.desk #s-rest .drnav-cart__bag { position: relative; flex: none; display: grid; place-items: center; width: 22px; height: 22px; }
-html.desk #s-rest .drnav-cart__bag svg.i { width: 21px; height: 21px; }
+html.desk #s-rest .drnav-cart__bag { position: relative; flex: none; display: grid; place-items: center; width: 25px; height: 25px; }
+html.desk #s-rest .drnav-cart__bag > .bag,
+html.desk #s-rest .drnav-cart__bag svg.i { width: 25px; height: 25px; }
 html.desk #s-rest .drnav-cart__n {
-    position: absolute; top: -6px; right: -8px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+    position: absolute; top: -4px; right: -7px; z-index: 2; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
     border-radius: 999px; background: var(--brand); color: #fff; font: 750 10.5px/18px var(--font); text-align: center;
     box-shadow: 0 0 0 2px var(--cta);
 }
