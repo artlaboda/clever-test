@@ -822,10 +822,10 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage img:not(.round) {
     position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage img.round {
-    width: 80%; height: auto; aspect-ratio: 1; max-width: 400px;
-    object-fit: contain; filter: drop-shadow(0 26px 38px rgba(40, 18, 8, .24));
+    width: 84%; height: auto; aspect-ratio: 1; max-width: 420px;
+    object-fit: contain; border-radius: 50%; filter: none;
+    box-shadow: 0 22px 42px -12px rgba(45, 22, 10, .26);
 }
-html.desk :is(#sheet, #sheetUnder).is-dish #dishImg.round { scale: 1.06; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dph { transition: transform .48s cubic-bezier(.22, .61, .36, 1); }
 html.desk :is(#sheet, #sheetUnder).is-dish .dph__s { position: relative; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dph__dots {
