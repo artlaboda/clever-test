@@ -518,46 +518,76 @@ window.cleverDesk = function (A) {
     app.addEventListener('scroll', function (e) {
         if (askEl && deskOn() && e.target && e.target.scrollTop > 24) hideAskAddr();
     }, true);
-    /* 24.11: страница заведения на десктопе — кнопки .rtop на самой обложке .rhero, а при прокрутке к меню .rtabs
-       прилипает к верхнему краю: слева выезжают кнопка «Назад», мини-аватар и название заведения, справа — живая корзина */
+    /* 27.11: страница заведения на десктопе — кнопки .rtop на обложке .rhero, статичное крупное меню #rtabs в потоке
+       (переносится на 2 ряда без стрелок), а как только корзина #cartTab в шапке уходит за верхний край — сверху плавно
+       появляется панель #drnavBar: слева мини-аватар и название (без стрелки «Назад»), по центру разделы меню с «Каплей»,
+       справа живая корзина; красной линии прогресса нет */
+    function deskRestScroll() {
+        var bar = document.getElementById('drnavBar');
+        if (!bar || !deskOn() || S.stack.indexOf('rest') < 0) return;
+        var sc = document.getElementById('restScroll'), scr = document.getElementById('s-rest'), ct = document.getElementById('cartTab');
+        if (!sc || !scr) return;
+        var sr = scr.getBoundingClientRect();
+        var ctBot = ct && ct.isConnected && scr.contains(ct) ? (ct.getBoundingClientRect().bottom - sr.top) : (84 - sc.scrollTop);
+        var was = bar.classList.contains('is-on');
+        var on = was ? (ctBot < 14 && sc.scrollTop > 20) : (ctBot <= 2);
+        if (on !== was) {
+            bar.classList.toggle('is-on', on);
+            bar.setAttribute('aria-hidden', on ? 'false' : 'true');
+            if (on && A.selFit) requestAnimationFrame(A.selFit);
+        }
+    }
     function deskRestMount() {
         if (!deskOn() || S.stack.indexOf('rest') < 0) return;
         var scr = document.getElementById('s-rest'); if (!scr) return;
         var hero = scr.querySelector('.rhero'), rtop = document.getElementById('rtop');
         if (hero && rtop && rtop.parentNode !== hero) hero.appendChild(rtop);
-        var cap = scr.querySelector('#rtabs > .rtabs__cap'), row = cap && cap.querySelector('.rtabs__row');
-        if (!cap || !row || cap.querySelector('.drnav-cart')) return;
+        var row = scr.querySelector('#rtabs .rtabs__row');
+        if (!row || document.getElementById('drnavBar')) return;
         var r = A.rest && A.curRest && A.rest(A.curRest());
         var himg = hero && hero.querySelector('img'), src = himg ? himg.getAttribute('src') : '';
-        var idEl = document.createElement('div');
-        idEl.className = 'drnav-id';
-        idEl.innerHTML =
-            '<button type="button" class="drnav-back" data-act="back" aria-label="Назад">' + ic('i-back') + '</button>' +
-            '<button type="button" class="drnav-who" aria-label="Наверх страницы">' +
-                (src ? '<img src="' + esc(src) + '" alt="">' : '') +
-                '<span>' + esc(r ? r.name : '') + '</span>' +
-            '</button>';
-        idEl.querySelector('.drnav-who').addEventListener('click', function (e) {
+        var btnsHtml = $$('button[data-act="rtab"]', row).map(function (b) {
+            return '<button type="button" data-act="rtab" data-id="' + esc(b.dataset.id) + '" aria-current="' + (b.getAttribute('aria-current') === 'true' ? 'true' : 'false') + '">' + esc(b.textContent) + '</button>';
+        }).join('');
+        var bar = document.createElement('header');
+        bar.className = 'drnav-bar';
+        bar.id = 'drnavBar';
+        bar.setAttribute('aria-hidden', 'true');
+        bar.innerHTML =
+            '<div class="drnav-id">' +
+                '<button type="button" class="drnav-who" aria-label="Наверх страницы">' +
+                    (src ? '<img src="' + esc(src) + '" alt="">' : '') +
+                    '<span>' + esc(r ? r.name : '') + '</span>' +
+                '</button>' +
+            '</div>' +
+            '<nav class="drnav-tabs" aria-label="Разделы меню">' +
+                '<div class="rtabs__row">' +
+                    '<span class="rtabs__ink" aria-hidden="true"><span class="rtabs__th"><span class="rtabs__clip"><span class="rtabs__lit"></span></span></span></span>' +
+                    btnsHtml +
+                '</div>' +
+            '</nav>' +
+            '<div class="drnav-cart">' +
+                '<button type="button" class="drnav-cart__btn" aria-label="Открыть корзину">' +
+                    '<span class="drnav-cart__bag" aria-hidden="true">' + ic('i-bag') + '<span class="drnav-cart__n" hidden>0</span></span>' +
+                    '<span class="drnav-cart__sum">Корзина</span>' +
+                '</button>' +
+            '</div>';
+        bar.querySelector('.drnav-who').addEventListener('click', function (e) {
             e.stopPropagation();
             var sc = document.getElementById('restScroll');
             if (sc) sc.scrollTo({ top: 0, behavior: fxOff() ? 'auto' : 'smooth' });
         });
-        cap.insertBefore(idEl, row);
-        var cartEl = document.createElement('div');
-        cartEl.className = 'drnav-cart';
-        cartEl.innerHTML =
-            '<button type="button" class="drnav-cart__btn" aria-label="Открыть корзину">' +
-                '<span class="drnav-cart__bag" aria-hidden="true">' + ic('i-bag') + '<span class="drnav-cart__n" hidden>0</span></span>' +
-                '<span class="drnav-cart__sum">Корзина</span>' +
-            '</button>';
-        cartEl.querySelector('.drnav-cart__btn').addEventListener('click', function (e) {
+        bar.querySelector('.drnav-cart__btn').addEventListener('click', function (e) {
             e.stopPropagation();
             deskCartToggle();
         });
-        cap.appendChild(cartEl);
+        scr.appendChild(bar);
+        if (A.selAdd) A.selAdd(bar.querySelector('.rtabs__row'));
+        if (A.selFit) requestAnimationFrame(A.selFit);
         var n = A.cartCount ? A.cartCount() : 0;
         var sum = n && A.cartTotals && A.moneyShort ? A.moneyShort(A.cartTotals().total) + '\u00a0' + (A.BYN || '⃅') : '';
         deskCartSync(n, sum, 0, 0);
+        deskRestScroll();
     }
     /* 25.11: плавающая круглая корзина на главной (.dfcart) с живой водой:
        • при добавлении блюда со скроллом выпрыгивает справа и ловит комету; при повторном скролле вниз с товарами
@@ -1414,7 +1444,7 @@ window.cleverDesk = function (A) {
                 if (n > 0 && dir > 0 && !fxOff() && cnt.animate) cnt.animate([{ scale: .45 }, { scale: 1.24, offset: .55 }, { scale: 1 }], { duration: 380, easing: 'cubic-bezier(.22, 1.2, .36, 1)' });
             }
             if (sm) sm.textContent = n > 0 && sum ? sum : 'Корзина';
-            if (dir > 0 && n > 0 && !fxOff() && btn.animate && btn.closest('.rtabs.is-stuck')) {
+            if (dir > 0 && n > 0 && !fxOff() && btn.animate && btn.closest('.drnav-bar.is-on')) {
                 btn.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.06)', offset: .35 }, { transform: 'scale(.98)', offset: .72 }, { transform: 'scale(1)' }], { duration: 420, easing: 'cubic-bezier(.22, 1, .36, 1)' });
             }
         };
@@ -1422,7 +1452,7 @@ window.cleverDesk = function (A) {
     }
     function deskCartBag() {
         if (deskOn() && S.stack.indexOf('rest') >= 0) {
-            var stuck = document.querySelector('#s-rest #rtabs.is-stuck .drnav-cart__bag');
+            var stuck = document.querySelector('#s-rest .drnav-bar.is-on .drnav-cart__bag');
             if (stuck) return stuck;
         }
         if (homeCanFloat() && homeCartHidden()) {
@@ -1442,7 +1472,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskPop(); deskNavSync();
+        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskRestScroll(); deskPop(); deskNavSync();
         homeCartRingSync(document.getElementById('cartTab'));
         homeFloatScroll();
     }
@@ -1503,7 +1533,7 @@ window.cleverDesk = function (A) {
         }
         app.addEventListener('mouseover', function (e) {
             if (!deskOn() || e.target.closest('.hsnav') || document.documentElement.classList.contains('is-hdrag')) return;
-            var h = e.target.closest('.hscroll:not(#promoRow), .filters, .rtabs__row, .ri-tks, .cdays, .slots');
+            var h = e.target.closest('.hscroll:not(#promoRow), .filters, .ri-tks, .cdays, .slots');
             if (h && h.scrollWidth - h.clientWidth < 8) h = null;
             if (h !== cur) { cur = h; put(); }
         });
@@ -2046,5 +2076,5 @@ window.cleverDesk = function (A) {
         }).observe(sh, { attributes: true, attributeFilter: ['class'] });
     })();
 
-    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded, askAddr: askAddr, cartSync: deskCartSync, cartBag: deskCartBag, syncDish: deskDishSync };
+    return { kind: deskKind, chrome: deskChrome, close: deskClose, cartToggle: deskCartToggle, dishAdded: deskDishAdded, askAddr: askAddr, cartSync: deskCartSync, cartBag: deskCartBag, syncDish: deskDishSync, restScroll: deskRestScroll };
 };

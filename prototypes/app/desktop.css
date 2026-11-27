@@ -506,83 +506,109 @@ html.desk[data-theme="dark"] .app[data-deal="live"] #s-rest .ri-tk--pick:hover .
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick:hover::before,
     html.desk:not([data-theme="light"]) .app[data-deal="live"] #s-rest .ri-tk--pick:hover .ri-pk__stub::before { filter: brightness(1.14) saturate(1.1); }
 }
-/* 24.11: верхняя липкая панель меню на странице заведения (десктоп): прилипает прямо к top: 0 во всю ширину экрана,
-   при прилипании стекло, линия прогресса и само меню плавно раскрываются на всю ширину — слева «Назад» и заведение, справа корзина */
+/* 27.11: навигация по меню на странице заведения (десктоп):
+   1) Статичное меню #rtabs в потоке страницы — заметно крупнее (18 px), без стрелок вправо/влево: если разделов много,
+      они естественно переносятся в два ряда; переключение между пунктами — мобильным эффектом «Капля».
+   2) Верхняя плавающая панель .drnav-bar — мягко появляется сверху сразу, как только #cartTab в шапке скрывается при прокрутке:
+      слева только мини-аватар и название заведения (без стрелки «Назад»), по центру разделы меню с эффектом «Капля»,
+      справа живая корзина; красной линии прогресса под меню нет */
 html.desk #s-rest .rtabs {
-    position: sticky; top: 0 !important; z-index: 8; width: 100%; margin: 4px 0 0; padding: 0;
+    position: relative; top: auto !important; z-index: 2; width: 100%; margin: 18px 0 8px; padding: 0;
 }
-html.desk #s-rest .rtabs::before {
-    top: 0 !important;
-    background: color-mix(in srgb, var(--app-bg) 84%, transparent);
+html.desk #s-rest .rtabs::before,
+html.desk #s-rest .rtabs::after { display: none !important; }
+html.desk #s-rest .rtabs__cap {
+    position: relative; z-index: 1; display: block;
+    width: 100%; max-width: none; box-sizing: border-box; padding: 0 var(--dg); min-height: 0;
+}
+html.desk #s-rest #rtabs .rtabs__row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px;
+    padding: 4px 0; overflow: visible;
+}
+html.desk #s-rest #rtabs button[data-act="rtab"] {
+    padding: 11px 22px; border-radius: 999px;
+    font: 650 18px/22px var(--font); letter-spacing: -.01em;
+    color: color-mix(in srgb, var(--ink) 64%, var(--muted));
+    transition: color .2s ease, background-color .2s ease;
+}
+html.desk #s-rest #rtabs button[data-act="rtab"]:hover {
+    color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+html.desk #s-rest :is(#rtabs, .drnav-bar) .rtabs__ink { z-index: 2; }
+html.desk #s-rest :is(#rtabs, .drnav-bar) .rtabs__clip { display: block; }
+html.desk #s-rest :is(#rtabs, .drnav-bar) .rtabs__th { border-radius: 999px; background: var(--ink); }
+html.desk #s-rest #rtabs .rtabs__lit > span {
+    font: 650 18px/22px var(--font); letter-spacing: -.01em;
+}
+/* плавающая верхняя панель заведения (появляется, когда #cartTab скрылась за верхним краем) */
+html.desk #s-rest .drnav-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 14;
+    height: 68px; box-sizing: border-box;
+    display: flex; align-items: center; padding: 0 clamp(24px, 2.5vw, 44px);
+    background: color-mix(in srgb, var(--app-bg) 86%, transparent);
     -webkit-backdrop-filter: blur(22px) saturate(1.85); backdrop-filter: blur(22px) saturate(1.85);
-    box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 85%, transparent), 0 14px 36px -22px rgba(40, 24, 12, .22);
-    transition: opacity .34s var(--dease);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--line) 85%, transparent), 0 12px 34px -20px rgba(40, 24, 12, .22);
+    opacity: 0; transform: translateY(-16px); pointer-events: none; visibility: hidden;
+    transition: opacity .32s cubic-bezier(.22, 1, .36, 1), transform .44s cubic-bezier(.22, 1, .36, 1), visibility 0s linear .44s;
 }
-html.desk #s-rest .rtabs::after {
-    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; pointer-events: none;
-    background: linear-gradient(90deg, var(--brand) 0%, #ff6a45 100%);
-    transform-origin: 0 50%; transform: scaleX(var(--rprog, 0)); opacity: 0; transition: opacity .28s ease;
+html.desk #s-rest .drnav-bar.is-on {
+    opacity: 1; transform: translateY(0); pointer-events: auto; visibility: visible;
+    transition: opacity .34s cubic-bezier(.22, 1, .36, 1), transform .46s cubic-bezier(.22, 1, .36, 1), visibility 0s;
 }
-html.desk #s-rest .rtabs.is-stuck::after { opacity: .9; }
-html.desk[data-theme="dark"] #s-rest .rtabs::before {
-    background: color-mix(in srgb, var(--app-bg) 82%, transparent);
+html.desk[data-theme="dark"] #s-rest .drnav-bar {
+    background: color-mix(in srgb, var(--app-bg) 84%, transparent);
     box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 16px 40px -18px rgba(0, 0, 0, .7);
 }
 @media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) #s-rest .rtabs::before {
-        background: color-mix(in srgb, var(--app-bg) 82%, transparent);
+    html.desk:not([data-theme="light"]) #s-rest .drnav-bar {
+        background: color-mix(in srgb, var(--app-bg) 84%, transparent);
         box-shadow: 0 1px 0 rgba(255, 255, 255, .08), 0 16px 40px -18px rgba(0, 0, 0, .7);
     }
 }
-html.desk #s-rest .rtabs__cap {
-    position: relative; z-index: 1; display: flex; align-items: center;
-    width: 100%; max-width: none; box-sizing: border-box; padding: 0 var(--dg); min-height: 68px;
-    transition: padding-inline .46s var(--dease);
-}
-html.desk #s-rest .rtabs.is-stuck .rtabs__cap { padding-inline: clamp(24px, 2.5vw, 44px); }
-html.desk #s-rest .rtabs__row { flex: 1 1 auto; min-width: 0; padding: 12px 0; gap: 6px; }
-html.desk #s-rest .rtabs button[data-act="rtab"] { font-size: 15.5px; padding: 10px 16px; }
-/* левый блок: назад + мини-обложка + название (выезжает при прилипании) */
+/* левый блок: мини-обложка и название заведения (без стрелки «Назад») */
 html.desk #s-rest .drnav-id {
-    flex: none; display: flex; align-items: center; gap: 8px; overflow: hidden;
-    max-width: 0; opacity: 0; margin-right: 0; padding-right: 0; border-right: 1px solid transparent;
-    transform: translateX(-16px); pointer-events: none;
-    transition: max-width .42s var(--dease), opacity .3s ease, transform .42s var(--dease), margin-right .42s var(--dease), padding-right .42s var(--dease), border-color .3s;
+    flex: none; display: flex; align-items: center;
+    margin-right: 16px; padding-right: 18px; border-right: 1px solid var(--line);
 }
-html.desk #s-rest .rtabs.is-stuck .drnav-id {
-    max-width: 280px; opacity: 1; margin-right: 16px; padding-right: 18px; border-right-color: var(--line);
-    transform: none; pointer-events: auto;
-}
-html.desk #s-rest .drnav-back {
-    flex: none; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%;
-    display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 6%, transparent); color: var(--ink);
-    transition: background .2s, transform .22s var(--dease);
-}
-html.desk #s-rest .drnav-back:hover { background: color-mix(in srgb, var(--ink) 12%, transparent); transform: translateX(-2px); }
-html.desk #s-rest .drnav-back:active { transform: scale(.93); }
-html.desk #s-rest .drnav-back svg.i { width: 19px; height: 19px; stroke-width: 2.2; }
 html.desk #s-rest .drnav-who {
-    min-width: 0; display: inline-flex; align-items: center; gap: 9px; padding: 4px 10px 4px 4px;
+    min-width: 0; display: inline-flex; align-items: center; gap: 10px; padding: 4px 12px 4px 4px;
     border: 0; border-radius: 999px; background: none; color: var(--ink); text-align: left;
-    transition: background .2s;
+    transition: background-color .2s ease;
 }
 html.desk #s-rest .drnav-who:hover { background: color-mix(in srgb, var(--ink) 6%, transparent); }
 html.desk #s-rest .drnav-who img {
-    flex: none; width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+    flex: none; width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
     box-shadow: 0 0 0 1px var(--line);
 }
 html.desk #s-rest .drnav-who span {
-    min-width: 0; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font: 700 15px/1.2 var(--font); letter-spacing: -.01em;
+    min-width: 0; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font: 700 15.5px/1.2 var(--font); letter-spacing: -.01em;
 }
-/* правый блок: кнопка корзины (пружинно выезжает при прилипании) */
+/* центр: разделы меню в верхней панели с эффектом «Капля» */
+html.desk #s-rest .drnav-tabs {
+    flex: 1 1 auto; min-width: 0; overflow: hidden;
+}
+html.desk #s-rest .drnav-tabs .rtabs__row {
+    position: relative; display: flex; align-items: center; gap: 4px;
+    padding: 12px 2px; overflow-x: auto; scrollbar-width: none;
+}
+html.desk #s-rest .drnav-tabs .rtabs__row::-webkit-scrollbar { display: none; }
+html.desk #s-rest .drnav-tabs button[data-act="rtab"] {
+    position: relative; z-index: 1; border: 0; background: none;
+    padding: 9px 16px; border-radius: 999px;
+    font: 600 15px/19px var(--font); color: var(--muted); white-space: nowrap;
+    transition: color .2s ease, background-color .2s ease;
+}
+html.desk #s-rest .drnav-tabs button[data-act="rtab"]:hover {
+    color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+html.desk #s-rest .drnav-tabs .rtabs__th { border-radius: 999px; }
+html.desk #s-rest .drnav-tabs .rtabs__lit > span {
+    font: 600 15px/19px var(--font);
+}
+/* правый блок: кнопка живой корзины */
 html.desk #s-rest .drnav-cart {
-    flex: none; display: flex; align-items: center; overflow: hidden;
-    max-width: 0; opacity: 0; margin-left: 0; transform: translateX(20px) scale(.92); pointer-events: none;
-    transition: max-width .44s var(--dease), opacity .3s ease .04s, transform .46s cubic-bezier(.22, 1.15, .36, 1), margin-left .44s var(--dease);
-}
-html.desk #s-rest .rtabs.is-stuck .drnav-cart {
-    max-width: 220px; opacity: 1; margin-left: 16px; transform: none; pointer-events: auto; overflow: visible;
+    flex: none; display: flex; align-items: center; margin-left: 16px;
 }
 html.desk #s-rest .drnav-cart__btn {
     position: relative; height: 44px; min-width: 144px; padding: 0 18px 0 15px; border: 0; border-radius: 14px;
@@ -1635,6 +1661,6 @@ html.desk[data-theme="dark"] .daddr-ask__tip { background: #2e2824; border-color
     html.desk:not([data-theme="light"]) .daddr-ask__tip { background: #2e2824; border-color: rgba(255, 255, 255, .15); }
 }
 @media (prefers-reduced-motion: reduce) {
-    html.desk .daddr-ask, html.desk .daddr-ask__ic { transition: opacity .15s; animation: none !important; transform: none; }
+    html.desk .daddr-ask, html.desk .daddr-ask__ic, html.desk #s-rest .drnav-bar { transition: opacity .15s; animation: none !important; transform: none; }
     html.desk #s-home .promo__banner, html.desk #s-home .dpromo-shadow { transition-duration: .15s; transform: none; }
 }

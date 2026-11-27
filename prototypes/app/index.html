@@ -6787,7 +6787,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 16:59';
+    var BUILD = '27.11 · 17:16';
 
     /* ── состояние ── */
     var S = {
@@ -10713,11 +10713,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         restBarOff = 0; restInset = inset;
         function place() {
             if (deskOn()) {
-                var stuck = sc.scrollTop >= mark.offsetTop - 1;
-                tb.classList.toggle('is-stuck', stuck);
-                tb.classList.toggle('is-joined', stuck);
-                var maxS = Math.max(1, sc.scrollHeight - sc.clientHeight - mark.offsetTop);
-                tb.style.setProperty('--rprog', (stuck ? Math.max(0, Math.min(1, (sc.scrollTop - mark.offsetTop) / maxS)) : 0).toFixed(4));
+                tb.classList.remove('is-stuck', 'is-joined');
+                if (Desk && Desk.restScroll) Desk.restScroll();
                 return;
             }
             var F = mark.offsetTop, nat = F - sc.scrollTop, edge = inset + 44 + off, joined = nat <= edge + .5;
@@ -11032,7 +11029,10 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     var restJump = 0, restJumpCap = 0;   // лента едет от касания пункта меню (не от пальца) — до этого времени; не дольше restJumpCap
     function menuOffset(shown) {
         var tb = document.getElementById('rtabs');
-        if (deskOn()) return tb ? tb.offsetHeight : 0;
+        if (deskOn()) {
+            var bar = document.getElementById('drnavBar');
+            return (bar ? bar.offsetHeight : 68) + 6;
+        }
         return restInset + 44 + (shown == null ? restBarOff : shown ? 0 : -44) + tb.offsetHeight;
     }
     var spyTap = null;   // раздел, выбранный касанием (пока лента не ушла от низа)
@@ -11052,19 +11052,33 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (b && b.getAttribute('aria-current') !== 'true') selPick(b);
     }
     // выбранная категория: отметка, ряд — к середине на неё (прокручиваем только сам ряд: scrollIntoView трогал и ленту меню
-    // и обрывал её плавный ход — раздел вставал на 13–18 px ниже ряда), бегунок перетекает
+    // и обрывал её плавный ход — раздел вставал на 13–18 px ниже ряда), бегунок перетекает (на десктопе — сразу в статичном и верхнем меню)
     function selPick(b) {
+        var tid = b && b.dataset ? b.dataset.id : '';
+        if (SELS.length) {
+            SELS.forEach(function (Q) {
+                if (!Q || !Q.row.isConnected) return;
+                var qb = tid ? Q.row.querySelector('[data-act="rtab"][data-id="' + tid + '"]') : b;
+                if (!qb) return;
+                $$('button[data-act="rtab"]', Q.row).forEach(function (x) { x.setAttribute('aria-current', x === qb); });
+                var row = Q.row, to = qb.offsetLeft - (row.clientWidth - qb.offsetWidth) / 2;
+                var canScr = row.scrollWidth > row.clientWidth + 2;
+                if (Q === SEL && glassOn() && !fxOff() && performance.now() - selTapAt < 400) selScrollTo = to;
+                else { if (Q === SEL) selScrollTo = null; if (canScr) row.scrollTo({ left: to, behavior: 'smooth' }); }
+                selToQ(Q, qb);
+                if (Q === SEL && selScrollTo != null) { if (canScr) row.scrollTo({ left: selScrollTo, behavior: 'smooth' }); selScrollTo = null; }
+            });
+            return;
+        }
         $$('#rtabs button').forEach(function (x) { x.setAttribute('aria-current', x === b); });
         var row = b.parentNode, to = b.offsetLeft - (row.clientWidth - b.offsetWidth) / 2;
-        // «Стекло», касание: ряд докручивает сама линза — в одном кадре с собой. Плавная прокрутка браузера идёт своим ходом
-        // (на iPhone — в другом процессе), и линза, нарисованная по прошлому положению ряда, отставала бы от подписей на кадр
         if (glassOn() && !fxOff() && performance.now() - selTapAt < 400) selScrollTo = to;
         else { selScrollTo = null; row.scrollTo({ left: to, behavior: 'smooth' }); }
         selTo(b);
-        if (selScrollTo != null) { row.scrollTo({ left: selScrollTo, behavior: 'smooth' }); selScrollTo = null; }   // линзы не вышло — как обычно
+        if (selScrollTo != null) { row.scrollTo({ left: selScrollTo, behavior: 'smooth' }); selScrollTo = null; }
     }
-    /* ── бегунок выбранной категории: одна плашка перетекает по пунктам. Края (L, R) и форма — пружины, шаг — кадр.
-       Варианты («Варианты» → «Меню категорий»; «Стекло» — своя линза, ниже):
+    /* ── бегунок выбранной категории: одна плашка перетекает по пунктам. Края (L, R), строка (T) и форма — пружины, шаг — кадр.
+       Варианты («Варианты» → «Меню категорий»; на десктопе — всегда «Капля»; «Стекло» — своя линза, ниже):
        • «Перелив» — передний край убегает к пункту, задний догоняет мягче и чуть позже: бегунок тянется и тоньшает (объём
          тот же), сжимаясь — дрожит, как желе;
        • «Желе» — едет целиком с перелётом, вытягивается от скорости и сплющивается на остановке, колышется;
@@ -11076,7 +11090,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        Светлая подпись — копия подписей внутри бегунка: selMarks раскладывает копии по местам пунктов, selPaint сдвигает их
        обратно на ход бегунка и снимает с них растяжение — светлым ровно то, что бегунок закрывает, в любой момент хода.
        «Меньше движения» в системе — сразу на место ── */
-    var SEL = null;
+    var SEL = null, SELS = [];
     // рамка пункта в координатах ряда — дробно: offsetLeft округляет до пикселя, и копия подписи съезжала бы с настоящей на
     // полпикселя. k — масштаб, если приложение уменьшено целиком (просмотр на компьютере)
     function selBox(b) {
@@ -11084,63 +11098,86 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var l = (r.left - pr.left) / k - p.clientLeft + p.scrollLeft, t = (r.top - pr.top) / ky - p.clientTop + p.scrollTop, w = r.width / k;
         return { l: l, r: l + w, w: w, c: l + w / 2, t: t, h: r.height / ky };
     }
-    function selInit() {
-        var row = document.querySelector('#rtabs .rtabs__row'), ink = row && row.querySelector('.rtabs__ink'), b = row && (row.querySelector('[aria-current="true"]') || row.querySelector('button'));
-        if (!ink || !b) { SEL = null; return; }
+    function selMake(row, withGlass) {
+        var ink = row && row.querySelector('.rtabs__ink'), b = row && (row.querySelector('[aria-current="true"]') || row.querySelector('button'));
+        if (!ink || !b) return null;
         var r = selBox(b);
-        SEL = { row: row, ink: ink, th: ink.querySelector('.rtabs__th'), lit: ink.querySelector('.rtabs__lit'), lt: null, raf: 0, lock: 0, mode: '', dir: 1,
-            L: r.l, R: r.r, vL: 0, vR: 0, tL: r.l, tR: r.r, tc: r.c, tw: r.w, h: r.h, s: 1, vs: 0, d: 0, vd: 0, c: r.c, vc: 0, w: r.w, vw: 0, dx: r.c, vdx: 0 };
-        SEL.th.style.top = r.t.toFixed(2) + 'px'; SEL.th.style.height = r.h.toFixed(2) + 'px';
-        SEL.th.classList.toggle('is-lens', selKind() === 'lens');   // «Линза» — стекло и в покое
-        glassAttach(SEL);
-        selMarks(); selPaint();
-        if (selRO) { selRO.disconnect(); $$('button', row).forEach(function (x) { selRO.observe(x); }); }
+        var Q = { row: row, ink: ink, th: ink.querySelector('.rtabs__th'), lit: ink.querySelector('.rtabs__lit'), lt: null, raf: 0, lock: 0, mode: '', dir: 1,
+            L: r.l, R: r.r, vL: 0, vR: 0, tL: r.l, tR: r.r, T: r.t, vT: 0, tT: r.t, tc: r.c, tw: r.w, h: r.h, s: 1, vs: 0, d: 0, vd: 0, c: r.c, vc: 0, w: r.w, vw: 0, dx: r.c, vdx: 0 };
+        Q.th.style.top = '0px'; Q.th.style.height = r.h.toFixed(2) + 'px';
+        Q.th.classList.toggle('is-lens', selKind() === 'lens');   // «Линза» — стекло и в покое
+        if (withGlass) glassAttach(Q);
+        selMarks(Q); selPaint(Q);
+        return Q;
+    }
+    function selInit() {
+        SELS.forEach(function (Q) { if (Q && Q.raf) cancelAnimationFrame(Q.raf); });
+        SELS = [];
+        var row = document.querySelector('#rtabs .rtabs__row');
+        SEL = selMake(row, true);
+        if (SEL) SELS.push(SEL);
+        if (selRO) { selRO.disconnect(); if (row) $$('button', row).forEach(function (x) { selRO.observe(x); }); }
+        var barRow = document.querySelector('#drnavBar .rtabs__row');
+        if (barRow) selAdd(barRow);
+    }
+    function selAdd(row) {
+        if (!row) return null;
+        SELS = SELS.filter(function (Q) { return Q && Q.row.isConnected && Q.row !== row; });
+        var Q = selMake(row, false);
+        if (!Q) return null;
+        SELS.push(Q);
+        if (selRO) $$('button', row).forEach(function (x) { selRO.observe(x); });
+        return Q;
     }
     /* пункты сменили размер (шрифт догрузился, когда витрину открыли по ссылке; сменили шрифт; повернули экран) — бегунок
        встаёт по выбранному пункту заново, если едет — едет к его новому месту. Скрытый ряд (ширина 0) не трогаем */
-    var selRO = window.ResizeObserver ? new ResizeObserver(function () { selFit(); }) : null;
-    function selFit() {
-        var Q = SEL; if (!Q || !Q.row.isConnected) return;
+    var selRO = window.ResizeObserver ? new ResizeObserver(function () { selFitAll(); }) : null;
+    function selFitQ(Q) {
+        if (!Q || !Q.row.isConnected) return;
         var b = Q.row.querySelector('[aria-current="true"]') || Q.row.querySelector('button');
         if (!b || !b.offsetWidth) return;
         var r = selBox(b);
-        Q.th.style.top = r.t.toFixed(2) + 'px'; Q.th.style.height = r.h.toFixed(2) + 'px'; Q.h = r.h;
-        Q.ink.style.width = Q.row.scrollWidth + 'px'; selMarks();
-        Q.tL = r.l; Q.tR = r.r; Q.tc = r.c; Q.tw = r.w;
+        Q.th.style.top = '0px'; Q.th.style.height = r.h.toFixed(2) + 'px'; Q.h = r.h;
+        Q.ink.style.width = (Q.row.scrollWidth > Q.row.clientWidth + 1 ? Q.row.scrollWidth + 'px' : '100%'); selMarks(Q);
+        Q.tL = r.l; Q.tR = r.r; Q.tT = r.t; Q.tc = r.c; Q.tw = r.w;
         if (Q.raf) return;
-        Q.L = r.l; Q.R = r.r; Q.c = r.c; Q.w = r.w;
-        var m = Q.mode; Q.mode = ''; selPaint(); Q.mode = m;
+        Q.L = r.l; Q.R = r.r; Q.T = r.t; Q.c = r.c; Q.w = r.w;
+        var m = Q.mode; Q.mode = ''; selPaint(Q); Q.mode = m;
     }
+    function selFitAll() { SELS.forEach(selFitQ); }
+    function selFit() { selFitAll(); }
     // светлые копии подписей — по местам пунктов (лежат в бегунке; selPaint сдвигает их обратно на его ход)
-    function selMarks() {
-        var Q = SEL, bs = $$('button', Q.row);
+    function selMarks(Q) {
+        Q = Q || SEL; if (!Q) return;
+        var bs = $$('button', Q.row);
         if (!Q.lt || Q.lt.length !== bs.length) {
             Q.lit.textContent = '';
             Q.lt = bs.map(function (b) { var x = document.createElement('span'); x.textContent = b.textContent; Q.lit.appendChild(x); return x; });
         }
-        bs.forEach(function (b, i) { var r = selBox(b), x = Q.lt[i].style; x.left = r.l.toFixed(2) + 'px'; x.width = r.w.toFixed(2) + 'px'; x.height = r.h.toFixed(2) + 'px'; });
+        bs.forEach(function (b, i) { var r = selBox(b), x = Q.lt[i].style; x.left = r.l.toFixed(2) + 'px'; x.top = r.t.toFixed(2) + 'px'; x.width = r.w.toFixed(2) + 'px'; x.height = r.h.toFixed(2) + 'px'; });
     }
     function spr(x, v, to, k, c, dt) { v += (-k * (x - to) - c * v) * dt; return [x + v * dt, v]; }
-    function selTo(b) {
-        var Q = SEL; if (!Q || !Q.row.isConnected || !b || !Q.row.contains(b)) return;
+    function selToQ(Q, b) {
+        if (!Q || !Q.row.isConnected || !b || !Q.row.contains(b)) return;
         var r = selBox(b);
-        Q.tL = r.l; Q.tR = r.r; Q.tc = r.c; Q.tw = r.w; Q.dir = r.c >= (Q.L + Q.R) / 2 ? 1 : -1; Q.t = 0;
-        Q.ink.style.width = Q.row.scrollWidth + 'px'; selMarks();
+        Q.tL = r.l; Q.tR = r.r; Q.tT = r.t; Q.tc = r.c; Q.tw = r.w; Q.dir = r.c >= (Q.L + Q.R) / 2 ? 1 : -1; Q.t = 0;
+        Q.ink.style.width = (Q.row.scrollWidth > Q.row.clientWidth + 1 ? Q.row.scrollWidth + 'px' : '100%'); selMarks(Q);
         var was = Q.mode; Q.mode = selKind();
-        if (fxOff()) { glassStop(); Q.L = r.l; Q.R = r.r; Q.s = 1; Q.d = 0; selEnd(); return; }
+        if (fxOff()) { if (Q === SEL) glassStop(); Q.L = r.l; Q.R = r.r; Q.T = r.t; Q.s = 1; Q.d = 0; selEndQ(Q); return; }
         // «Стекло»: касание пункта — линза (летит и садится сама); линза уже летит — туда же, к новой цели. Прокрутка меню —
         // плашка просто едет пружиной
-        if (glassOn() && (performance.now() - selTapAt < 400 || (GLS && GLS.on && GLS.Q === Q)) && glassRun(Q, b)) {
+        if (Q === SEL && glassOn() && (performance.now() - selTapAt < 400 || (GLS && GLS.on && GLS.Q === Q)) && glassRun(Q, b)) {
             if (Q.raf) { cancelAnimationFrame(Q.raf); Q.raf = 0; }
             Q.mode = ''; return;
         }
         if (Q.mode === 'jelly' && was !== 'jelly') { Q.c = (Q.L + Q.R) / 2; Q.w = Q.R - Q.L; Q.vc = (Q.vL + Q.vR) / 2; Q.vw = Q.vR - Q.vL; Q.d = 0; Q.vd = 0; }
         Q.th.classList.toggle('is-lens', Q.mode === 'lens');
         if (Q.mode === 'lens') { Q.th.classList.add('is-moving'); Q.landed = false; }
-        if (!Q.raf) { Q.last = performance.now(); Q.raf = requestAnimationFrame(selFrame); }
+        if (!Q.raf) { Q.last = performance.now(); Q.raf = requestAnimationFrame(function (now) { selFrameQ(Q, now); }); }
     }
-    function selFrame(now) {
-        var Q = SEL; if (!Q || !Q.row.isConnected) { if (Q) Q.raf = 0; return; }
+    function selTo(b) { selToQ(SEL, b); }
+    function selFrameQ(Q, now) {
+        if (!Q || !Q.row.isConnected) { if (Q) Q.raf = 0; return; }
         var dt = Math.min(.032, Math.max(.001, (now - Q.last) / 1000)), m = Q.mode, q;
         Q.last = now; Q.t += dt;
         if (m === 'flow') {
@@ -11166,33 +11203,38 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             if (!Q.landed && Math.abs((Q.L + Q.R) / 2 - Q.tc) < 2 && Math.abs(Q.vL + Q.vR) < 60) { Q.landed = true; Q.th.classList.remove('is-moving'); }   // встала — прозрачное стекло
             q = Q.landed ? spr(Q.s, Q.vs, 1, 520, 12, dt) : spr(Q.s, Q.vs, 1.14, 500, 26, dt); Q.s = q[0]; Q.vs = q[1];
         }
-        selPaint();
-        var near = Math.abs(Q.L - Q.tL) < .3 && Math.abs(Q.R - Q.tR) < .3 && Math.abs(Q.vL) < 6 && Math.abs(Q.vR) < 6;
-        if (m === 'jelly') near = Math.abs(Q.c - Q.tc) < .3 && Math.abs(Q.w - Q.tw) < .3 && Math.abs(Q.vc) < 6 && Math.abs(Q.d) < .004 && Math.abs(Q.vd) < .05;
+        if (Math.abs(Q.T - Q.tT) > .05 || Math.abs(Q.vT) > .5) { q = spr(Q.T, Q.vT, Q.tT, 320, 26, dt); Q.T = q[0]; Q.vT = q[1]; }
+        else { Q.T = Q.tT; Q.vT = 0; }
+        selPaint(Q);
+        var near = Math.abs(Q.L - Q.tL) < .3 && Math.abs(Q.R - Q.tR) < .3 && Math.abs(Q.T - Q.tT) < .3 && Math.abs(Q.vL) < 6 && Math.abs(Q.vR) < 6 && Math.abs(Q.vT) < 6;
+        if (m === 'jelly') near = Math.abs(Q.c - Q.tc) < .3 && Math.abs(Q.w - Q.tw) < .3 && Math.abs(Q.T - Q.tT) < .3 && Math.abs(Q.vc) < 6 && Math.abs(Q.vT) < 6 && Math.abs(Q.d) < .004 && Math.abs(Q.vd) < .05;
         if (m === 'flow' || m === 'lens') near = near && Math.abs(Q.s - 1) < .004 && Math.abs(Q.vs) < .05 && (m !== 'lens' || Q.landed);
-        if (near) { selEnd(); return; }
-        Q.raf = requestAnimationFrame(selFrame);
+        if (near) { selEndQ(Q); return; }
+        Q.raf = requestAnimationFrame(function (n) { selFrameQ(Q, n); });
     }
-    function selEnd() {
-        var Q = SEL; Q.raf && cancelAnimationFrame(Q.raf); Q.raf = 0;
-        Q.L = Q.tL; Q.R = Q.tR; Q.c = Q.tc; Q.w = Q.tw; Q.s = 1; Q.d = 0; Q.vL = Q.vR = Q.vs = Q.vd = Q.vc = Q.vw = 0;
+    function selEndQ(Q) {
+        Q = Q || SEL; if (!Q) return;
+        Q.raf && cancelAnimationFrame(Q.raf); Q.raf = 0;
+        Q.L = Q.tL; Q.R = Q.tR; Q.T = Q.tT; Q.c = Q.tc; Q.w = Q.tw; Q.s = 1; Q.d = 0; Q.vL = Q.vR = Q.vT = Q.vs = Q.vd = Q.vc = Q.vw = 0;
         Q.th.classList.remove('is-moving'); Q.th.classList.toggle('is-lens', selKind() === 'lens');
-        var m = Q.mode; Q.mode = ''; selPaint(); Q.mode = m;
+        var m = Q.mode; Q.mode = ''; selPaint(Q); Q.mode = m;
     }
-    function selPaint() {
-        var Q = SEL, m = Q.mode, sx = 1, sy = 1;
+    function selEnd() { selEndQ(SEL); }
+    function selPaint(Q) {
+        Q = Q || SEL; if (!Q) return;
+        var m = Q.mode, sx = 1, sy = 1;
         if (m === 'flow') sy = Q.s;
         else if (m === 'jelly') { sx = 1 + Q.d; sy = 1 - .6 * Q.d; }
         else if (m === 'lens') sx = sy = Q.s;
         var w = Math.max(4, Q.R - Q.L), hw = w / 2, hh = Q.h / 2;
         Q.th.style.width = w.toFixed(2) + 'px';
         // 2D-сдвиг, не 3D: бегунок рисуется вместе с рядом, а не отдельным слоем — светлая подпись в нём не мылится на iPhone
-        Q.th.style.transform = 'translate(' + Q.L.toFixed(2) + 'px,0)' + (sx !== 1 || sy !== 1 ? ' scale(' + sx.toFixed(4) + ',' + sy.toFixed(4) + ')' : '');
+        Q.th.style.transform = 'translate(' + Q.L.toFixed(2) + 'px,' + Q.T.toFixed(2) + 'px)' + (sx !== 1 || sy !== 1 ? ' scale(' + sx.toFixed(4) + ',' + sy.toFixed(4) + ')' : '');
         // копии подписей — обратно на ход бегунка (стоят там же, где настоящие), растяжение бегунка с них снято. У линзы — нет:
         // она увеличивает подпись под собой
         var cx = m === 'lens' ? 1 : 1 / sx, cy = m === 'lens' ? 1 : 1 / sy;
-        Q.lit.style.transform = cx === 1 && cy === 1 ? 'translate(' + (-Q.L).toFixed(2) + 'px,0)'
-            : 'translate(' + hw.toFixed(2) + 'px,' + hh.toFixed(2) + 'px) scale(' + cx.toFixed(4) + ',' + cy.toFixed(4) + ') translate(' + (-hw - Q.L).toFixed(2) + 'px,' + (-hh).toFixed(2) + 'px)';
+        Q.lit.style.transform = cx === 1 && cy === 1 ? 'translate(' + (-Q.L).toFixed(2) + 'px,' + (-Q.T).toFixed(2) + 'px)'
+            : 'translate(' + hw.toFixed(2) + 'px,' + hh.toFixed(2) + 'px) scale(' + cx.toFixed(4) + ',' + cy.toFixed(4) + ') translate(' + (-hw - Q.L).toFixed(2) + 'px,' + (-hh - Q.T).toFixed(2) + 'px)';
         // «Капля»: плашка — капля. Голова — полный круг (высота плашки), хвост тем тоньше, чем сильнее плашка растянута
         // (до 38% головы); бока — общие касательные двух кругов. В покое — круглая капсула. Подпись внутри режется той же формой
         if (m === 'drop' || (!m && selKind() === 'drop')) {
@@ -11232,8 +11274,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        (текстура) — её и преломляем. Холст живёт только на время перехода; плашка в покое — обычный элемент.
        Прокрутка меню переводит плашку пружиной, без линзы: стекло поднимается от пальца, а не от ленты ── */
     var GLS = null, selTapAt = 0, selScrollTo = null;
-    function glassOn() { return FXV.rmenu === 'glass'; }
-    function selKind() { return glassOn() ? 'spring' : FXV.rmenu || 'flow'; }   // как переезжает плашка; у «Стекла» без касания — пружиной
+    function glassOn() { return !deskOn() && FXV.rmenu === 'glass'; }
+    function selKind() { return deskOn() ? 'drop' : (glassOn() ? 'spring' : FXV.rmenu || 'flow'); }   // на десктопе — всегда «Капля»; на телефоне — выбранный эффект
     var GLASS_VS = 'attribute vec2 aP;uniform vec2 uRes;varying vec2 vP;void main(){vP=vec2(aP.x*.5+.5,.5-aP.y*.5)*uRes;gl_Position=vec4(aP,0.,1.);}';
     var GLASS_FS = [
         'precision highp float;',
@@ -21175,7 +21217,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             popScreen: popScreen, pushScreen: pushScreen, setTab: setTab, resetStack: resetStack, renderHome: renderHome, syncChrome: syncChrome, syncDish: syncDish, cntSet: cntSet, odoQ: odoQ, fxPress: fxPress,
             closeSheet: closeSheet, closeSheetNice: closeSheetNice, fxFly: fxFly, fxPt: fxPt, fxOff: fxOff, crGame: crGame,
             openSheet: openSheet, confirmAddr: confirmAddr, cartCount: cartCount, cartTotals: cartTotals, moneyShort: moneyShort, BYN: BYN, curRest: function () { return curRest; },
-            segPlay: segPlay, segStart: segStart, tr: tr,
+            segPlay: segPlay, segStart: segStart, selAdd: selAdd, selFit: selFitAll, tr: tr,
             DISHES: DISHES, SIZES: SIZES, BASES: BASES, ADDONS: ADDONS, EXCLUDES: EXCLUDES, dishAddons: dishAddons, dishExcludes: dishExcludes, dishExtras: dishExtras, dishNutr: dishNutr, dishWeight: dishWeight, dishPrice: dishPrice, dishPics: dishPics,
             sheetKind: function () { return sheetKind; }, dishState: function () { return dishState; }, setFxTarget: function (v) { fxTargetOver = v; } };
     }
@@ -21553,6 +21595,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             case 'share': shareRest(id); break;
             case 'rtab':
                 var sec = document.getElementById('m-' + id), sc = document.getElementById('restScroll');
+                if (!sec || !sc) break;
                 // вниз — ряд выдавит панель и встанет под часами; вверх — панель какая была, такая и остаётся: касание — не свайп,
                 // спрятанная не выезжает. Раздел — сразу под рядом. Бегунок — сразу к нажатой; пока лента едет, промежуточные
                 // разделы его не дёргают
@@ -23778,7 +23821,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var list = root.matches && root.matches(SQ_SEL) ? [root] : [];
         (root.querySelectorAll ? [].slice.call(root.querySelectorAll(SQ_SEL)) : []).forEach(function (e) { list.push(e); });
         list.forEach(function (el) {
-            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava') || el.classList.contains('ddish-nutr__tab') || (el.closest('.ddish-addon') && !el.classList.contains('ddish-addon'))) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него; вкладки КБЖУ и внутренние кнопки .ddish-addon — без перерисовки контура
+            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava') || el.classList.contains('ddish-nutr__tab') || (el.dataset && el.dataset.act === 'rtab') || (el.closest('.ddish-addon') && !el.classList.contains('ddish-addon'))) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него; вкладки КБЖУ, пункты меню (у них своя «Капля») и внутренние кнопки .ddish-addon — без перерисовки контура
             el._sqX = el.matches(SQ_X); el._sqRing = el._sqX && el.matches(SQ_RING);
             if (el._sqX && el.closest('.ri-tk')) return;   // плашки акций: рисунки нарочно выходят за край
             el._sqOn = true; if (sqRO) sqRO.observe(el); else sqUpdate(el);
