@@ -579,7 +579,9 @@ h2.h { margin: 0; font: var(--display-weight) 22px/1.15 var(--font-display); let
 .btn2 {
     border: 0; border-radius: 14px; padding: 11px 16px;
     background: var(--surface); color: var(--ink); font-weight: 650; font-size: 14.5px;
+    transition: transform .15s, background-color .15s, opacity .2s;
 }
+.btn2:active { transform: scale(.98); }
 a.btn2 { display: inline-flex; align-items: center; text-decoration: none; }   /* ссылка в виде кнопки («Открыть» версию) */
 .chip {
     display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
@@ -2326,6 +2328,11 @@ html.kb-on .sheet.has-map > .sheet__foot { padding-bottom: 12px; }
 #fxsApply.is-off { opacity: .45; pointer-events: none; }   /* текст — на радиус/2 от краёв полей (16 + 8), плашки справа — вровень с ними */
 .sheet__head h2 { margin: 0; font: var(--display-weight) 22px/1.15 var(--font-display); letter-spacing: var(--display-track); }
 .sheet__foot { position: relative; padding: 12px 16px calc(var(--bottom) + 12px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 10px; align-items: center; background: var(--app-bg); }
+.swap__body { padding: 30px 24px 16px; }
+.swap__body p { max-width: 310px; text-wrap: balance; }
+.swap__foot { border: 0; display: grid; gap: 10px; padding: 8px 20px calc(var(--bottom) + 18px + env(safe-area-inset-bottom, 0px)); }
+.swap__foot :is(.cta, .btn2) { height: 52px; border-radius: 999px; font-size: 15.5px; }
+.swap__foot .btn2 { display: flex; align-items: center; justify-content: center; padding: 0 20px; }
 
 /* метки на шторке блюда — крупнее (фото большое): высота 26 px, кегль 13. Середина — на середине крестика (он 44 px, 12 px сверху:
    середина на 34 px), слева — как крестик справа (12 px); справа — его защитная зона (12 px) */
@@ -5700,6 +5707,16 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
 .is-winking .pep-wink { animation: winkOn 2.6s .9s both; }
 @keyframes eyeShut { 0%, 8% { transform: scaleY(1); opacity: 1; } 14%, 40% { transform: scaleY(.1); opacity: 0; } 48%, 100% { transform: scaleY(1); opacity: 1; } }
 @keyframes winkOn { 0%, 10% { opacity: 0; } 14%, 40% { opacity: 1; } 46%, 100% { opacity: 0; } }
+.pep-body { transform-box: view-box; transform-origin: 60px 108px; }
+.pep-eyes, .pep-oh { transform-box: fill-box; transform-origin: center; }
+.sheet.is-on .is-surprised .pep-body { animation: pepGasp .78s .14s cubic-bezier(.22, 1.18, .36, 1) both; }
+.sheet.is-on .is-surprised .pep-eyes { animation: pepWide .74s .14s cubic-bezier(.22, 1.24, .36, 1) both; }
+.sheet.is-on .is-surprised .pep-eye { animation: pepBlink 2.6s .14s both; }
+.sheet.is-on .is-surprised .pep-oh { animation: pepOh .72s .16s cubic-bezier(.22, 1.28, .36, 1) both; }
+@keyframes pepGasp { 0% { transform: translateY(5px) rotate(2deg); } 36% { transform: translateY(-3.5px) rotate(-2.5deg); } 70% { transform: translateY(1px) rotate(.6deg); } 100% { transform: none; } }
+@keyframes pepWide { 0% { transform: scale(.86); } 42% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes pepBlink { 0%, 64% { transform: scaleY(1); } 68% { transform: scaleY(.12); } 73%, 100% { transform: scaleY(1); } }
+@keyframes pepOh { 0% { transform: scale(.25); } 45% { transform: scale(1.22); } 74% { transform: scale(.94); } 100% { transform: scale(1); } }
 .is-bobbing { animation: bob 2.4s ease-in-out infinite; transform-origin: 50% 90%; }
 @keyframes bob { 50% { transform: rotate(-5deg) translateY(-3px); } }
 
@@ -5989,7 +6006,16 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         wink: 'M63.68 55.34A8.7 8.7 0 0 1 80.82 58.36'
     };
     var pepUid = 0;
-    function pepArt(body) {
+    function pepArt(body, mood) {
+        if (mood === 'oh') {
+            return '<g transform="translate(4.8 4.8) scale(.92)"><g class="pep-body">' +
+                '<path fill="' + body + '" d="' + PEP.body + '"/><path fill="' + body + '" d="' + PEP.stem + '"/>' +
+                '<g class="pep-eyes" fill="none" stroke="#000" stroke-width="6.3">' +
+                '<circle class="pep-eye pep-eye--l" cx="42.5" cy="51.8" r="9.2"/>' +
+                '<circle class="pep-eye pep-eye--r" cx="72.8" cy="56.5" r="9.2"/></g>' +
+                '<g class="pep-oh"><ellipse cx="59.5" cy="83.5" rx="5.7" ry="7" transform="rotate(8 59.5 83.5)" fill="#000"/></g>' +
+                '</g></g>';
+        }
         return '<g transform="translate(4.8 4.8) scale(.92)">' +
             '<path fill="' + body + '" d="' + PEP.body + '"/><path fill="' + body + '" d="' + PEP.stem + '"/>' +
             '<g fill="none" stroke="#000" stroke-width="6.3" stroke-linecap="butt">' +
@@ -6005,7 +6031,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         return '<svg viewBox="0 0 120 120" class="' + (opts.cls || '') + '" aria-hidden="true">' +
             '<defs><clipPath id="' + u + '"><circle cx="60" cy="60" r="56"/></clipPath></defs>' +
             '<circle cx="60" cy="60" r="56" fill="' + (opts.disc || 'var(--brand)') + '"/>' +
-            '<g clip-path="url(#' + u + ')">' + pepArt('#fff') + '</g></svg>';
+            '<g clip-path="url(#' + u + ')">' + pepArt('#fff', opts.mood) + '</g></svg>';
     }
     // перчик целиком, без круга
     function pepFree(cls, body) {
@@ -6652,7 +6678,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 00:15';
+    var BUILD = '27.11 · 09:56';
 
     /* ── состояние ── */
     var S = {
@@ -11362,7 +11388,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         document.getElementById('scrim').classList.toggle('is-island', kind === 'auth' && FXV.auth === 'card');
         if (kind === 'auth') authBind(data);
         if (kind === 'about') { aboutBind(data); abHeadBind(); abTick(); }   // 16.11: шапка уходит и у заведений без карты зон (Terra); 17.11: чип «Открыто» — раз в минуту
-        sh.classList.toggle('is-legal', kind === 'legal'); sh.classList.toggle('is-card', kind === 'card' || kind === 'nset' || kind === 'again' || kind === 'deal'); sh.classList.toggle('is-nset', kind === 'nset'); sh.classList.toggle('is-again', kind === 'again'); sh.classList.toggle('is-agnw', kind === 'again' && FXV.agnbg === 'white'); sh.classList.remove('is-agnfly'); sh.classList.toggle('is-deal', kind === 'deal'); sh.classList.remove('is-scrolled'); sh.style.removeProperty('--lh'); sh.style.removeProperty('--hp'); sh.style.removeProperty('--xt'); sh._lh = 0;
+        sh.classList.toggle('is-legal', kind === 'legal'); sh.classList.toggle('is-swap', kind === 'swap'); sh.classList.toggle('is-card', kind === 'card' || kind === 'nset' || kind === 'again' || kind === 'deal'); sh.classList.toggle('is-nset', kind === 'nset'); sh.classList.toggle('is-again', kind === 'again'); sh.classList.toggle('is-agnw', kind === 'again' && FXV.agnbg === 'white'); sh.classList.remove('is-agnfly'); sh.classList.toggle('is-deal', kind === 'deal'); sh.classList.remove('is-scrolled'); sh.style.removeProperty('--lh'); sh.style.removeProperty('--hp'); sh.style.removeProperty('--xt'); sh._lh = 0;
         sh.classList.toggle('is-glass', kind === 'legal' || kind === 'about');   // шапка — матовым стеклом поверх ленты
         sh.classList.toggle('is-about', kind === 'about');   // 16.11: уходящая вверх шапка прячется за краем шторки
         if (kind === 'legal' || kind === 'about') isbBind(sh);
@@ -15620,8 +15646,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     }
     function swapSheet() {
         var r = rest(S.cartRest);
-        return '<div class="empty" style="padding:30px 24px 10px">' + pepDisc() + '<b>Начать новый заказ?</b><p>В заказе уже блюда из «' + esc(r.name) + '». Заказать из двух мест сразу нельзя.</p></div>' +
-            '<div class="sheet__foot" style="border:0;display:grid;gap:8px"><button type="button" class="cta" data-act="swap-yes">Очистить и добавить</button><button type="button" class="btn2" style="height:50px" data-act="close-sheet">Оставить как есть</button></div>';
+        return '<div class="empty swap__body">' + pepDisc({ mood: 'oh', cls: 'is-surprised' }) + '<b>Начать новый заказ?</b><p>В заказе уже блюда из «' + esc(r.name) + '». Заказать из двух мест сразу нельзя.</p></div>' +
+            '<div class="sheet__foot swap__foot"><button type="button" class="cta" data-act="swap-yes">Очистить и добавить</button><button type="button" class="btn2" data-act="close-sheet">Оставить как есть</button></div>';
     }
     function pushSheet() {
         return '<div class="empty" style="padding:30px 24px 10px">' + pepDisc({ cls: 'is-winking' }) + '<b>Сообщить, когда курьер подъедет?</b><p>Пришлём одно уведомление на заказ. Никаких рассылок.</p></div>' +

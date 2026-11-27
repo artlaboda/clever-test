@@ -312,8 +312,12 @@ html.desk .dcard img, html.desk .item__pic img { transition: transform .45s var(
 html.desk .ups:hover { transform: translateY(-3px); }
 /* кнопки, плашки, строки */
 html.desk .cta { transition: translate .2s var(--dease), scale .16s var(--dease), box-shadow .2s, filter .2s; }
-html.desk .cta:hover:not(:disabled):not(.is-off) { translate: 0 -1px; box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -12px rgba(20, 12, 8, .6); }
+html.desk .cta:hover:not(:disabled):not(.is-off) { z-index: 2; translate: 0 -1px; box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -12px rgba(20, 12, 8, .6); }
 html.desk .cta:active { transform: none; scale: .985; }
+html.desk .btn2 { position: relative; transition: translate .2s var(--dease), scale .16s var(--dease), background-color .2s var(--dease), box-shadow .2s var(--dease), color .2s, filter .2s; }
+html.desk .btn2:hover:not(:disabled) { z-index: 2; translate: 0 -1px; background: color-mix(in srgb, var(--ink) 8%, var(--surface)); box-shadow: 0 10px 20px -12px rgba(20, 12, 8, .32); }
+html.desk .btn2:active:not(:disabled) { transform: none; translate: 0 0; scale: .985; }
+html.desk .pep-hello .btn2:hover { background: var(--brand); filter: brightness(1.06); box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--brand) 55%, transparent); }
 html.desk .chip, html.desk .link, html.desk .lrow, html.desk .me, html.desk .tilecat, html.desk .sq__top, html.desk .slot, html.desk .cday, html.desk .cpay, html.desk .opt, html.desk .citem, html.desk .fgrp__r, html.desk .fgrp__all, html.desk .bt__link, html.desk .cchg, html.desk .cother, html.desk .cwo { transition: background .2s, box-shadow .2s, color .2s, transform .2s var(--dease); }
 /* фильтры (20.11: «при ховере не выделять ни чёрным, ни коричневым — нужна красивая тень под ними; всё по центру по высоте»):
    под курсором рамка тает, плашка чуть приподнимается, под ней — мягкая тень. Высота 40 px, строка — 1: значок и буквы
@@ -677,6 +681,17 @@ html.desk .sheet {
 }
 html.desk .sheet.is-on { transform: none; opacity: 1; visibility: visible; transition: transform .42s var(--dease), opacity .25s, visibility 0s; }
 html.desk .sheet.has-map { height: min(820px, calc(100% - 64px)); max-height: none; width: 600px; }
+html.desk #sheet.is-swap { width: 440px; }
+html.desk #sheet.is-swap .swap__body { padding: 34px 28px 18px; }
+html.desk #sheet.is-swap .swap__foot { padding: 6px 24px 24px; gap: 10px; }
+html.desk #sheet.is-swap .cta:hover:not(:disabled):not(.is-off) { box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -10px rgba(20, 12, 8, .38); }
+html.desk #sheet.is-swap .btn2:hover:not(:disabled) { box-shadow: 0 10px 22px -10px rgba(20, 12, 8, .26); }
+html.desk[data-theme="dark"] #sheet.is-swap .cta:hover:not(:disabled):not(.is-off) { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .26), 0 14px 28px -8px rgba(0, 0, 0, .75); }
+html.desk[data-theme="dark"] #sheet.is-swap .btn2:hover:not(:disabled) { box-shadow: 0 10px 22px -10px rgba(0, 0, 0, .62); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #sheet.is-swap .cta:hover:not(:disabled):not(.is-off) { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .26), 0 14px 28px -8px rgba(0, 0, 0, .75); }
+    html.desk:not([data-theme="light"]) #sheet.is-swap .btn2:hover:not(:disabled) { box-shadow: 0 10px 22px -10px rgba(0, 0, 0, .62); }
+}
 /* 26.11: карточка товара на десктопе — крупное двухколоночное окно без прокрутки и без скруглений у фото:
    слева во всю высоту фото, справа — название, описание, КБЖУ, опции (размер, борт 2×2, добавки) и футер */
 html.desk :is(#sheet, #sheetUnder).is-dish {
