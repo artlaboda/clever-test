@@ -1706,10 +1706,12 @@ window.cleverDesk = function (A) {
                             '</span>' +
                         '</div>';
                     }
-                    var sub = (showW && a.w && a.w >= 10 ? (a.w + '\u00a0г · ') : '') + priceStr;
-                    return '<div class="ddish-addon" data-id="' + k + '" data-qty="0"' + (showW && a.w && a.w >= 10 ? (' data-w="' + a.w + '"') : '') + '>' +
+                    var hasW = showW && a.w && a.w >= 10;
+                    var gLbl = A.tr ? A.tr('г') : 'г';
+                    var wHtml = hasW ? '<span class="ddish-addon__sep" aria-hidden="true">\u00a0·\u00a0</span><span class="ddish-addon__w"><span class="ddish-addon__wn">' + a.w + '</span>\u00a0' + esc(gLbl) + '</span>' : '';
+                    return '<div class="ddish-addon" data-id="' + k + '" data-qty="0"' + (hasW ? (' data-w="' + a.w + '"') : '') + '>' +
                         '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
-                        '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">' + sub + '</small></span>' + ctl +
+                        '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num"><span class="ddish-addon__p">' + priceStr + '</span>' + wHtml + '</small></span>' + ctl +
                     '</div>';
                 };
                 // 1) Дополнительно (например, «Удвоить соус, 50 г»)
@@ -1911,11 +1913,15 @@ window.cleverDesk = function (A) {
             if (dec) dec.tabIndex = on ? 0 : -1;
             if (inc) { inc.disabled = q >= 5; inc.tabIndex = on && q < 5 ? 0 : -1; }
             if (hit) hit.disabled = q >= 5;
-            var sm = card.querySelector('.ddish-addon__txt small'), a = A.ADDONS && A.ADDONS[k];
-            if (sm && a) {
-                var adSum = Math.round(a.add * Math.max(1, q) * 100) / 100;
-                var wPre = !on && card.dataset.w ? (card.dataset.w + '\u00a0г · ') : '';
-                rollVal(sm, wPre + '+' + A.moneyShort(adSum) + '\u00a0' + (A.BYN || '⃅'), adSum);
+            var pEl = card.querySelector('.ddish-addon__p'), wnEl = card.querySelector('.ddish-addon__wn'), a = A.ADDONS && A.ADDONS[k];
+            if (pEl && a) {
+                var mul = Math.max(1, q);
+                var adSum = Math.round(a.add * mul * 100) / 100;
+                rollVal(pEl, '+' + A.moneyShort(adSum) + '\u00a0' + (A.BYN || '⃅'), adSum);
+                if (wnEl && card.dataset.w) {
+                    var adW = Math.round(Number(card.dataset.w) * mul);
+                    rollVal(wnEl, String(adW), adW);
+                }
             }
         });
         var syncCnt = function (cntEl, nVal, tplKey) {

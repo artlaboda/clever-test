@@ -930,7 +930,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-size, .opts) > h3 {
     font: 650 13.5px/1.2 var(--font); letter-spacing: .015em; color: var(--muted);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__head h3 {
-    margin: 0; font: 650 13.5px/1.2 var(--font); letter-spacing: .015em; color: var(--muted);
+    margin: 0; font: 650 13.5px/17px var(--font); letter-spacing: .015em; color: var(--muted);
 }
 /* размер — аккуратный сегмент */
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg[data-key="size"] { height: 52px; border-radius: 15px; }
@@ -977,27 +977,27 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt input:checked + .ra
 /* добавки и топпинги — компактные тактильные чипы со smooth corners и мягкой рамкой; счётчик выбранных — рядом через интерпункт тёплым серым */
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__head {
     display: flex; align-items: baseline; justify-content: flex-start;
-    margin-bottom: 8px; padding-inline: var(--dish-in);
+    height: 17px; margin-bottom: 8px; padding-inline: var(--dish-in);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__cnt {
-    display: inline-flex; align-items: baseline;
-    font: 500 13px/1.2 var(--font); color: var(--muted);
+    display: inline-flex; align-items: baseline; height: 17px;
+    font: 500 13px/17px var(--font); color: var(--muted);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__cnt[hidden] { display: none; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__dot {
     margin-inline: 6px; color: color-mix(in srgb, var(--muted) 72%, transparent);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__val {
-    display: inline-flex; align-items: flex-start; white-space: pre;
+    display: inline-flex; align-items: flex-start; height: 17px; white-space: pre;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__val::before {
     content: "\200b"; width: 0; overflow: hidden;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__num {
-    display: inline-flex; align-items: flex-start; height: 1.2em; white-space: nowrap;
+    display: inline-flex; align-items: flex-start; height: 17px; white-space: nowrap;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__num > .dd {
-    flex: none; height: 1.2em;
+    flex: none; height: 17px; line-height: 17px;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid { display: grid; gap: 9px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--1 { grid-template-columns: minmax(0, 1fr); }
@@ -1062,15 +1062,28 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__txt {
     position: relative; z-index: 0; display: grid; gap: 2px; min-width: 0; pointer-events: none;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__txt b {
-    font: 600 13px/1.2 var(--font); color: var(--ink);
+    font: 600 13px/16px var(--font); color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__txt small {
-    font: 500 12px/1.2 var(--font); color: var(--muted);
+    display: inline-flex; align-items: flex-start; height: 15px; white-space: nowrap;
+    font: 500 12px/15px var(--font); color: var(--muted);
     transition: color .2s ease;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-multi .ddish-addon__txt small {
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__p,
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__sep,
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__w,
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__wn {
+    display: inline-flex; align-items: flex-start; height: 15px; white-space: pre;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__p {
+    transition: color .2s ease;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-multi .ddish-addon__p {
     color: var(--ink); font-weight: 650;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__txt :is(.dd, .dd--edge) {
+    height: 15px; line-height: 15px; vertical-align: top;
 }
 /* степпер количества внутри добавки — в невыбранном состоянии скрыт (добавляется по тапу на карточку);
    при выборе появляется аккуратная капсула «− N +» с градиентом нажатия и пружиной (pressDown/fxPress) */
