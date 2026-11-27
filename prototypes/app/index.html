@@ -6056,14 +6056,14 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
 
     /* ── данные ── */
     var IMG = 'img/';
-    function img(name) { return IMG + name + (name.indexOf('p-') === 0 || name.indexOf('u/') === 0 ? '.webp' : '.jpg') + (name.indexOf('u/r-') === 0 ? '?v=1211' : ''); }   // ?v — обложку заменили под тем же именем: телефон не покажет прежнюю из памяти
+    function img(name) { return IMG + name + (name.indexOf('p-') === 0 || name.indexOf('u/') === 0 ? '.webp' : '.jpg') + (name.indexOf('u/r-') === 0 || name.indexOf('u/dish-') === 0 ? '?v=2711' : ''); }   // ?v — обложку или фото заменили под тем же именем: телефон не покажет прежнее из памяти
     function isRound(name) { return name.indexOf('p-') === 0; }
     /* фото блюд (u/dish-*) — квадратные кадры по блюду (tools/dish_pics.py, источники — img/u/SOURCES.md): блюдо — в центральных
        82% ширины и 74% высоты, поэтому целиком в любой рамке от 0,86 до 1,3 — от «Популярного» в меню до страницы блюда и
        «Добавить к заказу?». Где блюдо в кадре — img/u/dish-boxes.json, по нему проверка. Пиццы (p-*) — круглые, целиком (contain).
        Каждое — в трёх размерах (180, 540, 1080): px — ширина рамки, телефон берёт файл под неё (карточке на iPhone — 540) */
     function picTag(name, alt, px) {
-        var set = name.indexOf('u/dish-') === 0 ? ' srcset="' + IMG + name + '-s.webp 180w, ' + IMG + name + '-m.webp 540w, ' + IMG + name + '.webp 1080w" sizes="' + (px || 180) + 'px"' : '';
+        var set = name.indexOf('u/dish-') === 0 ? ' srcset="' + IMG + name + '-s.webp?v=2711 180w, ' + IMG + name + '-m.webp?v=2711 540w, ' + IMG + name + '.webp?v=2711 1080w" sizes="' + (px || 180) + 'px"' : '';
         return '<img src="' + img(name) + '"' + set + ' alt="' + (alt || '') + '"' + (isRound(name) ? ' class="round"' : '') + ' decoding="async">';
     }
 
@@ -6787,7 +6787,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 18:02';
+    var BUILD = '27.11 · 18:37';
 
     /* ── состояние ── */
     var S = {
