@@ -1079,7 +1079,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__wn {
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__p {
     transition: color .2s ease;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-multi .ddish-addon__p {
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-on .ddish-addon__p {
     color: var(--ink); font-weight: 650;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon__txt :is(.dd, .dd--edge) {
