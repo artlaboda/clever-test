@@ -246,7 +246,7 @@ html.desk #s-home .promo {
     --promo-inset: clamp(12px, 1.35vw, 20px); --promo-height: 204px;
     width: calc((100% - 3 * var(--promo-gap)) / 4); gap: 12px;
 }
-html.desk #s-home .promo__banner { padding-block: 20px 22px; container-type: inline-size; }
+html.desk #s-home .promo__banner { padding-block: 20px 22px; gap: 34px; container-type: inline-size; }
 html.desk #s-home .promo .rest__name { min-width: 0; overflow-wrap: anywhere; }
 @media (hover: hover) {
     html.desk #s-home .promo__banner { transition: transform .52s cubic-bezier(.28, .52, .32, 1); will-change: transform; }

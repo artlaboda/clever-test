@@ -700,7 +700,7 @@ a.btn2 { display: inline-flex; align-items: center; text-decoration: none; }   /
     position: relative; overflow: hidden; background: var(--promo-bg); color: var(--promo-ink);
     /* Safari не обрезает по скруглению слой с drop-shadow без clip-path */
     clip-path: inset(0 round var(--r-card));
-    display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start;
+    display: flex; flex-direction: column; justify-content: flex-start; align-items: flex-start; gap: 34px;   /* 27.11: сетка по 1-й строке заголовка — короткое описание не опускает заголовок */
 }
 /* 16.11, «блоки акций — тоже»: clip-path выше стоит ниже правила «гладких углов» той же силы и перебивал их — у акции был
    обычный радиус. Гладкий контур режет так же (блюдо с тенью — тоже), только по iOS-углу */
@@ -767,7 +767,7 @@ a.btn2 { display: inline-flex; align-items: center; text-decoration: none; }   /
 .promo--9 .promo__cut { width: 146px; right: 4px; bottom: -42px; }                                      /* Флора: пионы — справа, ваза уходит за край */
 .promo--2 .promo__text { max-width: 150px; }
 .promo__tag {
-    position: relative; z-index: 1;
+    position: relative; z-index: 1; flex: none;
     display: inline-flex; align-items: center; height: 26px; padding: 0 10px; border-radius: 9px;
     font: 650 11px/1 var(--font); letter-spacing: .08em; text-transform: uppercase;
     background: rgba(255, 255, 255, .16);
@@ -6787,7 +6787,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 16:14';
+    var BUILD = '27.11 · 16:19';
 
     /* ── состояние ── */
     var S = {
