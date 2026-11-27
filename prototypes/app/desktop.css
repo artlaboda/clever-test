@@ -284,6 +284,10 @@ html.desk #s-home :is(.promo__pz, .promo__photo, .promo__cut) {
 }
 html.desk #s-home .promo__photo { aspect-ratio: 1; }
 html.desk #s-home .promo__pep { width: min(104px, 88%); right: 5%; }
+html.desk .app[data-promo="rich"] #s-home .promo__media { width: 68%; }
+html.desk .app[data-promo="rich"] #s-home .promo__text { width: 61%; max-width: none; }
+html.desk #s-home .promo__rich { transition: scale .65s cubic-bezier(.28, .52, .32, 1); transform-origin: 72% 50%; }
+html.desk #s-home .promo:hover .promo__rich { scale: 1.06; }
 html.desk .hscroll { scroll-snap-type: none; }
 /* 12.11: «при ховере происходит обрезание». Лента с прокруткой по горизонтали обрезает и по вертикали: приподнятая карточка
    и её тень упирались в край ленты. Даём ленте запас сверху и снизу (под подъём и тень) и забираем его отрицательными

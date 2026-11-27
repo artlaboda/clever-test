@@ -738,8 +738,23 @@ a.btn2 { display: inline-flex; align-items: center; text-decoration: none; }   /
 .promo__photo { position: absolute; width: 108px; height: 108px; right: 14px; top: 50%; margin-top: -54px; border-radius: 23px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 10px 22px rgba(0, 0, 0, .28); }
 .promo__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .promo__pep { position: absolute; right: 8px; bottom: -32px; width: 104px; transform: rotate(-8deg); }
-/* «Сверху» (по умолчанию): блюдо снято сверху и вырезано по кругу тарелки — как пицца Доминос: справа, целиком, с тенью */
+/* «Сверху»: блюдо снято сверху и вырезано по кругу тарелки — как пицца Доминос: справа, целиком, с тенью */
 .promo__top { width: 124px; height: 124px; right: 12px; margin-top: -62px; transform: none; }
+/* 27.11: «сочные и красивые картинки для акций — чтобы они занимали правую часть карточки, а не просто кружок справа».
+   Фото занимает всю правую часть (62% ширины, вся высота от края до края) и мягко растворяется в цвет карточки слева через mask-image,
+   поэтому работает в светлой, тёмной теме и в любом скине без шва */
+.app[data-promo="rich"] .promo__banner::before { display: none; }
+.app[data-promo="rich"] .promo__media {
+    display: block; position: absolute; inset: 0 0 0 auto; width: 68%; height: 100%;
+    pointer-events: none; overflow: hidden;
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, .04) 16%, rgba(0, 0, 0, .22) 32%, rgba(0, 0, 0, .62) 48%, rgba(0, 0, 0, .92) 64%, #000 76%);
+    mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, .04) 16%, rgba(0, 0, 0, .22) 32%, rgba(0, 0, 0, .62) 48%, rgba(0, 0, 0, .92) 64%, #000 76%);
+}
+.promo__rich { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 50%; display: block; pointer-events: none; }
+.app[data-promo="rich"] .promo__text { max-width: 158px; z-index: 2; }
+.app[data-promo="rich"] .promo__tag { z-index: 2; }
+:root[data-theme="dark"] .promo__rich { filter: brightness(.88) contrast(1.04); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .promo__rich { filter: brightness(.88) contrast(1.04); } }
 /* вырезанное блюдо (без плашки, как пицца): тень — по контуру. Стоит справа целиком или выглядывает из правого угла —
    нижнего или верхнего, лишнее срезает край карточки (clip-path). Текст левее: заголовок с блюдом не пересекается (promoFit) */
 .promo__cut { position: absolute; display: block; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .3)); pointer-events: none; }
@@ -6772,7 +6787,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 15:07';
+    var BUILD = '27.11 · 15:13';
 
     /* ── состояние ── */
     var S = {
@@ -6805,7 +6820,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     /* 10.11: «коллеги видят не то, что я — у меня другие настройки; сделай мой выбор у всех по умолчанию» — по строке «Мои настройки →
        Скопировать» владельца. Было иначе: ups embed, hit cup, rmenu glass, dtags old, pcode field, dfoot even, co clean, seg lens, tbh dots,
        tbp wink, dcar deck */
-    var FXV_DEF = { dico: 'facet', deal: 'live', cbar: 'water', tab: 'stack', tail: 'line', num: 'rubber', promo: 'top', fav: 'ya', press: 'grad', ups: 'confetti', dlv: 'sum', rbtn: 'group', rinfo: 'simple', back: 'soft', fwd: 'soft', drate: 'photo', hit: 'medal', tgnew: 'spark', tghot: 'flame', tgchef: 'chef', tgveg: 'leaf', tglean: 'sprout', tggf: 'wheat', tgsale: 'none', rnew: 'none', rsale: 'auto', rgift: 'gift', rmenu: 'flow', dtags: 'one', pcode: 'ticket', cstrike: 'flick', dfoot: 'pill', co: 'bento', seg: 'spring', smoke: 'wisp', pick: 'isles', tbh: 'serve', tbp: 'hello', tbs: 'orbit', tbf: 'soft', tbc: 'lift', tbsel: 'line', dcar: 'stack', auth: 'dots', akbk: 'sys', akb: 'wave', akbv: 'clean', dcart: 'x', cnum: 'dodo', authcc: 'menu', authhd: 'free', authbot: 'auto', authic: 'none', agnbg: 'warm', lock: 'shield', lockfx: 'ring', hbrk: 'boltash' }, FXV = {};
+    var FXV_DEF = { dico: 'facet', deal: 'live', cbar: 'water', tab: 'stack', tail: 'line', num: 'rubber', promo: 'rich', fav: 'ya', press: 'grad', ups: 'confetti', dlv: 'sum', rbtn: 'group', rinfo: 'simple', back: 'soft', fwd: 'soft', drate: 'photo', hit: 'medal', tgnew: 'spark', tghot: 'flame', tgchef: 'chef', tgveg: 'leaf', tglean: 'sprout', tggf: 'wheat', tgsale: 'none', rnew: 'none', rsale: 'auto', rgift: 'gift', rmenu: 'flow', dtags: 'one', pcode: 'ticket', cstrike: 'flick', dfoot: 'pill', co: 'bento', seg: 'spring', smoke: 'wisp', pick: 'isles', tbh: 'serve', tbp: 'hello', tbs: 'orbit', tbf: 'soft', tbc: 'lift', tbsel: 'line', dcar: 'stack', auth: 'dots', akbk: 'sys', akb: 'wave', akbv: 'clean', dcart: 'x', cnum: 'dodo', authcc: 'menu', authhd: 'free', authbot: 'auto', authic: 'none', agnbg: 'warm', lock: 'shield', lockfx: 'ring', hbrk: 'boltash' }, FXV = {};
     (function () { var o = {}; try { o = JSON.parse(localStorage.getItem('clever2-fxv') || '{}') || {}; } catch (e) {} for (var k in FXV_DEF) FXV[k] = o[k] || FXV_DEF[k];
         // меню категорий — одна строка (04.11): раньше «Меню категорий» (стекло / как было) и отдельно «Выбор категории» (как
         // переезжает плашка) — второй выбор при «Стекле» ничего не менял. Сохранённое «как было» — это выбранный там переезд
@@ -6831,6 +6846,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         // теперь «Молния в пепел»; у владельца «Молния» сохранилась вместе с другими вариантами (setFxv пишет их все) — один раз
         // переводим на новую, «Молния» осталась в «Вариантах»
         try { if (!localStorage.getItem('clever2-ts1511')) { if (o.tgsale === 'percent') { FXV.tgsale = o.tgsale = 'none'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } localStorage.setItem('clever2-ts1511', '1'); } } catch (e) {}   // 15.11: скидка — без значка
+        try { if (!localStorage.getItem('clever2-pr2711')) { if (o.promo && o.promo !== 'rich') { FXV.promo = o.promo = 'rich'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } localStorage.setItem('clever2-pr2711', '1'); } } catch (e) {}   // 27.11: сочные фото в правой части акций — по умолчанию
         try { if (!localStorage.getItem('clever2-hb1311')) { if (o.hbrk === 'bolt') { FXV.hbrk = o.hbrk = 'boltash'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } localStorage.setItem('clever2-hb1311', '1'); } } catch (e) {}
         try { if (!localStorage.getItem('clever2-dcx')) { if (FXV.dcart === 'foot') { FXV.dcart = 'x'; if (o.dcart) { o.dcart = 'x'; localStorage.setItem('clever2-fxv', JSON.stringify(o)); } } localStorage.setItem('clever2-dcx', '1'); } } catch (e) {}
         if (['dots', 'pass', 'flow', 'card', 'photo'].indexOf(FXV.auth) < 0) FXV.auth = { pad: 'pass', island: 'card' }[FXV.auth] || 'dots';   // 09.11: прежние виды входа заменены   // «Завиток» дымка влился в «Струйки и завиток» (07.11) — см. fxvFix
@@ -9792,7 +9808,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function promoCard(p) {
         // блюдо — вырезанное, без плашки, как пицца (img/u/promo-*: вырезано из фото, img/u/SOURCES.md): справа или из угла
         var cut = IMG + 'u/promo-' + p.cut;
-        var media = p.pz ? '<img class="promo__pz" src="' + img(p.pz) + '" alt="">' : p.pep ? pepDisc({ cls: 'promo__pep is-bobbing', disc: 'var(--brand)' }) :
+        var media = FXV.promo === 'rich' ? '<img class="promo__rich" src="' + IMG + 'u/pr-' + p.n + '.webp" srcset="' + IMG + 'u/pr-' + p.n + '-s.webp 320w, ' + IMG + 'u/pr-' + p.n + '.webp 640w" sizes="200px" alt="" decoding="async">' :
+            p.pz ? '<img class="promo__pz" src="' + img(p.pz) + '" alt="">' : p.pep ? pepDisc({ cls: 'promo__pep is-bobbing', disc: 'var(--brand)' }) :
             FXV.promo === 'top' ? '<img class="promo__pz promo__top" src="' + IMG + 'u/top-' + p.top + '.webp" srcset="' + IMG + 'u/top-' + p.top + '-s.webp 260w, ' + IMG + 'u/top-' + p.top + '.webp 520w" sizes="124px" alt="" decoding="async" style="rotate:' + (p.rot || 0) + 'deg">' :   // круглое блюдо сверху, как пицца
             FXV.promo === 'tile' ? '<span class="promo__photo">' + picTag(DISHES[p.tile] ? DISHES[p.tile].pic : p.tile, '', 116) + '</span>' :   // прежний вариант — фото в плашке
             '<img class="promo__cut" src="' + cut + '.webp" srcset="' + cut + '-s.webp 320w, ' + cut + '.webp 640w" sizes="190px" alt="" decoding="async">';
@@ -20988,7 +21005,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         ['smoke', 'i-flame', 'Иконка «Как можно скорее»: дымок', [['wisp', 'Струйки и завиток'], ['rings', 'Колечки'], ['puff', 'Клубы'], ['embers', 'Искры'], ['steam', 'Пар']],
             'Оформление, «Когда»: выбрали «Ко времени» — огонёк «Как можно скорее» гаснет и дымит. Струйки и завиток — две-три тонкие струйки, примерно раз из трёх-четырёх одна закручивается завитком; весь дымок то выше, то ниже, каждый раз другой (изгибы, ход, толщина, где закручивается — случайные); колечки — дымные кольца одно за другим; клубы — мягкие клубы столбом; искры — угольки разлетаются и гаснут, следом струйка; пар — три ровные струйки, как над чашкой'],
         ['dfoot', 'i-plus', 'Боттом-шит блюда: степпер и кнопка (CTA)', [['even', 'Вровень'], ['merge', 'Одна кнопка'], ['round', 'Кружки'], ['pill', 'Капсулы'], ['stack', 'Над кнопкой'], ['old', 'Как было']], 'Шторка блюда, низ: «контрол по высоте значительно меньше кнопки, рядом плохо стоят». Вровень — «− n +» той же высоты (56 px) и скругления, что кнопка; одна кнопка — «− n +» внутри тёмной кнопки слева, через тонкий разделитель; кружки — круглые «−» и «+» во всю высоту кнопки, без подложки; капсулы — белая капсула с бликом и мягкой тенью, кнопка — тоже капсула, как в iOS 26; над кнопкой — крупные «− n +» по центру, кнопка — во всю ширину под ними; как было — «− n +» 40 px рядом с кнопкой 56 px. Цифры везде с эффектом: количество крутится счётчиком, сумма — прокруткой, как цены в корзине'],
-        ['promo', 'i-percent', 'Промо-баннер: картинка', [['top', 'Сверху'], ['cut', 'Вырезанные'], ['tile', 'В плашках']], 'Сверху — круглые блюда, снятые сверху, как пицца Доминос; вырезанные — блюда без фона справа и из угла; в плашках — прежние фото'],
+        ['promo', 'i-percent', 'Промо-баннер: картинка', [['rich', 'На полкарточки'], ['top', 'Сверху'], ['cut', 'Вырезанные'], ['tile', 'В плашках']], 'На полкарточки — сочные фото блюд во всю правую часть карточки; сверху — круглые блюда; вырезанные — без фона; в плашках — прежние фото'],
         ['dlv', 'i-courier', 'Прогресс-бар доставки: подсказка', [['sum', 'Сумма'], ['soft', 'Мягко'], ['mix', 'Смешанный']], 'Корзина, полоса «чем больше — тем дешевле доставка»: сумма — «Ещё на 25,00 \u20C5 — и доставка будет бесплатной»; мягко — «Добавьте ещё что-нибудь — доставка подешевеет»; смешанный — сначала мягко, с 60% пути — сумма'],
         ['cstrike', 'i-trash', 'Удаление позиции: зачёркивание', [['flick', 'Чирк'], ['scrawl', 'Каракули'], ['pen', 'Ручка'], ['school', 'Как в школе'], ['double', 'Дважды'], ['red', 'Красная ручка'], ['wave', 'Волна'], ['line', 'Как было']], 'Корзина: убрали блюдо — название и цена перечёркиваются, как ручкой, снизу вверх; текст под штрихом бледнеет. Чирк — одна изогнутая линия из нижнего левого угла строки вверх вправо, по самим буквам, каждый раз своя и чуть небрежная — иногда начинается выше, с середины букв, изредка уходит выше букв: в начале толще, к концу тоньше, как росчерк ручкой; иногда два чирка подряд, примерно каждое пятое удаление — широкая каракуля; каракули — каждый раз своя лёгкая линия, как рукой: снизу вверх с изломами или с одним изломом и крючком на конце; ровной толщины — одна ручка; ручка — одна живая линия с нажимом: в начале толще, к концу тоньше; как в школе — быстрый зигзаг туда-обратно поперёк слова, не замазывая; дважды — две линии, вторая выше и короче; красная ручка — толще и красная, с росчерком на конце; волна — волнистая линия; как было — тонкая прямая линия слева направо. «Убрать всё» — сверху вниз, по одной строке: блюдо за блюдом'],
         ['pcode', 'i-percent', 'Поле промокода (text field)', [['field', 'Как сейчас'], ['inline', 'Кнопка в поле'], ['ticket', 'Билет'], ['fold', 'Свёрнуто'], ['glow', 'Сияние'], ['chips', 'Подсказка']], 'Корзина, промокод. Как сейчас — поле как в шторке адреса и кнопка «Применить» рядом; кнопка в поле — одна капсула, справа круглая стрелка: серая, пока пусто, тёмная, когда код набран; применённый — галочка, «−10%» и «Убрать» в той же капсуле; билет — купон с вырезами и пунктиром, применённый — яркий, с бликом; свёрнуто — строка «Есть промокод?», по касанию раскрывается поле и сразу курсор; сияние — поле в фокусе обводит переливающийся ободок со свечением, как у Siri, применили — вспыхивает зелёным; подсказка — под полем готовый код с выгодой в рублях: касание — он сам впечатывается и применяется'],
