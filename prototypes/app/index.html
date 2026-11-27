@@ -5656,6 +5656,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
 .od__s > i::before { content: attr(data-o) "\200b"; }
 .od--out .od__ph::before { content: "\200b"; }
 .od--out .od__s { left: auto; right: 0; justify-items: end; }
+.od--out > .odx { right: auto; }
 .rl__o { white-space: pre; }
 /* «Как в iOS» и «Переворот» (Варианты → «Цифры»): цифра без ленты — старая и новая лежат слоями поверх места под цифру;
    окошко не режет — уходящая растворяется сама */
@@ -6678,7 +6679,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 12:12';
+    var BUILD = '27.11 · 12:31';
 
     /* ── состояние ── */
     var S = {
@@ -7493,12 +7494,11 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (!ok) { rollText(el, text, dir, delay); return; }
         el._to = text;
         var V = FXV.num, swap = V === 'ios' || V === 'flip' || V === 'rubber' || V === 'wave' || V === 'glitch', pad = V === 'spring' || V === 'slot' || V === 'tick';
-        var va = +was.replace(/\D/g, ''), vb = +tt.replace(/\D/g, ''), k = vb > va ? 1 : -1, parts = [], anims = [], p = 0, cols = [], nch = 0, inb = [];
+        var va = +was.replace(/\D/g, ''), vb = +tt.replace(/\D/g, ''), k = vb > va ? 1 : -1, parts = [], anims = [], p = 0, cols = [], nch = 0, inb = [], outb = [];
         for (i = 1; i <= Math.max(la, lb); i++) { var a1 = i <= la ? was.charAt(la - i) : '', b1 = i <= lb ? tt.charAt(lb - i) : ''; if ((isD(a1) || isD(b1)) && a1 !== b1) nch++; }   // сколько цифр меняется
         for (i = 1; i <= Math.max(la, lb); i++) {   // справа налево; p — номер цифры справа (0 — младшая)
             var a = i <= la ? was.charAt(la - i) : '', b = i <= lb ? tt.charAt(lb - i) : '';
             if (isD(a) || isD(b)) {
-                var nIn = !a && delay > 0;   // новый старший разряд, а точка ещё летит
                 var place = Math.pow(10, p++), fa = isD(a) ? +a : null, fb = isD(b) ? +b : null, real = Math.abs(Math.floor(vb / place) - Math.floor(va / place));
                 if (a === b) { parts.push(V === 'wave' ? odoSwap(fb, fb, cols, 'same') : document.createTextNode(b)); continue; }   // волна идёт и по тем, что не меняются
                 if (swap) parts.push(odoSwap(fa, fb, cols, V === 'rubber' ? 'od--rub' : ''));
@@ -7506,7 +7506,13 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
                 else if (V === 'wheel') parts.push(odoWheel(fa, fb, k, real, cols));
                 else if (V === 'scr') parts.push(odoScr(fa, fb, 5 + 3 * (nch - 1 - cols.length), cols));   // шифр: левые встают первыми
                 else parts.push(odoCol(isD(a) ? +a : null, isD(b) ? +b : null, k, V === 'tick' ? 0 : Math.abs(Math.floor(vb / place) - Math.floor(va / place)), delay, anims, cols, V === 'slot' ? nch - cols.length : 0, pad));   // слот: правый барабан — больше оборотов; механика — прямо к цифре, без лишнего оборота
-                if (nIn) inb.push(parts[parts.length - 1]);
+                var nd = parts[parts.length - 1];
+                if (!a) inb.push({ el: nd });
+                else if (!b) {
+                    var ph0 = nd.querySelector('.od__ph');
+                    if (ph0 && !ph0.textContent) ph0.textContent = a;   // для odoCol/odoScr временно ставим цифру, чтобы замерить ширину
+                    outb.push({ el: nd, ph: ph0 });
+                }
             } else if (b) parts.push(document.createTextNode(b === ' ' ? '\u00a0' : b));
         }
         /* Варианты → «Цифры» (05.11: «счётчики всё-таки красивее — дай больше вариантов счётчиков различных»).
@@ -7595,13 +7601,25 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             } else { st = Math.min(ci * 110, T - 320); du = T - st; }
             anims.push(c.s.animate(kf, { duration: du, delay: dl + st, easing: ease, fill: 'backwards' }));
         });
-        /* новый разряд (99,70 → 124,50) с задержкой: пока точка летит, его окошко — нулевой ширины, число стоит, как стояло;
-           упала — окошко раскрывается, соседние цифры плавно отходят. Раньше место занималось сразу: у подписи вкладки по
-           центру «99,70» на всё время полёта съезжало вправо на полцифры (08.11). max-width — до 1em: ширина цифры меньше,
-           дальше ограничение уже ни на что не влияет */
-        inb.forEach(function (c) { anims.push(c.animate([{ maxWidth: '0px' }, { maxWidth: '1em' }], { duration: 300, delay: delay, easing: 'cubic-bezier(.3,0,.25,1)', fill: 'backwards' })); });
         el.textContent = '';
         for (i = parts.length - 1; i >= 0; i--) el.appendChild(parts[i]);
+        /* 27.11: «в Моём заказе при переходе с 10 на 9 — скачок». Уходящий старший разряд (10 → 9, 100 → 95) раньше держал
+           свою ширину до onfinish, и в конце бейдж/сумма резко схлопывались; новый разряд (9 → 10) при delay = 0 появлялся
+           рывком. Теперь замеряем ширину входящих и уходящих разрядов и плавно раскрываем (0 → w) или схлопываем (w → 0);
+           текст уходящего .od__ph сразу очищаем (высоту строки держит .od--out .od__ph::before "\200b") */
+        if (inb.length || outb.length) {
+            inb.forEach(function (o) { o.w = o.el.getBoundingClientRect().width; });
+            outb.forEach(function (o) { o.w = o.el.getBoundingClientRect().width; });
+            inb.forEach(function (o) {
+                if (o.w > 0) anims.push(o.el.animate([{ width: '0px' }, { width: o.w + 'px' }], { duration: 260, delay: delay || 0, easing: 'cubic-bezier(.3,0,.25,1)', fill: 'backwards' }));
+                else if (delay > 0) anims.push(o.el.animate([{ maxWidth: '0px' }, { maxWidth: '1em' }], { duration: 300, delay: delay, easing: 'cubic-bezier(.3,0,.25,1)', fill: 'backwards' }));
+            });
+            outb.forEach(function (o) {
+                o.el.classList.add('od--out');
+                if (o.ph) o.ph.textContent = '';
+                if (o.w > 0) anims.push(o.el.animate([{ width: o.w + 'px' }, { width: '0px' }], { duration: 240, delay: (delay || 0) + (V === 'board' ? 230 : V === 'rubber' ? 45 : 28), easing: 'cubic-bezier(.3,.7,.2,1)', fill: 'both' }));
+            });
+        }
         el._rl = anims;
         var last = null, end = -1;
         anims.forEach(function (x) { var e = x.effect.getComputedTiming().endTime; if (e > end) { end = e; last = x; } });
