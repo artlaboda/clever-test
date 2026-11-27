@@ -6678,7 +6678,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 12:04';
+    var BUILD = '27.11 · 12:12';
 
     /* ── состояние ── */
     var S = {
@@ -7130,7 +7130,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         tab.setAttribute('aria-label', n ? 'Мой заказ: ' + n + ' ' + plural(n, 'позиция', 'позиции', 'позиций') + ' на ' + money(cartTotals().total) : 'Мой заказ');
         lastCartN = n;
         flyLater(function (delay) {
-            var cls = function () { tab.classList.toggle('has-sum', cartCount() > 0); };
+            var cls = function () { tab.classList.toggle('has-sum', cartCount() > 0); tab.classList.toggle('from-empty', !was && cartCount() > 0); };   // from-empty — «Мой заказ» уезжает с прежнего места (desktop.css)
             if (delay) setTimeout(cls, delay); else cls();
             badge.hidden = !n;
             if (n) {

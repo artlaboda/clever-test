@@ -78,7 +78,7 @@ html.desk #cartTab .tab__badge { position: static; margin: 0 0 0 2px; order: 3; 
 /* 12.11, позже: «кнопка корзины стала очень большой, а цифра — очень далеко; даже пустая — несуразно большая». Кнопка снова
    компактная: пакет и сумма; число позиций — значком на пакете (не занимает места в строке). Ширина — не меньше, чем у
    «Мой заказ», поэтому от пустой корзины до сумм вида 999,99 Б кнопка одной ширины — шапка не сдвигается */
-html.desk #cartTab { position: relative; justify-content: flex-start; min-width: 150px; gap: 10px; padding: 0 18px 0 16px; transition: color .2s, transform .2s var(--dease); }
+html.desk #cartTab { position: relative; justify-content: flex-start; min-width: 154px; gap: 10px; padding: 0 18px 0 16px; transition: color .2s, transform .2s var(--dease); }   /* 154 — по «Мая замова» (самая длинная подпись): иначе по-белорусски кнопка на 3px шире и при первом товаре сжималась бы */
 /* число позиций — у правого верхнего угла пакета, левее ручки не заходит (12.11: «при двойной цифре не видно ручки, даже
    кусочка»); двузначное растёт вправо — в промежуток до суммы (он шире, когда есть сумма) */
 html.desk #cartTab.has-sum { gap: 20px; }
@@ -86,6 +86,13 @@ html.desk #cartTab .tab__badge { position: absolute; left: 31px; right: auto; to
     font: 750 10.5px/18px var(--font); box-shadow: 0 0 0 2px var(--cta); }
 html.desk #cartTab > span:last-child, html.desk #cartTab #cartLabel { white-space: nowrap; }
 html.desk #cartTab.has-sum #cartLabel { font-weight: 750; font-variant-numeric: proportional-nums; }
+/* 27.11: «когда в корзину прилетает первый товар — скачок: цифра отскакивает от корзины, а потом возвращается». Пока «Мой заказ»
+   уезжает, а сумма въезжает (rollText), уходящий текст занимал место в строке: с промежутком суммы (20px) «Мой заказ» шире
+   150px — кнопка на 5px раздавалась влево, а когда старый текст убирался, всё прыгало обратно. Да и сам «Мой заказ» в момент
+   появления суммы отскакивал на 10px вправо (промежуток 10 → 20px). Теперь уходящий текст места не занимает (ширина — по новому),
+   а при первом товаре (.from-empty) стоит там же, где стоял, — на 10px левее начала суммы */
+html.desk #cartTab #cartLabel .rl__o { position: absolute; left: 0; top: 0; white-space: nowrap; }
+html.desk #cartTab.from-empty #cartLabel .rl__o { left: -10px; }
 html.desk #cartTab > :not(.dcart-bg):not(.dcart-ring):not(.dcart-fly):not(.dcart-sp):not(.tab__badge) { position: relative; z-index: 1; }
 html.desk #cartTab > .tab__badge { z-index: 2; }
 /* iOS smooth corners (60% при 48px и r=15px): без box-shadow на самой #cartTab движок squircle всегда держит data-sq="clip"
