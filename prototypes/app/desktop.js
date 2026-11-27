@@ -1856,18 +1856,22 @@ window.cleverDesk = function (A) {
                 }
             }
             var segEl = nutrBox.querySelector('.ddish-nutr__seg');
-            if (segEl) segEl.style.setProperty('--i', is100 ? 0 : 1);
+            var segI = is100 ? '0' : '1';
+            if (segEl && segEl.style.getPropertyValue('--i') !== segI) segEl.style.setProperty('--i', segI);
             $$('.ddish-nutr__tab', nutrBox).forEach(function (b) {
-                var on = b.dataset.mode === mode;
-                b.setAttribute('aria-pressed', String(on));
-                b.setAttribute('aria-checked', String(on));
+                var on = String(b.dataset.mode === mode);
+                if (b.getAttribute('aria-pressed') !== on) {
+                    b.setAttribute('aria-pressed', on);
+                    b.setAttribute('aria-checked', on);
+                }
             });
 
             rollVal(nutrBox.querySelector('.ddish-nutr__kcal'), (is100 ? '' : '~') + showKcal + ' ккал', showKcal);
             var wWrap = nutrBox.querySelector('.ddish-nutr__wwrap'), wEl = nutrBox.querySelector('.ddish-nutr__w');
             if (wWrap && wEl) {
-                wWrap.hidden = is100 || allW <= 0;
-                if (!is100 && allW > 0) rollVal(wEl, allW + (d.ml ? ' мл' : ' г'), allW);
+                var wh = is100 || allW <= 0;
+                if (wWrap.hidden !== wh) wWrap.hidden = wh;
+                if (!wh) rollVal(wEl, allW + (d.ml ? ' мл' : ' г'), allW);
             }
             var pcts = macroPcts(p100, f100, c100);
             var setCol = function (cls, v, pct) {
@@ -1877,8 +1881,10 @@ window.cleverDesk = function (A) {
                 rollVal(b, fmtMacro(rv) + ' г', rv);
                 if (pEl) rollVal(pEl, pct + '%', pct);
                 if (bar) {
-                    bar.style.width = pct + '%';
-                    bar.classList.toggle('has-v', v > 0);
+                    var bw = pct + '%';
+                    if (bar.style.width !== bw) bar.style.width = bw;
+                    var hv = v > 0;
+                    if (bar.classList.contains('has-v') !== hv) bar.classList.toggle('has-v', hv);
                 }
             };
             setCol('is-p', showP, pcts[0]);

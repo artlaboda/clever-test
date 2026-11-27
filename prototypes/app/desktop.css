@@ -709,9 +709,13 @@ html.desk :is(#sheet, #sheetUnder).is-dish {
     -webkit-clip-path: none; clip-path: none;
     background: transparent;
     box-shadow: none;
-    filter: drop-shadow(0 30px 54px rgba(20, 12, 8, .34)) drop-shadow(0 8px 20px rgba(20, 12, 8, .18));
+    filter: none;
     transform: translateY(18px) scale(.97);
     transition: transform .38s cubic-bezier(.22, .61, .36, 1), opacity .24s ease, visibility 0s linear .38s;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish::before {
+    content: ""; position: absolute; inset: 0; border-radius: 28px; pointer-events: none; z-index: -1;
+    box-shadow: 0 34px 72px -12px rgba(20, 12, 8, .38), 0 10px 26px -6px rgba(20, 12, 8, .20);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-on {
     transform: none; opacity: 1; visibility: visible;
@@ -847,20 +851,26 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
     background: var(--surface);
     --ring-c: color-mix(in srgb, var(--line) 80%, transparent);
     display: grid; gap: 16px;
+    contain: layout paint; isolation: isolate; transform: translateZ(0);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 12px var(--dish-in) 13px; gap: 13px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__top {
-    display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 32px;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 34px;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__info {
-    display: flex; align-items: baseline; flex-wrap: nowrap; min-width: 0;
-    font: 500 13px/1.25 var(--font); color: var(--muted); white-space: nowrap;
+    display: flex; align-items: flex-start; flex-wrap: nowrap; min-width: 0; height: 16px;
+    font: 500 13px/16px var(--font); color: var(--muted); white-space: nowrap;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__title { color: color-mix(in srgb, var(--ink) 68%, var(--muted)); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__dot { margin-inline: 5px; }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__b { font-weight: 700; color: var(--ink); white-space: nowrap; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__b {
+    display: inline-flex; align-items: flex-start; height: 16px; font-weight: 700; color: var(--ink); white-space: pre;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__wwrap { display: inline-flex; align-items: flex-start; height: 16px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__wwrap[hidden] { display: none; }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__w { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__w {
+    display: inline-flex; align-items: flex-start; height: 16px; font-size: 12.5px; line-height: 16px; color: var(--muted); white-space: pre;
+}
 /* капсульный переключатель «На 100 г / На порцию» на движке .cseg — с линзой, стеклом и перетягиванием */
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
     --seg-bg: color-mix(in srgb, #d4c3aa 36%, var(--surface));
@@ -885,19 +895,24 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c {
     display: grid; gap: 2px; min-width: 0;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c > b {
-    font: 700 18px/1.15 var(--font); letter-spacing: -.015em; color: var(--ink); white-space: nowrap;
+    display: inline-flex; align-items: flex-start; height: 22px;
+    font: 700 18px/22px var(--font); letter-spacing: -.015em; color: var(--ink); white-space: pre;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__c > b { font-size: 16.5px; }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__c > b { height: 20px; font-size: 16.5px; line-height: 20px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__lbl {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 6px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; height: 15px;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__lbl > span {
-    font: 500 12.5px/1.2 var(--font); color: var(--muted);
+    font: 500 12.5px/15px var(--font); color: var(--muted);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__pct {
-    font-style: normal; font: 600 11.5px/1.2 var(--font);
+    display: inline-flex; align-items: flex-start; height: 15px;
+    font-style: normal; font: 600 11.5px/15px var(--font);
     color: color-mix(in srgb, var(--ink) 42%, var(--muted));
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: tabular-nums; white-space: pre;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr :is(.dd, .dd--edge) {
+    height: 100%; line-height: inherit; vertical-align: top;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__track {
     display: block; height: 4px; border-radius: 99px; overflow: hidden; margin-top: 5px;
@@ -1227,7 +1242,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dfoot .cta {
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich .dish__body { padding: 20px 24px 16px; gap: 13px; }
     html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) .dish__name { font-size: 26px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 9px var(--dish-in) 10px; gap: 10px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__top { min-height: 28px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__top { height: 30px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg.ddish-nutr__seg { height: 30px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg.ddish-nutr__seg > button,
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg.ddish-nutr__seg .cseg__c { min-width: 76px; padding: 0 9px; font-size: 11.5px; }
