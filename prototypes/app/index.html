@@ -6678,7 +6678,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 11:15';
+    var BUILD = '27.11 · 11:24';
 
     /* ── состояние ── */
     var S = {
@@ -21102,7 +21102,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        сменяются («Вернуть» ↔ «− 1 +»), поэтому желе доигрывает тот, кто встал на их место (jellyOn) */
     /* 16.11 (видео 11:39:09, «фон дёргается дальше»): у затемнения под шторкой то же действие «close-sheet», что у крестиков, — и желе
        сжимало всё затемнение, как кнопку (на 4 %): по краям и сверху проступала светлая рамка и пружинила обратно. Затемнение — не кнопка */
-    var JELLY_SEL = '[data-act="open-city"], [data-act="pick-city"], [data-act="close-sheet"]:not(.scrim), [data-act="city-close"], .app:not([data-rbtn="old"]) .rtop > .ibtn, .app[data-rbtn="split"] .rtop__acts > .ibtn, .app[data-rbtn="group"] .rtop__acts' +
+    var JELLY_SEL = '[data-act="open-city"], [data-act="pick-city"], [data-act="close-sheet"]:not(.scrim):not(.btn2):not(.cta), [data-act="city-close"], .app:not([data-rbtn="old"]) .rtop > .ibtn, .app[data-rbtn="split"] .rtop__acts > .ibtn, .app[data-rbtn="group"] .rtop__acts' +
         ', .dcar__cart, .ri-i, [data-act="restore-line"], #s-cart .stepper [data-d="-1"][aria-label="Убрать из заказа"], [data-act="clear-cart"], .screen > .bar > .ibtn:first-child, .cwho__x, .oc__rep, .oc__rc, .tk__b';
     var JELLY = [[1, 1, 0], [.86, .9, .16], [1.07, .95, .38], [.97, 1.03, .58], [1.015, .99, .78], [1, 1, 1]];
     app.addEventListener('pointerdown', function (e) {

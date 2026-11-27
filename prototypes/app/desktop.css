@@ -314,9 +314,9 @@ html.desk .ups:hover { transform: translateY(-3px); }
 html.desk .cta { transition: translate .2s var(--dease), scale .16s var(--dease), box-shadow .2s, filter .2s; }
 html.desk .cta:hover:not(:disabled):not(.is-off) { z-index: 2; translate: 0 -1px; box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -12px rgba(20, 12, 8, .6); }
 html.desk .cta:active { transform: none; scale: .985; }
-html.desk .btn2 { position: relative; transition: scale .18s var(--dease), translate .18s var(--dease), background-color .2s var(--dease), color .2s, filter .2s; }
+html.desk .btn2 { position: relative; transition: scale .14s var(--dease), translate .14s var(--dease), background-color .18s var(--dease), color .2s, filter .2s; }
 html.desk .btn2:hover:not(:disabled) { background: color-mix(in srgb, var(--ink) 7%, var(--surface)); box-shadow: none; }
-html.desk .btn2:active:not(:disabled) { transform: none; translate: 0 1px; scale: .98; background: color-mix(in srgb, var(--ink) 11%, var(--surface)); }
+html.desk .btn2:active:not(:disabled) { transform: none; translate: 0 1px; scale: .985; background: color-mix(in srgb, var(--ink) 11%, var(--surface)); }
 html.desk .pep-hello .btn2:hover { background: var(--brand); filter: brightness(1.06); box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--brand) 55%, transparent); }
 html.desk .chip, html.desk .link, html.desk .lrow, html.desk .me, html.desk .tilecat, html.desk .sq__top, html.desk .slot, html.desk .cday, html.desk .cpay, html.desk .opt, html.desk .citem, html.desk .fgrp__r, html.desk .fgrp__all, html.desk .bt__link, html.desk .cchg, html.desk .cother, html.desk .cwo { transition: background .2s, box-shadow .2s, color .2s, transform .2s var(--dease); }
 /* фильтры (20.11: «при ховере не выделять ни чёрным, ни коричневым — нужна красивая тень под ними; всё по центру по высоте»):
