@@ -862,8 +862,8 @@ a.btn2 { display: inline-flex; align-items: center; text-decoration: none; }   /
 :is(.dcard__pic, .item__pic, .dish__stage, .citem__pic, .ups__pic, .ocard__pics span, .resrow__pic, .toast__pic) { grid-template-rows: 100%; }
 .dcard__pic.is-round { background: var(--surface); }
 .dcard__pic img.round { width: 112px; height: 112px; object-fit: contain; }
-.dcard__body { display: grid; gap: 4px; }
-.dcard b { font: 650 14px/1.22 var(--font); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dcard__body { display: grid; gap: 4px; min-width: 0; }
+.dcard b { font: 650 14px/1.22 var(--font); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-width: 0; }
 .dcard small { color: var(--muted); font: 500 12.5px/1.25 var(--font); }
 .star-line svg { width: 12px; height: 12px; fill: var(--star); vertical-align: -1px; margin: 0 2px 0 1px; }
 .dcard__foot { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: auto; min-height: 34px; }
@@ -6787,7 +6787,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 16:45';
+    var BUILD = '27.11 · 16:59';
 
     /* ── состояние ── */
     var S = {
@@ -9167,19 +9167,18 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         h += '<div class="sec"><div class="sec__head pad"><h2 class="h">Снова хочется</h2><button type="button" class="link" data-act="go-orders">Все заказы</button></div><div class="hscroll">' +
             AGAIN.map(againCard).join('') + '</div></div>'; cut('again');
 
+        // 27.11: «Часто заказывают» идёт сразу после «Снова хочется», а ниже — цельный список заведений без разрыва
+        h += '<div class="sec"><div class="sec__head pad"><h2 class="h">Часто заказывают</h2></div><div class="hscroll">' +
+            [['steak', 'terra'], ['pasta', 'terra'], ['california', 'fusion'], ['shashlik', 'mangal'], ['manhattan', 'dominos'], ['pancakes', 'letitbe'], ['dumplings', 'terra'], ['bowl', 'terra'], ['cake', 'terra']].map(function (x) {
+                var id = x[0], rid = x[1];
+                return dcard(id, rid, esc(rest(rid).name) + ' · ' + STAR + DISHES[id].rating.toFixed(1).replace('.', ','));
+            }).join('') + '</div></div>'; cut('freq');
+
         h += '<div class="sec"><div class="sec__head pad"><h2 class="h">Заведения</h2><small style="color:var(--muted);font-weight:600" class="num">' + list.length + ' ' + plural(list.length, 'место', 'места', 'мест') + '</small></div>' +
             '<div class="filters" role="group" aria-label="Фильтры">' +
             fchip('free', 'i-courier', 'Бесплатная доставка') + fchip('fast', 'i-clock', 'До 50 мин') + fchip('top', 'i-star', 'Рейтинг 4.8+') + fchip('promo', 'i-percent', 'Акции') +
             '</div>' +
-            '<div class="rests">' + (list.length ? list.slice(0, 3).map(restCard).join('') : '<div class="empty">' + pepDisc() + '<b>Ничего не нашлось</b><p>Снимите пару фильтров, и рестораны вернутся.</p><button type="button" class="cta" data-act="reset-filters">Сбросить фильтры</button></div>') + '</div></div>'; cut('rests');
-
-        h += '<div class="sec"><div class="sec__head pad"><h2 class="h">Часто заказывают</h2></div><div class="hscroll">' +
-            ['steak', 'pasta', 'dumplings', 'bowl', 'cake'].map(function (id) {
-                return dcard(id, 'terra', 'Terra · ' + STAR + DISHES[id].rating.toFixed(1).replace('.', ','));
-            }).join('') + '</div></div>'; cut('freq');
-        // 08.11: «давай блок «Часто заказывают» где-то после первых трёх заведений, а не в конце — заведений может быть и 70,
-        // до конца не долистаешь». Остальные заведения — следом, тем же списком
-        if (list.length > 3) { h += '<div class="sec sec--rests2"><div class="rests">' + list.slice(3).map(restCard).join('') + '</div></div>'; cut('rests2'); }
+            '<div class="rests">' + (list.length ? list.map(restCard).join('') : '<div class="empty">' + pepDisc() + '<b>Ничего не нашлось</b><p>Снимите пару фильтров, и рестораны вернутся.</p><button type="button" class="cta" data-act="reset-filters">Сбросить фильтры</button></div>') + '</div></div>'; cut('rests');
 
         h += '<p class="endnote">clever.by · доставка из 153 заведений Беларуси</p>'; cut('end');
         h += '<div style="height:150px"></div>'; cut('pad');
@@ -10691,7 +10690,11 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             '<div class="rtabs__mark" id="rtabsMark"></div><nav class="rtabs" id="rtabs"><div class="rtabs__cap"><div class="rtabs__row"><span class="rtabs__ink" aria-hidden="true"><span class="rtabs__th"><span class="rtabs__clip"><span class="rtabs__lit"></span></span></span></span>' + (popular.length ? '<button type="button" data-act="rtab" data-id="popular" aria-current="true">Популярное</button>' : '') +
             menu.map(function (s, i) { return '<button type="button" data-act="rtab" data-id="' + s.id + '" aria-current="' + (!popular.length && !i) + '">' + s.name + '</button>'; }).join('') + '</div></div></nav>';
         if (popular.length) {
-            h += '<section class="msec" id="m-popular" style="padding-left:0;padding-right:0"><h2 class="h pad">Популярное</h2><div class="hscroll pop-row">' + popular.map(function (it) { return itemCard(it, id); }).join('') + '</div></section>';
+            // 27.11: «Популярное» на странице заведения — тем же блоком карточек (.dcard), что и «Часто заказывают»
+            h += '<section class="msec" id="m-popular" style="padding-left:0;padding-right:0"><h2 class="h pad">Популярное</h2><div class="hscroll pop-row">' + popular.map(function (it) {
+                var d = DISHES[it];
+                return dcard(it, id, STAR + d.rating.toFixed(1).replace('.', ',') + (d.w ? ' · ' + dishWeight(d) : ''));
+            }).join('') + '</div></section>';
         }
         h += menu.map(function (s) {
             return '<section class="msec" id="m-' + s.id + '"><h2 class="h">' + s.name + '</h2><div class="grid2">' + s.items.map(function (it) { return itemCard(it, id); }).join('') + '</div></section>';
@@ -10959,6 +10962,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             el.replaceWith(fresh);
             if (was) popMorph(fresh, was);
         });
+        $$('#s-rest .adder').forEach(function (a) { adderSet(a, dishQty(a.dataset.id)); });
     }
     /* 08.11: «на странице заведения в популярных, когда добавляю что-то и расширяется контрол минус-плюс, нет эффектов никаких:
        цена просто перескакивает наверх, а контрол становится большим. Без эффектов не делаем — это важное правило». Карточку

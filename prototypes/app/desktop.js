@@ -344,49 +344,23 @@ window.cleverDesk = function (A) {
             sh.classList.toggle('is-on', card === hovered && inView && !!banner);
         }
     }
-    /* 24.11: карусель «Популярное» на странице заведения — ровно 3 (или 2) целых карточки и стрелки в шапке секции, как у «Акций» */
-    function deskPop() {
-        var sec = document.getElementById('m-popular'), row = sec && sec.querySelector('.pop-row');
-        if (!sec || !row || !deskOn()) return;
-        var hd = sec.querySelector('.dpop-h');
-        if (!hd) {
-            var title = sec.querySelector(':scope > h2.h');
-            if (!title) return;
-            hd = document.createElement('div'); hd.className = 'dpop-h';
-            sec.insertBefore(hd, title);
-            hd.appendChild(title);
-            var nav = document.createElement('span'); nav.className = 'dpromo-nav';
-            nav.innerHTML = '<button type="button" aria-label="Назад">' + ic('i-right') + '</button>' +
-                '<button type="button" aria-label="Вперёд">' + ic('i-right') + '</button>';
-            hd.appendChild(nav);
-            var btns = nav.querySelectorAll('button');
-            var sync = row._dpopSync = function () {
-                var max = row.scrollWidth - row.clientWidth;
-                nav.hidden = max < 8;
-                btns[0].disabled = row.scrollLeft < 2;
-                btns[1].disabled = row.scrollLeft >= max - 2;
-            };
-            [-1, 1].forEach(function (dir, i) {
-                btns[i].addEventListener('click', function () {
-                    if (row.children.length < 2) return;
-                    var pitch = row.children[1].getBoundingClientRect().left - row.children[0].getBoundingClientRect().left;
-                    if (!pitch) return;
-                    var next = (Math.round(row.scrollLeft / pitch) + dir) * pitch;
-                    row.scrollTo({ left: next, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-                });
-            });
-            row.addEventListener('scroll', sync, { passive: true });
-        }
-        if (row._dpopSync) requestAnimationFrame(row._dpopSync);
+    /* 27.11: «Популярное» на странице заведения теперь тем же форматом .dcard, что и «Часто заказывают» — без отдельной шапки со стрелками */
+    var DRAG_SEL = '#promoRow, #s-home .hscroll:not(.cats), #s-rest .pop-row';
+    function syncDraggable() {
+        if (!deskOn()) return;
+        document.querySelectorAll(DRAG_SEL).forEach(function (el) {
+            el.classList.toggle('is-draggable', el.scrollWidth - el.clientWidth > 4);
+        });
     }
+    function deskPop() { if (deskOn()) requestAnimationFrame(syncDraggable); }
     window.addEventListener('resize', function () {
         var row = document.getElementById('promoRow');
         if (deskOn() && row) placePromoShadow(row);
-        if (deskOn()) deskPop();
+        if (deskOn()) syncDraggable();
         if (askEl) placeAskAddr();
         clearTimeout(deskAddrRun._t); deskAddrRun._t = setTimeout(deskAddrRun, 180);
     });
-    (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(deskCats).observe(hs, { childList: true }); deskCats(); })();
+    (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(function () { deskCats(); requestAnimationFrame(syncDraggable); }).observe(hs, { childList: true }); deskCats(); requestAnimationFrame(syncDraggable); })();
     (function () { var rs = document.getElementById('s-rest'); if (!rs || !window.MutationObserver) return; new MutationObserver(function () { if (deskOn()) { deskPlaceHead(); deskRestMount(); deskPop(); } }).observe(rs, { childList: true }); })();
     // курьер в карточке заведения: при наведении сразу бежит (crGame('run')) ровно из позы статичной иконки #i-courier
     // (кадр 22 — максимальное совпадение силуэта, головы, сумки, передней ноги и рук при viewBox 0.7 0.1 19.5 19.5);
@@ -1528,13 +1502,103 @@ window.cleverDesk = function (A) {
             B[0].classList.toggle('is-on', cur.scrollLeft > 4); B[1].classList.toggle('is-on', cur.scrollLeft < max - 4);
         }
         app.addEventListener('mouseover', function (e) {
-            if (!deskOn() || e.target.closest('.hsnav')) return;
-            var h = e.target.closest('.hscroll:not(#promoRow):not(.pop-row), .filters, .rtabs__row, .ri-tks, .cdays, .slots');
+            if (!deskOn() || e.target.closest('.hsnav') || document.documentElement.classList.contains('is-hdrag')) return;
+            var h = e.target.closest('.hscroll:not(#promoRow), .filters, .rtabs__row, .ri-tks, .cdays, .slots');
             if (h && h.scrollWidth - h.clientWidth < 8) h = null;
             if (h !== cur) { cur = h; put(); }
         });
         app.addEventListener('mouseleave', function () { cur = null; put(); });
         app.addEventListener('scroll', function () { if (cur) put(); }, true);
+    })();
+
+    /* 27.11: перетягивание мышкой лент «Акции», «Снова хочется», «Часто заказывают» и «Популярное» — как пальцем на смартфоне:
+       1-к-1 за курсором, инерция после отпускания (у «Акций» — мягкий довод к карточке), без случайного клика по карточке */
+    (function () {
+        var st = null, suppressUntil = 0;
+        function stopAnim(el) {
+            if (el && el._dragRaf) { cancelAnimationFrame(el._dragRaf); el._dragRaf = 0; }
+        }
+        function endDrag() {
+            if (!st) return;
+            var s = st; st = null;
+            document.documentElement.classList.remove('is-hdrag');
+            if (!s.dragged) { s.el.classList.remove('is-dragging'); return; }
+            suppressUntil = performance.now() + 120;
+            var el = s.el, max = Math.max(0, el.scrollWidth - el.clientWidth);
+            // вычисляем скорость по последним ~90 мс
+            var now = performance.now(), pts = s.pts, v = 0;
+            for (var i = pts.length - 1; i >= 0; i--) {
+                if (now - pts[i].t > 90) { pts = pts.slice(i); break; }
+            }
+            if (pts.length >= 2) {
+                var a = pts[0], b = pts[pts.length - 1], dt = Math.max(8, b.t - a.t);
+                if (now - b.t < 75) v = (a.x - b.x) / dt * 16;   // px за кадр 16 мс
+            }
+            v = Math.max(-60, Math.min(60, v));
+            var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (el.id === 'promoRow' && el.children.length > 1) {
+                var pitch = el.children[1].getBoundingClientRect().left - el.children[0].getBoundingClientRect().left;
+                var proj = el.scrollLeft + (reduced ? 0 : v * 11);
+                var target = pitch > 10 ? Math.round(proj / pitch) * pitch : proj;
+                target = Math.max(0, Math.min(max, target));
+                var start = el.scrollLeft, diff = target - start;
+                if (reduced || Math.abs(diff) < 1) { el.scrollLeft = target; el.classList.remove('is-dragging'); return; }
+                var t0 = performance.now(), dur = Math.min(420, Math.max(220, 200 + Math.abs(diff) * .35));
+                (function step(t) {
+                    var u = Math.min(1, (t - t0) / dur);
+                    var e = 1 - Math.pow(1 - u, 3);
+                    el.scrollLeft = start + diff * e;
+                    if (u < 1) el._dragRaf = requestAnimationFrame(step);
+                    else { el._dragRaf = 0; el.classList.remove('is-dragging'); }
+                })(t0);
+            } else if (!reduced && Math.abs(v) > 0.6) {
+                var lastT = performance.now();
+                (function step(t) {
+                    var dt = Math.min(40, Math.max(4, t - lastT)); lastT = t;
+                    var next = el.scrollLeft + v * (dt / 16);
+                    if (next <= 0 || next >= max) {
+                        el.scrollLeft = Math.max(0, Math.min(max, next));
+                        el._dragRaf = 0; el.classList.remove('is-dragging'); return;
+                    }
+                    el.scrollLeft = next;
+                    v *= Math.pow(0.92, dt / 16);
+                    if (Math.abs(v) > 0.25) el._dragRaf = requestAnimationFrame(step);
+                    else { el._dragRaf = 0; el.classList.remove('is-dragging'); }
+                })(lastT);
+            } else {
+                el.classList.remove('is-dragging');
+            }
+        }
+        document.addEventListener('pointerdown', function (e) {
+            if (!deskOn() || e.pointerType !== 'mouse' || e.button !== 0) return;
+            var el = e.target.closest(DRAG_SEL);
+            if (!el || el.scrollWidth - el.clientWidth <= 4) return;
+            stopAnim(el);
+            st = { el: el, x0: e.clientX, y0: e.clientY, s0: el.scrollLeft, dragged: false, pts: [{ x: e.clientX, t: performance.now() }] };
+        }, true);
+        window.addEventListener('pointermove', function (e) {
+            if (!st) return;
+            var dx = e.clientX - st.x0, dy = e.clientY - st.y0;
+            if (!st.dragged) {
+                if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+                if (Math.abs(dy) > Math.abs(dx) * 1.25) { st = null; return; }   // вертикальный жест — не мешаем
+                st.dragged = true;
+                st.el.classList.add('is-dragging');
+                document.documentElement.classList.add('is-hdrag');
+            }
+            st.el.scrollLeft = st.s0 - dx;
+            st.pts.push({ x: e.clientX, t: performance.now() });
+            if (st.pts.length > 10) st.pts.shift();
+        }, { passive: true });
+        window.addEventListener('pointerup', endDrag, true);
+        window.addEventListener('pointercancel', endDrag, true);
+        window.addEventListener('blur', endDrag);
+        document.addEventListener('dragstart', function (e) {
+            if (deskOn() && e.target.closest && e.target.closest(DRAG_SEL)) e.preventDefault();
+        }, true);
+        document.addEventListener('click', function (e) {
+            if (performance.now() < suppressUntil) { e.preventDefault(); e.stopPropagation(); }
+        }, true);
     })();
 
     /* 26.11: карточка товара на десктопе — двухколоночное окно без прокрутки и без скруглений у фото:

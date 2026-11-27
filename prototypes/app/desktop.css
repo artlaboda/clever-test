@@ -293,6 +293,16 @@ html.desk .hscroll { scroll-snap-type: none; }
    и её тень упирались в край ленты. Даём ленте запас сверху и снизу (под подъём и тень) и забираем его отрицательными
    полями — раскладка вокруг не сдвигается */
 html.desk .hscroll { padding-top: 12px; padding-bottom: 40px; margin-top: -12px; margin-bottom: -40px; }
+/* 27.11: карточки блюд в горизонтальных лентах («Снова хочется», «Часто заказывают», «Популярное») — соразмерны десктопу
+   и перетягиваются мышкой, как на смартфоне пальцем (drag-to-scroll в desktop.js) */
+html.desk .dcard { width: 210px; }
+html.desk .dcard__pic { height: 168px; }
+html.desk .dcard__pic img.round { width: 132px; height: 132px; }
+html.desk :is(#s-home .hscroll:has(.dcard), #s-rest .pop-row) { gap: 16px; }
+html.desk :is(#promoRow, #s-home .hscroll:not(.cats), #s-rest .pop-row).is-draggable { cursor: grab; }
+html.desk.is-hdrag, html.desk.is-hdrag * { cursor: grabbing !important; user-select: none !important; }
+html.desk .hscroll.is-dragging { scroll-snap-type: none !important; scroll-behavior: auto !important; }
+html.desk.is-hdrag .dpromo-shadow, html.desk.is-hdrag .hsnav { opacity: 0 !important; pointer-events: none !important; }
 /* карточки: приподнимаются под курсором */
 /* карточки заведений (20.11: «в заведениях с параллаксом — перебор… сердце тоже уезжает и увеличивается, ведёт себя странно;
    при ховере на заведение курьер должен начать идти»). Фото не поднимается — под ним проявляется мягкая тень (слой ::before
@@ -609,21 +619,12 @@ html.desk #s-rest .msec { padding: 34px var(--dg) 4px; gap: 18px; scroll-margin-
 html.desk #s-rest #m-popular { padding-inline: calc(var(--dg) - 16px) !important; }
 html.desk #s-rest .grid2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 html.desk #s-rest .grid2 .item__body { min-width: 0; padding: 4px 14px 0; }
-html.desk #s-rest .dpop-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px 0 calc(16px + var(--r-tile) / 2); }
-html.desk #s-rest .dpop-h .h { padding: 0; }
+/* 27.11: «Популярное» на странице заведения — тем же форматом .dcard, что и «Часто заказывают» на главной */
 html.desk #s-rest .pop-row {
-    --pop-gap: 20px; gap: var(--pop-gap); margin-inline: 0; padding-inline: 16px;
-    scroll-padding-inline: 16px; scroll-snap-type: x mandatory;
+    margin-inline: 0; padding-inline: 16px;
+    scroll-padding-inline: 16px; scroll-snap-type: none;
 }
-html.desk #s-rest .msec > .h.pad { padding-left: calc(16px + var(--r-tile) / 2); }
-html.desk #s-rest .pop-row .item {
-    width: calc((100% - 2 * var(--pop-gap)) / 3);
-    grid-template-columns: 136px minmax(0, 1fr); gap: 0 14px;
-}
-html.desk #s-rest .pop-row .item__body { min-width: 0; padding: 14px 16px 0 0; }
-html.desk #s-rest .pop-row .item__foot { min-width: 0; padding: 8px 16px 14px 0; }
-html.desk #s-rest .pop-row .item__tags { max-width: 120px; }
-html.desk #s-rest .pop-row .item__count { left: 128px; }
+html.desk #s-rest .msec > .h.pad { padding-left: 16px; }
 html.desk #s-rest .item__body > b { font-size: 15.5px; min-width: 0; overflow-wrap: break-word; }
 /* рейтинг блюда на десктопе: крупнее мобильного (10 → 12 px), цифра оценки и число отзывов строго одного кегля */
 html.desk .app .rbadge { height: 24px; border-radius: 12px; font: 600 12px/24px var(--font); }
@@ -632,10 +633,6 @@ html.desk .app .rbadge__n { margin-left: -12px; padding: 0 8px 0 18px; border-ra
 html.desk .app .rbadge svg { width: 10.5px; height: 10.5px; }
 html.desk .app .rbadge b { display: inline; font: inherit; letter-spacing: inherit; font-variant-numeric: proportional-nums; }
 html.desk .app[data-drate="photo"] .item__rate { margin-top: calc(100% - 37px); }
-html.desk .app[data-drate="photo"] .pop-row .item__rate { margin-top: 0; }
-@media (max-width: 1080px) {
-    html.desk #s-rest .pop-row .item { width: calc((100% - var(--pop-gap)) / 2); }
-}
 
 /* ── корзина и оформление — панель справа ── */
 html.desk #s-cart, html.desk #s-checkout {
