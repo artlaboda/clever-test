@@ -928,23 +928,22 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt {
     padding: 10px var(--dish-in); border: 0; border-radius: 14px;
     background: var(--card); box-shadow: none;
     --ring-c: var(--line);
-    transition: background-color .22s ease, transform .18s var(--dease);
+    transition: background-color .22s ease;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt:hover {
     background: color-mix(in srgb, var(--ink) 2.5%, var(--card));
     --ring-c: color-mix(in srgb, var(--ink) 20%, var(--line));
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt:active { transform: scale(.985); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt.is-on {
     background: color-mix(in srgb, var(--ink) 3.2%, var(--card));
     --ring-c: color-mix(in srgb, var(--ink) 36%, var(--line));
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt > span:first-child {
-    grid-column: 1; grid-row: 1; font: 600 14px/1.2 var(--font); color: var(--ink);
+    grid-column: 1; grid-row: 1; font: 600 14px/17px var(--font); color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt > small {
-    grid-column: 1; grid-row: 2; font: 500 12.5px/1.2 var(--font); color: var(--muted);
+    grid-column: 1; grid-row: 2; font: 500 12.5px/15px var(--font); color: var(--muted);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-crust .opt > .radio {
     grid-column: 2; grid-row: 1 / span 2; width: 20px; height: 20px;
