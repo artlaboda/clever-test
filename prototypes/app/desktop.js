@@ -1685,7 +1685,7 @@ window.cleverDesk = function (A) {
                     adBox.innerHTML =
                         '<div class="ddish-addons__head">' +
                             '<h3>' + (sweet ? 'Топпинги' : 'Добавки') + '</h3>' +
-                            '<span class="ddish-addons__cnt" hidden><span class="ddish-addons__dot" aria-hidden="true">·</span><span class="ddish-addons__val num"></span></span>' +
+                            '<span class="ddish-addons__cnt" hidden><span class="ddish-addons__dot" aria-hidden="true">·</span><span class="ddish-addons__val"><span class="ddish-addons__pre"></span><span class="ddish-addons__num num"></span><span class="ddish-addons__suf"></span></span></span>' +
                         '</div>' +
                         '<div class="ddish-addons__grid ' + (adPicOn ? ('ddish-addons__grid--v' + (adKeys.length <= 4 ? '4' : '6')) : (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3')) + '">' +
                         adKeys.map(function (k) {
@@ -1885,21 +1885,24 @@ window.cleverDesk = function (A) {
             var nAds = selAds.length, prevAds = cntEl._nAds || 0;
             cntEl._nAds = nAds;
             cntEl.hidden = !nAds;
-            var valEl = cntEl.querySelector('.ddish-addons__val');
-            if (valEl && nAds > 0) {
-                var txtAds = loc('выбрано ' + nAds);
-                if (first || !A.odoQ) {
-                    valEl.textContent = txtAds;
+            var preEl = cntEl.querySelector('.ddish-addons__pre'), numEl = cntEl.querySelector('.ddish-addons__num'), sufEl = cntEl.querySelector('.ddish-addons__suf');
+            if (numEl && nAds > 0) {
+                var tpl = loc('выбрано 0').split('0'), pre = tpl[0] || '', suf = tpl[1] || '';
+                if (preEl && preEl.textContent !== pre) preEl.textContent = pre;
+                if (sufEl && sufEl.textContent !== suf) sufEl.textContent = suf;
+                var nStr = String(nAds);
+                if (first || (!A.cntSet && !A.odoQ)) {
+                    numEl.textContent = nStr;
                 } else if (prevAds === 0) {
-                    // первый выбор (0 → 1): сразу прокатываем цифру перекатом
-                    if (valEl._dd) { valEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(valEl._dd.t); valEl._dd = null; }
-                    valEl.textContent = loc('выбрано 0');
-                    A.odoQ(valEl, txtAds, 1);
+                    // первый выбор (0 → 1): слово «выбрано» стоит на месте, перекатывается только цифра
+                    if (numEl._dd) { numEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(numEl._dd.t); numEl._dd = null; }
+                    numEl.textContent = '0';
+                    if (A.cntSet) A.cntSet(numEl, nAds); else A.odoQ(numEl, nStr, 1);
                 } else if (prevAds !== nAds) {
-                    A.odoQ(valEl, txtAds, nAds >= prevAds ? 1 : -1);
+                    if (A.cntSet) A.cntSet(numEl, nAds); else A.odoQ(numEl, nStr, nAds >= prevAds ? 1 : -1);
                 }
-            } else if (valEl && !nAds && valEl._dd) {
-                valEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(valEl._dd.t); valEl._dd = null;
+            } else if (numEl && !nAds && numEl._dd) {
+                numEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(numEl._dd.t); numEl._dd = null;
             }
         }
     }
