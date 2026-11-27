@@ -1676,7 +1676,7 @@ window.cleverDesk = function (A) {
                     });
                     opts.appendChild(cg);
                 }
-                // добавки / топпинги — с выбором количества порций (1..5): кружок «+» плавно раскрывается в степпер «− N +»;
+                // добавки / топпинги — с выбором количества порций (1..5): по тапу на карточку появляется степпер «− N +»;
                 // для демонстрации картинок добавок включены на выбранных блюдах: «Кантри» и «Панкейки с бананом»
                 if (adKeys.length && A.ADDONS) {
                     var adPicOn = ds.id === 'country' || ds.id === 'pancakes';
@@ -1696,7 +1696,7 @@ window.cleverDesk = function (A) {
                                     '<svg class="i" viewBox="0 0 24 24"><path d="M6 12h12"/></svg>' +
                                 '</button>' +
                                 '<span class="ddish-addon__q num" aria-live="polite">1</span>' +
-                                '<button type="button" class="ddish-addon__btn ddish-addon__inc" data-act="addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию">' +
+                                '<button type="button" class="ddish-addon__btn ddish-addon__inc" data-act="addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию" tabindex="-1">' +
                                     '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
                                 '</button>' +
                             '</span>';
@@ -1872,7 +1872,7 @@ window.cleverDesk = function (A) {
             }
             var dec = card.querySelector('.ddish-addon__dec'), inc = card.querySelector('.ddish-addon__inc'), hit = card.querySelector('.ddish-addon__hit');
             if (dec) dec.tabIndex = on ? 0 : -1;
-            if (inc) inc.disabled = q >= 5;
+            if (inc) { inc.disabled = q >= 5; inc.tabIndex = on && q < 5 ? 0 : -1; }
             if (hit) hit.disabled = q >= 5;
             var sm = card.querySelector('.ddish-addon__txt small'), a = A.ADDONS && A.ADDONS[k];
             if (sm && a) {

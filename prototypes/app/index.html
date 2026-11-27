@@ -6679,7 +6679,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 12:31';
+    var BUILD = '27.11 · 12:32';
 
     /* ── состояние ── */
     var S = {
@@ -21316,18 +21316,18 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             case 'addon': {
                 if (!dishState.addons) dishState.addons = [];
                 var dlt = Number(t.dataset.d || 0);
+                var prevAdQ = dishState.addons.filter(function (x) { return x === id; }).length;
                 if (dlt < 0) {
                     var ai = dishState.addons.indexOf(id);
                     if (ai >= 0) dishState.addons.splice(ai, 1);
                 } else if (dlt > 0) {
-                    var cur = dishState.addons.filter(function (x) { return x === id; }).length;
-                    if (ADDONS[id] && cur < 5) dishState.addons.push(id);
+                    if (ADDONS[id] && prevAdQ < 5) dishState.addons.push(id);
                 } else {
                     var idx = dishState.addons.indexOf(id);
                     if (idx >= 0) dishState.addons.splice(idx, 1); else if (ADDONS[id]) dishState.addons.push(id);
                 }
                 syncDish();
-                var fxBtn = t.classList.contains('ddish-addon__hit') ? (t.parentNode && t.parentNode.querySelector('.ddish-addon__inc')) : t;
+                var fxBtn = t.classList.contains('ddish-addon__hit') ? (prevAdQ > 0 ? t.parentNode && t.parentNode.querySelector('.ddish-addon__inc') : null) : t;
                 if (fxBtn) fxPress(fxBtn, dlt < 0 ? -1 : 1);
                 break;
             }
