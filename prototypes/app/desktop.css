@@ -714,6 +714,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish.is-on {
     transition: transform .38s cubic-bezier(.22, .61, .36, 1), opacity .24s ease, visibility 0s;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-add { width: min(1180px, calc(100% - 64px)); }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich { width: min(1240px, calc(100% - 64px)); }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg { width: min(1260px, calc(100% - 64px)); }
 html.desk :is(#sheet, #sheetUnder).is-dish > .dcar__bar { display: none !important; }
 html.desk :is(#sheet, #sheetUnder).is-dish > .dpg {
@@ -730,7 +731,11 @@ html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close {
     -webkit-backdrop-filter: none; backdrop-filter: none;
     transition: transform .26s var(--dease), background-color .2s;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg > .sheet__close { top: 36px; right: 26px; }
+html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) > .sheet__close { top: 32px; right: 26px; }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich.is-dish-scr > .sheet__close {
+    background: var(--card);
+    box-shadow: 0 4px 14px -4px rgba(20, 12, 8, .16), 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
+}
 html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close:hover {
     background: color-mix(in srgb, #d4c3aa 36%, var(--surface));
     box-shadow: none;
@@ -740,11 +745,12 @@ html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close:active { transform: r
 html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close svg { width: 20px; height: 20px; stroke-width: 1.9; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-grid {
     position: relative;
-    display: grid; grid-template-columns: minmax(0, 47%) minmax(0, 53%);
-    align-items: stretch;
+    display: grid; grid-template-columns: minmax(0, 47%) minmax(0, 53%); grid-template-rows: minmax(0, 1fr);
+    align-items: stretch; max-height: calc(100vh - 48px);
     border-radius: 28px; overflow: hidden; background: var(--app-bg);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-add .ddish-grid { grid-template-columns: minmax(0, 46%) minmax(0, 54%); }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich .ddish-grid { grid-template-columns: minmax(0, 42%) minmax(0, 58%); }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-grid { grid-template-columns: minmax(0, 41.5%) minmax(0, 58.5%); }
 /* левая колонка — фото во всю высоту, строго без скруглений */
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage {
@@ -793,17 +799,29 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-pnav:active { transform: trans
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-pnav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage .item__tags { top: 24px; left: 24px; right: 24px; gap: 7px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__rb--pic { left: 24px; bottom: 24px; top: auto; }
-/* правая колонка: контент + футер внизу без прокрутки; --dish-in задаёт единую вертикаль текста (шапка, описание, заголовки секций и контент внутри карточек) */
+/* правая колонка: контент + футер внизу (при богатом списке добавок прокручивается только тело, фото и футер закреплены) */
 html.desk :is(#sheet, #sheetUnder).is-dish { --dish-in: 15px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-side {
+    position: relative;
     display: flex; flex-direction: column; justify-content: space-between;
-    min-width: 0; background: var(--app-bg);
+    min-width: 0; min-height: 0; max-height: calc(100vh - 48px); overflow: hidden; background: var(--app-bg);
 }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich .ddish-side::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 10px; height: 54px; z-index: 6; pointer-events: none;
+    background: linear-gradient(to bottom, var(--app-bg) 28%, color-mix(in srgb, var(--app-bg) 72%, transparent) 64%, transparent 100%);
+    opacity: 0; transition: opacity .22s ease;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich.is-dish-scr .ddish-side::before { opacity: 1; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__body {
     padding: 34px 30px 26px; display: grid; gap: 20px; align-content: start;
-    font-size: 16px;
+    font-size: 16px; min-height: 0;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__body { padding: 26px 26px 16px; gap: 15px; }
+html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich .dish__body {
+    flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain;
+    padding: 26px 26px 22px; gap: 16px;
+    scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 18%, transparent) transparent;
+}
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__body > :first-child { padding-inline: var(--dish-in); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-eyebrow {
     font: 600 13.5px/1.2 var(--font); color: var(--muted); letter-spacing: .01em; margin-bottom: 6px;
@@ -811,13 +829,13 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-eyebrow {
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__name {
     font-size: 34px; line-height: 1.08; letter-spacing: -.02em; padding-right: 40px; text-wrap: balance;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__name { font-size: 30px; }
+html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) .dish__name { font-size: 30px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__line { margin-top: 5px; font-size: 15px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dish__desc {
     margin: -11px 0 0; padding-inline: var(--dish-in); font-size: 16px; line-height: 1.5;
     color: color-mix(in srgb, var(--ink) 78%, var(--muted)); text-wrap: pretty;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__desc { margin-top: -7px; font-size: 14.5px; line-height: 1.44; }
+html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) .dish__desc { margin-top: -7px; font-size: 14.5px; line-height: 1.44; }
 /* КБЖУ: мягкая плашка со smooth corners (SQ_RING), в шапке калорийность и капсульный .cseg с эффектом линзы,
    ниже с воздухом — 3 колонки БЖУ с процентами и цветными полосами (в сумме всегда 100%) */
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
@@ -892,12 +910,12 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c.is-c .ddish-nutr__trac
 /* гладкие углы (smooth corners, SQ_RING) на плашке КБЖУ, бортах и добавках: контур режет сам элемент (data-sq="clip"),
    а обводку 1 / 1.5 px рисует ::after по тому же суперэллипсу (--sq-ring / --sq-ring2) — при наведении меняется только
    background-color, поэтому sqFollow (следит за shadow/border) не дёргает контур и углы не мерцают */
-html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-nutr, .ddish-crust .opt, .ddish-addon)::after {
+html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl)::after {
     content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4;
     border-radius: inherit;
     transition: background-color .22s ease;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-nutr, .ddish-crust .opt, .ddish-addon)[data-sq="clip"]::after {
+html.desk :is(#sheet, #sheetUnder).is-dish :is(.ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl)[data-sq="clip"]::after {
     border-radius: 0;
     background-color: var(--ring-c, var(--line));
     clip-path: var(--sq-ring, inset(50%));
@@ -978,8 +996,41 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__num > .dd {
     flex: none; height: 1.2em;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid { display: grid; gap: 9px; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--1 { grid-template-columns: minmax(0, 1fr); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addons__grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* «Убрать из состава» — спокойные тактильные чипы-переключатели со smooth corners; ховер — только обводка */
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl__list {
+    display: flex; flex-wrap: wrap; gap: 8px;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl {
+    position: relative; display: inline-flex; align-items: center; gap: 0;
+    height: 36px; padding: 0 14px; border: 0; border-radius: 12px;
+    background: var(--card); color: var(--ink); font: 550 13px/16px var(--font);
+    cursor: pointer; --ring-c: var(--line);
+    transition: background-color .2s ease, gap .22s var(--dease), padding-left .22s var(--dease);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl:hover {
+    --ring-c: color-mix(in srgb, var(--ink) 24%, var(--line));
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl.is-on {
+    gap: 6px; padding-left: 11px;
+    background: color-mix(in srgb, var(--ink) 4%, var(--card));
+    --ring-c: color-mix(in srgb, var(--ink) 38%, var(--line));
+    font-weight: 600;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl.is-on:hover {
+    --ring-c: color-mix(in srgb, var(--ink) 46%, var(--line));
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl__ic {
+    display: grid; place-items: center; width: 0; height: 14px; overflow: hidden; opacity: 0;
+    color: var(--muted); transition: width .22s var(--dease), opacity .18s ease;
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl.is-on .ddish-excl__ic {
+    width: 14px; opacity: 1; color: var(--ink);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl__ic svg { width: 12px; height: 12px; stroke-width: 2.3; }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-excl__t { white-space: nowrap; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-addon {
     position: relative; display: flex; align-items: center; justify-content: space-between; gap: 0;
     padding: 9px 10px 9px var(--dish-in); border: 0; border-radius: 14px; text-align: left;
@@ -1139,7 +1190,7 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-side > .sheet__foot {
     border-top: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
     box-shadow: none;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-side > .sheet__foot { padding: 15px 26px 22px; }
+html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) .ddish-side > .sheet__foot { padding: 15px 26px 22px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-side > .sheet__foot::before { display: none; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dfoot .stepper {
     height: 54px; padding: 0 8px; border-radius: 16px;
@@ -1153,10 +1204,11 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dfoot .cta {
 @media (max-height: 820px) {
     html.desk :is(#sheet, #sheetUnder).is-dish { --dish-in: 13px; }
     html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close,
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg > .sheet__close { top: 26px; right: 24px; width: 38px; height: 38px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) > .sheet__close { top: 24px; right: 24px; width: 38px; height: 38px; }
     html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage { min-height: min(490px, calc(100vh - 72px)); }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__body { padding: 18px 24px 10px; gap: 9px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dish__name { font-size: 26px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich .dish__body { padding: 20px 24px 16px; gap: 13px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) .dish__name { font-size: 26px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr { padding: 9px var(--dish-in) 10px; gap: 10px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__top { min-height: 28px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .cseg.ddish-nutr__seg { height: 30px; }
@@ -1175,11 +1227,15 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dfoot .cta {
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon.has-pic .ddish-addon__btn { width: 22px; height: 24px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addons__grid--v4 .ddish-addon.has-pic .ddish-addon__btn { width: 26px; height: 24px; }
     html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-addon.has-pic .ddish-addon__q { line-height: 24px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-side > .sheet__foot { padding: 12px 24px 16px; }
-    html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .dfoot :is(.stepper, .cta) { height: 48px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) .ddish-side > .sheet__foot { padding: 12px 24px 16px; }
+    html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) .dfoot :is(.stepper, .cta) { height: 48px; }
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish > .sheet__close {
     background: color-mix(in srgb, #e8d8c4 9%, var(--card));
+}
+html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish.is-dish-rich.is-dish-scr > .sheet__close {
+    background: color-mix(in srgb, #e8d8c4 12%, var(--card));
+    box-shadow: 0 6px 18px -4px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .10);
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish > .sheet__close:hover {
     background: color-mix(in srgb, #e8d8c4 16%, var(--card));
@@ -1195,13 +1251,13 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__
     background: color-mix(in srgb, var(--ink) 18%, var(--card));
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 6px rgba(0, 0, 0, .35);
 }
-html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-addon:hover {
+html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish :is(.ddish-addon, .ddish-excl):hover {
     --ring-c: rgba(255, 255, 255, .24);
 }
-html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish :is(.ddish-crust .opt, .ddish-addon).is-on {
+html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish :is(.ddish-crust .opt, .ddish-addon, .ddish-excl).is-on {
     --ring-c: rgba(255, 255, 255, .32);
 }
-html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-on:hover {
+html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish :is(.ddish-addon, .ddish-excl).is-on:hover {
     --ring-c: rgba(255, 255, 255, .42);
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-addon .ddish-addon__ctl {
@@ -1219,6 +1275,10 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-pnav:hover 
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish > .sheet__close {
         background: color-mix(in srgb, #e8d8c4 9%, var(--card));
     }
+    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish.is-dish-rich.is-dish-scr > .sheet__close {
+        background: color-mix(in srgb, #e8d8c4 12%, var(--card));
+        box-shadow: 0 6px 18px -4px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .10);
+    }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish > .sheet__close:hover {
         background: color-mix(in srgb, #e8d8c4 16%, var(--card));
     }
@@ -1233,13 +1293,13 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-pnav:hover 
         background: color-mix(in srgb, var(--ink) 18%, var(--card));
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 2px 6px rgba(0, 0, 0, .35);
     }
-    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .ddish-addon:hover {
+    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish :is(.ddish-addon, .ddish-excl):hover {
         --ring-c: rgba(255, 255, 255, .24);
     }
-    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish :is(.ddish-crust .opt, .ddish-addon).is-on {
+    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish :is(.ddish-crust .opt, .ddish-addon, .ddish-excl).is-on {
         --ring-c: rgba(255, 255, 255, .32);
     }
-    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .ddish-addon.is-on:hover {
+    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish :is(.ddish-addon, .ddish-excl).is-on:hover {
         --ring-c: rgba(255, 255, 255, .42);
     }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .ddish-addon .ddish-addon__ctl {

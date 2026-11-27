@@ -1571,10 +1571,14 @@ window.cleverDesk = function (A) {
         var body = pg.querySelector('.dish__body');
         if (!body) return;
         var adKeys = A.dishAddons ? A.dishAddons(ds.id) : [];
+        var extKeys = A.dishExtras ? A.dishExtras(ds.id) : [];
+        var exKeys = A.dishExcludes ? A.dishExcludes(ds.id) : [];
+        var isRich = extKeys.length > 0 || exKeys.length > 0 || adKeys.length > 6;
         var nutr = A.dishNutr ? A.dishNutr(ds.id) : null;
         var sweet = ds.id === 'cinnabon' || ds.id === 'pancakes' || ds.id === 'syrniki' || ds.id === 'bliny' || ds.id === 'granola_bowl';
         sh.classList.toggle('is-dish-cfg', !!d.pizza);
-        sh.classList.toggle('is-dish-add', !d.pizza && adKeys.length > 0);
+        sh.classList.toggle('is-dish-add', !d.pizza && (adKeys.length > 0 || extKeys.length > 0 || exKeys.length > 0));
+        sh.classList.toggle('is-dish-rich', !d.pizza && isRich);
         var first = !pg.querySelector('.ddish-grid');
         if (first) {
             var scr = pg.querySelector('.scroll'), stage = scr && scr.querySelector('.dish__stage'), foot = pg.querySelector('.sheet__foot.dfoot');
@@ -1676,49 +1680,82 @@ window.cleverDesk = function (A) {
                     });
                     opts.appendChild(cg);
                 }
-                // добавки / топпинги — с выбором количества порций (1..5): по тапу на карточку появляется степпер «− N +»;
+                // вспомогательная разметка одной карточки добавки (без кнопки «+» до выбора)
+                var mkAddonCard = function (k, hasPic, showW) {
+                    var a = A.ADDONS[k]; if (!a) return '';
+                    var ctl = '<span class="ddish-addon__ctl">' +
+                        '<button type="button" class="ddish-addon__btn ddish-addon__dec" data-act="addon" data-id="' + k + '" data-d="-1" aria-label="Убрать порцию" tabindex="-1">' +
+                            '<svg class="i" viewBox="0 0 24 24"><path d="M6 12h12"/></svg>' +
+                        '</button>' +
+                        '<span class="ddish-addon__q num" aria-live="polite">1</span>' +
+                        '<button type="button" class="ddish-addon__btn ddish-addon__inc" data-act="addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию" tabindex="-1">' +
+                            '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
+                        '</button>' +
+                    '</span>';
+                    var priceStr = '+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅');
+                    if (hasPic) {
+                        return '<div class="ddish-addon has-pic" data-id="' + k + '" data-qty="0">' +
+                            '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
+                            '<span class="ddish-addon__pic">' +
+                                '<img src="img/addons/' + k + '.webp" alt="" loading="eager" decoding="async">' +
+                            '</span>' +
+                            '<span class="ddish-addon__body"><b class="ddish-addon__name">' + esc(a.name) + '</b></span>' +
+                            '<span class="ddish-addon__foot">' +
+                                '<small class="ddish-addon__price num">' + priceStr + '</small>' +
+                                ctl +
+                            '</span>' +
+                        '</div>';
+                    }
+                    var sub = (showW && a.w && a.w >= 10 ? (a.w + '\u00a0г · ') : '') + priceStr;
+                    return '<div class="ddish-addon" data-id="' + k + '" data-qty="0"' + (showW && a.w && a.w >= 10 ? (' data-w="' + a.w + '"') : '') + '>' +
+                        '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
+                        '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">' + sub + '</small></span>' + ctl +
+                    '</div>';
+                };
+                // 1) Дополнительно (например, «Удвоить соус, 50 г»)
+                if (extKeys.length && A.ADDONS) {
+                    var extBox = document.createElement('div'); extBox.className = 'ddish-extras';
+                    extBox.innerHTML =
+                        '<div class="ddish-addons__head"><h3>Дополнительно</h3></div>' +
+                        '<div class="ddish-addons__grid ddish-addons__grid--' + (extKeys.length === 1 ? '1' : '2') + '">' +
+                        extKeys.map(function (k) { return mkAddonCard(k, false, true); }).join('') +
+                        '</div>';
+                    body.appendChild(extBox);
+                }
+                // 2) Убрать из состава (бесплатные переключатели-чипы: «Без яйца», «Без арахиса», «Без кунжута»…)
+                if (exKeys.length && A.EXCLUDES) {
+                    var exBox = document.createElement('div'); exBox.className = 'ddish-excludes';
+                    exBox.innerHTML =
+                        '<div class="ddish-addons__head">' +
+                            '<h3>Убрать из состава</h3>' +
+                            '<span class="ddish-addons__cnt ddish-excl__cnt" hidden><span class="ddish-addons__dot" aria-hidden="true">·</span><span class="ddish-addons__val"><span class="ddish-addons__pre"></span><span class="ddish-addons__num num"></span><span class="ddish-addons__suf"></span></span></span>' +
+                        '</div>' +
+                        '<div class="ddish-excl__list">' +
+                        exKeys.map(function (k) {
+                            var ex = A.EXCLUDES[k]; if (!ex) return '';
+                            return '<button type="button" class="ddish-excl" data-act="exclude" data-id="' + k + '" aria-pressed="false">' +
+                                '<span class="ddish-excl__ic" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></span>' +
+                                '<span class="ddish-excl__t">' + esc(ex.name) + '</span>' +
+                            '</button>';
+                        }).join('') +
+                        '</div>';
+                    body.appendChild(exBox);
+                }
+                // 3) добавки / топпинги / начинка — с выбором количества порций (1..5): по тапу на карточку появляется степпер «− N +»;
                 // для демонстрации картинок добавок включены на выбранных блюдах: «Кантри» и «Панкейки с бананом»
                 if (adKeys.length && A.ADDONS) {
                     var adPicOn = ds.id === 'country' || ds.id === 'pancakes';
+                    var isPt = ds.id.indexOf('pt_') === 0;
                     var adPics = { mozzarella: 1, olives: 1, onion: 1, jalapeno: 1, mushrooms: 1, bacon: 1, icecream: 1, blueberry: 1, maple: 1, caramel: 1 };
+                    var adTitle = sweet ? 'Топпинги' : (isPt ? 'Начинка' : 'Добавки');
                     var adBox = document.createElement('div'); adBox.className = 'ddish-addons' + (adPicOn ? ' is-pics' : '');
                     adBox.innerHTML =
                         '<div class="ddish-addons__head">' +
-                            '<h3>' + (sweet ? 'Топпинги' : 'Добавки') + '</h3>' +
+                            '<h3>' + adTitle + '</h3>' +
                             '<span class="ddish-addons__cnt" hidden><span class="ddish-addons__dot" aria-hidden="true">·</span><span class="ddish-addons__val"><span class="ddish-addons__pre"></span><span class="ddish-addons__num num"></span><span class="ddish-addons__suf"></span></span></span>' +
                         '</div>' +
                         '<div class="ddish-addons__grid ' + (adPicOn ? ('ddish-addons__grid--v' + (adKeys.length <= 4 ? '4' : '6')) : (adKeys.length <= 4 ? 'ddish-addons__grid--2' : 'ddish-addons__grid--3')) + '">' +
-                        adKeys.map(function (k) {
-                            var a = A.ADDONS[k]; if (!a) return '';
-                            var hasPic = adPicOn && !!adPics[k];
-                            var ctl = '<span class="ddish-addon__ctl">' +
-                                '<button type="button" class="ddish-addon__btn ddish-addon__dec" data-act="addon" data-id="' + k + '" data-d="-1" aria-label="Убрать порцию" tabindex="-1">' +
-                                    '<svg class="i" viewBox="0 0 24 24"><path d="M6 12h12"/></svg>' +
-                                '</button>' +
-                                '<span class="ddish-addon__q num" aria-live="polite">1</span>' +
-                                '<button type="button" class="ddish-addon__btn ddish-addon__inc" data-act="addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию" tabindex="-1">' +
-                                    '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
-                                '</button>' +
-                            '</span>';
-                            var priceStr = '+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅');
-                            if (hasPic) {
-                                return '<div class="ddish-addon has-pic" data-id="' + k + '" data-qty="0">' +
-                                    '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
-                                    '<span class="ddish-addon__pic">' +
-                                        '<img src="img/addons/' + k + '.webp" alt="" loading="eager" decoding="async">' +
-                                    '</span>' +
-                                    '<span class="ddish-addon__body"><b class="ddish-addon__name">' + esc(a.name) + '</b></span>' +
-                                    '<span class="ddish-addon__foot">' +
-                                        '<small class="ddish-addon__price num">' + priceStr + '</small>' +
-                                        ctl +
-                                    '</span>' +
-                                '</div>';
-                            }
-                            return '<div class="ddish-addon" data-id="' + k + '" data-qty="0">' +
-                                '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
-                                '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">' + priceStr + '</small></span>' + ctl +
-                            '</div>';
-                        }).join('') +
+                        adKeys.map(function (k) { return mkAddonCard(k, adPicOn && !!adPics[k], isPt); }).join('') +
                         '</div>';
                     body.appendChild(adBox);
                 }
@@ -1877,41 +1914,58 @@ window.cleverDesk = function (A) {
             var sm = card.querySelector('.ddish-addon__txt small'), a = A.ADDONS && A.ADDONS[k];
             if (sm && a) {
                 var adSum = Math.round(a.add * Math.max(1, q) * 100) / 100;
-                rollVal(sm, '+' + A.moneyShort(adSum) + '\u00a0' + (A.BYN || '⃅'), adSum);
+                var wPre = !on && card.dataset.w ? (card.dataset.w + '\u00a0г · ') : '';
+                rollVal(sm, wPre + '+' + A.moneyShort(adSum) + '\u00a0' + (A.BYN || '⃅'), adSum);
             }
         });
-        var cntEl = body.querySelector('.ddish-addons__cnt');
-        if (cntEl) {
-            var nAds = selAds.length, prevAds = cntEl._nAds || 0;
-            cntEl._nAds = nAds;
-            cntEl.hidden = !nAds;
+        var syncCnt = function (cntEl, nVal, tplKey) {
+            if (!cntEl) return;
+            var prevVal = cntEl._nVal || 0;
+            cntEl._nVal = nVal;
+            cntEl.hidden = !nVal;
             var preEl = cntEl.querySelector('.ddish-addons__pre'), numEl = cntEl.querySelector('.ddish-addons__num'), sufEl = cntEl.querySelector('.ddish-addons__suf');
-            if (numEl && nAds > 0) {
-                var tpl = loc('выбрано 0').split('0'), pre = tpl[0] || '', suf = tpl[1] || '';
+            if (numEl && nVal > 0) {
+                var tpl = loc(tplKey).split('0'), pre = tpl[0] || '', suf = tpl[1] || '';
                 if (preEl && preEl.textContent !== pre) preEl.textContent = pre;
                 if (sufEl && sufEl.textContent !== suf) sufEl.textContent = suf;
-                var nStr = String(nAds);
+                var nStr = String(nVal);
                 if (first || (!A.cntSet && !A.odoQ)) {
                     numEl.textContent = nStr;
-                } else if (prevAds === 0) {
-                    // первый выбор (0 → 1): слово «выбрано» стоит на месте, перекатывается только цифра
+                } else if (prevVal === 0) {
                     if (numEl._dd) { numEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(numEl._dd.t); numEl._dd = null; }
                     numEl.textContent = '0';
-                    if (A.cntSet) A.cntSet(numEl, nAds); else A.odoQ(numEl, nStr, 1);
-                } else if (prevAds !== nAds) {
-                    if (A.cntSet) A.cntSet(numEl, nAds); else A.odoQ(numEl, nStr, nAds >= prevAds ? 1 : -1);
+                    if (A.cntSet) A.cntSet(numEl, nVal); else A.odoQ(numEl, nStr, 1);
+                } else if (prevVal !== nVal) {
+                    if (A.cntSet) A.cntSet(numEl, nVal); else A.odoQ(numEl, nStr, nVal >= prevVal ? 1 : -1);
                 }
-            } else if (numEl && !nAds && numEl._dd) {
+            } else if (numEl && !nVal && numEl._dd) {
                 numEl._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(numEl._dd.t); numEl._dd = null;
             }
+        };
+        var selExs = ds.excludes && ds.excludes.length ? ds.excludes : [];
+        $$('.ddish-excl', body).forEach(function (btn) {
+            var on = selExs.indexOf(btn.dataset.id) >= 0;
+            btn.classList.toggle('is-on', on);
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        syncCnt(body.querySelector('.ddish-excl__cnt'), selExs.length, 'убрано 0');
+        var adSet = {}; adKeys.forEach(function (k) { adSet[k] = 1; });
+        var nFill = selAds.filter(function (k) { return !!adSet[k]; }).length;
+        syncCnt(body.querySelector('.ddish-addons .ddish-addons__cnt'), nFill, 'выбрано 0');
+        if (!body._dScrBind) {
+            body._dScrBind = 1;
+            body.addEventListener('scroll', function () {
+                if (sh.classList.contains('is-dish-rich')) sh.classList.toggle('is-dish-scr', body.scrollTop > 8);
+            }, { passive: true });
         }
+        sh.classList.toggle('is-dish-scr', !d.pizza && isRich && body.scrollTop > 8);
     }
     (function () {
         var sh = document.getElementById('sheet');
         if (!sh || !window.MutationObserver) return;
         new MutationObserver(function () {
-            if (!sh.classList.contains('is-dish') && (sh.classList.contains('is-dish-cfg') || sh.classList.contains('is-dish-add'))) {
-                sh.classList.remove('is-dish-cfg', 'is-dish-add');
+            if (!sh.classList.contains('is-dish') && (sh.classList.contains('is-dish-cfg') || sh.classList.contains('is-dish-add') || sh.classList.contains('is-dish-rich') || sh.classList.contains('is-dish-scr'))) {
+                sh.classList.remove('is-dish-cfg', 'is-dish-add', 'is-dish-rich', 'is-dish-scr');
             }
         }).observe(sh, { attributes: true, attributeFilter: ['class'] });
     })();
