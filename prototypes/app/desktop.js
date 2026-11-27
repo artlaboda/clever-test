@@ -1700,20 +1700,23 @@ window.cleverDesk = function (A) {
                                     '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
                                 '</button>' +
                             '</span>';
-                            var txt = '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅') + '</small></span>';
+                            var priceStr = '+' + A.moneyShort(a.add) + '\u00a0' + (A.BYN || '⃅');
                             if (hasPic) {
                                 return '<div class="ddish-addon has-pic" data-id="' + k + '" data-qty="0">' +
                                     '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
                                     '<span class="ddish-addon__pic">' +
                                         '<img src="img/addons/' + k + '.webp" alt="" loading="eager" decoding="async">' +
+                                    '</span>' +
+                                    '<span class="ddish-addon__body"><b class="ddish-addon__name">' + esc(a.name) + '</b></span>' +
+                                    '<span class="ddish-addon__foot">' +
+                                        '<small class="ddish-addon__price num">' + priceStr + '</small>' +
                                         ctl +
                                     '</span>' +
-                                    txt +
                                 '</div>';
                             }
                             return '<div class="ddish-addon" data-id="' + k + '" data-qty="0">' +
                                 '<button type="button" class="ddish-addon__hit" data-act="addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"></button>' +
-                                txt + ctl +
+                                '<span class="ddish-addon__txt"><b>' + esc(a.name) + '</b><small class="num">' + priceStr + '</small></span>' + ctl +
                             '</div>';
                         }).join('') +
                         '</div>';
