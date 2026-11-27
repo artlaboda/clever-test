@@ -344,15 +344,69 @@ window.cleverDesk = function (A) {
             sh.classList.toggle('is-on', card === hovered && inView && !!banner);
         }
     }
-    /* 27.11: «Популярное» на странице заведения теперь тем же форматом .dcard, что и «Часто заказывают» — без отдельной шапки со стрелками */
+    /* 27.11: ленты карточек блюд («Снова хочется», «Часто заказывают», «Популярное») — стрелки сверху в шапке, как у «Акций»,
+       ровный шаг по ширине карточки (6/5/4 целых на экране) + перетягивание мышкой */
     var DRAG_SEL = '#promoRow, #s-home .hscroll:not(.cats), #s-rest .pop-row';
+    function mountRowNav(row, host) {
+        if (!row || !host) return;
+        if (!row._dnavSync) {
+            var nav = document.createElement('span'); nav.className = 'dpromo-nav';
+            nav.innerHTML = '<button type="button" aria-label="Назад">' + ic('i-right') + '</button>' +
+                '<button type="button" aria-label="Вперёд">' + ic('i-right') + '</button>';
+            var exist = host.querySelector(':scope > .link');
+            if (exist) {
+                var wrap = document.createElement('span'); wrap.className = 'dsec-acts';
+                host.insertBefore(wrap, exist); wrap.appendChild(exist); wrap.appendChild(nav);
+            } else {
+                host.appendChild(nav);
+            }
+            var btns = nav.querySelectorAll('button');
+            var sync = row._dnavSync = function () {
+                var max = row.scrollWidth - row.clientWidth;
+                nav.hidden = max < 4;
+                btns[0].disabled = row.scrollLeft < 2;
+                btns[1].disabled = row.scrollLeft >= max - 2;
+            };
+            [-1, 1].forEach(function (dir, i) {
+                btns[i].addEventListener('click', function () {
+                    if (row.children.length < 2) return;
+                    var pitch = row.children[1].getBoundingClientRect().left - row.children[0].getBoundingClientRect().left;
+                    if (!pitch) return;
+                    var next = (Math.round(row.scrollLeft / pitch) + dir) * pitch;
+                    row.scrollTo({ left: next, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+                });
+            });
+            row.addEventListener('scroll', sync, { passive: true });
+        }
+        row._dnavSync();
+    }
+    function deskDcardNavs() {
+        if (!deskOn()) return;
+        document.querySelectorAll('#s-home .sec').forEach(function (sec) {
+            var row = sec.querySelector(':scope > .hscroll');
+            if (!row || row.id === 'promoRow' || !row.querySelector('.dcard')) return;
+            var hd = sec.querySelector(':scope > .sec__head');
+            if (hd) mountRowNav(row, hd);
+        });
+        var psec = document.getElementById('m-popular'), prow = psec && psec.querySelector('.pop-row');
+        if (psec && prow) {
+            var phd = psec.querySelector('.dpop-h');
+            if (!phd) {
+                var pt = psec.querySelector(':scope > h2.h');
+                if (pt) { phd = document.createElement('div'); phd.className = 'dpop-h'; psec.insertBefore(phd, pt); phd.appendChild(pt); }
+            }
+            if (phd) mountRowNav(prow, phd);
+        }
+        syncDraggable();
+    }
     function syncDraggable() {
         if (!deskOn()) return;
         document.querySelectorAll(DRAG_SEL).forEach(function (el) {
             el.classList.toggle('is-draggable', el.scrollWidth - el.clientWidth > 4);
+            if (el._dnavSync) el._dnavSync();
         });
     }
-    function deskPop() { if (deskOn()) requestAnimationFrame(syncDraggable); }
+    function deskPop() { if (deskOn()) requestAnimationFrame(deskDcardNavs); }
     window.addEventListener('resize', function () {
         var row = document.getElementById('promoRow');
         if (deskOn() && row) placePromoShadow(row);
@@ -360,7 +414,7 @@ window.cleverDesk = function (A) {
         if (askEl) placeAskAddr();
         clearTimeout(deskAddrRun._t); deskAddrRun._t = setTimeout(deskAddrRun, 180);
     });
-    (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(function () { deskCats(); requestAnimationFrame(syncDraggable); }).observe(hs, { childList: true }); deskCats(); requestAnimationFrame(syncDraggable); })();
+    (function () { var hs = document.getElementById('homeScroll'); if (!hs || !window.MutationObserver) return; new MutationObserver(function () { deskCats(); requestAnimationFrame(deskDcardNavs); }).observe(hs, { childList: true }); deskCats(); requestAnimationFrame(deskDcardNavs); })();
     (function () { var rs = document.getElementById('s-rest'); if (!rs || !window.MutationObserver) return; new MutationObserver(function () { if (deskOn()) { deskPlaceHead(); deskRestMount(); deskPop(); } }).observe(rs, { childList: true }); })();
     // курьер в карточке заведения: при наведении сразу бежит (crGame('run')) ровно из позы статичной иконки #i-courier
     // (кадр 22 — максимальное совпадение силуэта, головы, сумки, передней ноги и рук при viewBox 0.7 0.1 19.5 19.5);
@@ -1533,7 +1587,7 @@ window.cleverDesk = function (A) {
         }
         app.addEventListener('mouseover', function (e) {
             if (!deskOn() || e.target.closest('.hsnav') || document.documentElement.classList.contains('is-hdrag')) return;
-            var h = e.target.closest('.hscroll:not(#promoRow), .filters, .ri-tks, .cdays, .slots');
+            var h = e.target.closest('.hscroll:not(#promoRow):not(.pop-row):not(:has(.dcard)), .filters, .ri-tks, .cdays, .slots');
             if (h && h.scrollWidth - h.clientWidth < 8) h = null;
             if (h !== cur) { cur = h; put(); }
         });
@@ -1542,7 +1596,7 @@ window.cleverDesk = function (A) {
     })();
 
     /* 27.11: перетягивание мышкой лент «Акции», «Снова хочется», «Часто заказывают» и «Популярное» — как пальцем на смартфоне:
-       1-к-1 за курсором, инерция после отпускания (у «Акций» — мягкий довод к карточке), без случайного клика по карточке */
+       1-к-1 за курсором, инерция после отпускания и мягкий довод к целой карточке, без случайного клика по карточке */
     (function () {
         var st = null, suppressUntil = 0;
         function stopAnim(el) {
@@ -1566,7 +1620,7 @@ window.cleverDesk = function (A) {
             }
             v = Math.max(-60, Math.min(60, v));
             var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (el.id === 'promoRow' && el.children.length > 1) {
+            if (el.children.length > 1) {
                 var pitch = el.children[1].getBoundingClientRect().left - el.children[0].getBoundingClientRect().left;
                 var proj = el.scrollLeft + (reduced ? 0 : v * 11);
                 var target = pitch > 10 ? Math.round(proj / pitch) * pitch : proj;
@@ -1581,20 +1635,6 @@ window.cleverDesk = function (A) {
                     if (u < 1) el._dragRaf = requestAnimationFrame(step);
                     else { el._dragRaf = 0; el.classList.remove('is-dragging'); }
                 })(t0);
-            } else if (!reduced && Math.abs(v) > 0.6) {
-                var lastT = performance.now();
-                (function step(t) {
-                    var dt = Math.min(40, Math.max(4, t - lastT)); lastT = t;
-                    var next = el.scrollLeft + v * (dt / 16);
-                    if (next <= 0 || next >= max) {
-                        el.scrollLeft = Math.max(0, Math.min(max, next));
-                        el._dragRaf = 0; el.classList.remove('is-dragging'); return;
-                    }
-                    el.scrollLeft = next;
-                    v *= Math.pow(0.92, dt / 16);
-                    if (Math.abs(v) > 0.25) el._dragRaf = requestAnimationFrame(step);
-                    else { el._dragRaf = 0; el.classList.remove('is-dragging'); }
-                })(lastT);
             } else {
                 el.classList.remove('is-dragging');
             }

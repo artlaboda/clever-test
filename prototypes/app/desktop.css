@@ -293,12 +293,33 @@ html.desk .hscroll { scroll-snap-type: none; }
    и её тень упирались в край ленты. Даём ленте запас сверху и снизу (под подъём и тень) и забираем его отрицательными
    полями — раскладка вокруг не сдвигается */
 html.desk .hscroll { padding-top: 12px; padding-bottom: 40px; margin-top: -12px; margin-bottom: -40px; }
-/* 27.11: карточки блюд в горизонтальных лентах («Снова хочется», «Часто заказывают», «Популярное») — соразмерны десктопу
-   и перетягиваются мышкой, как на смартфоне пальцем (drag-to-scroll в desktop.js) */
-html.desk .dcard { width: 210px; }
-html.desk .dcard__pic { height: 168px; }
-html.desk .dcard__pic img.round { width: 132px; height: 132px; }
-html.desk :is(#s-home .hscroll:has(.dcard), #s-rest .pop-row) { gap: 16px; }
+/* 27.11: ленты карточек блюд («Снова хочется», «Часто заказывают», «Популярное») — ровно 6 целых карточек без обрезки справа,
+   при сужении экрана плавно сужаются и переключаются на 5 (≤1240px), затем на 4 (≤1020px); стрелки сверху в шапке, как у «Акций»,
+   плюс перетягивание мышкой с инерцией и доводом к карточке */
+html.desk :is(#s-home .hscroll:has(.dcard), #s-rest .pop-row) {
+    --dc-n: 6; --dc-gap: 14px;
+    gap: var(--dc-gap); margin-inline: 16px; padding-inline: 0;
+    scroll-padding-inline: 0; scroll-snap-type: x mandatory;
+}
+html.desk :is(#s-home .hscroll:has(.dcard), #s-rest .pop-row) > .dcard {
+    flex: none;
+    width: calc((100% - (var(--dc-n) - 1) * var(--dc-gap)) / var(--dc-n));
+    scroll-snap-align: start;
+}
+html.desk :is(#s-home .hscroll:has(.dcard), #s-rest .pop-row) .dcard__pic { height: auto; aspect-ratio: 5 / 4; }
+html.desk .dcard__pic img.round { width: 72%; height: 72%; }
+@media (max-width: 1240px) {
+    html.desk :is(#s-home .hscroll:has(.dcard), #s-rest .pop-row) { --dc-n: 5; }
+}
+@media (max-width: 1020px) {
+    html.desk :is(#s-home .hscroll:has(.dcard), #s-rest .pop-row) { --dc-n: 4; }
+}
+html.desk .sec__head:has(.dpromo-nav) { align-items: center; }
+html.desk .sec__head:has(.dpromo-nav) > :is(.dsec-acts, .dpromo-nav),
+html.desk .dsec-acts > .link { translate: none !important; }
+html.desk .dsec-acts { display: inline-flex; align-items: center; gap: 16px; }
+html.desk #s-rest .dpop-h { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 16px; }
+html.desk #s-rest .dpop-h .h { padding: 0; }
 html.desk :is(#promoRow, #s-home .hscroll:not(.cats), #s-rest .pop-row).is-draggable { cursor: grab; }
 html.desk.is-hdrag, html.desk.is-hdrag * { cursor: grabbing !important; user-select: none !important; }
 html.desk .hscroll.is-dragging { scroll-snap-type: none !important; scroll-behavior: auto !important; }
@@ -645,11 +666,7 @@ html.desk #s-rest .msec { padding: 34px var(--dg) 4px; gap: 18px; scroll-margin-
 html.desk #s-rest #m-popular { padding-inline: calc(var(--dg) - 16px) !important; }
 html.desk #s-rest .grid2 { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
 html.desk #s-rest .grid2 .item__body { min-width: 0; padding: 4px 14px 0; }
-/* 27.11: «Популярное» на странице заведения — тем же форматом .dcard, что и «Часто заказывают» на главной */
-html.desk #s-rest .pop-row {
-    margin-inline: 0; padding-inline: 16px;
-    scroll-padding-inline: 16px; scroll-snap-type: none;
-}
+/* 27.11: «Популярное» на странице заведения — тем же форматом .dcard (6/5/4 целых карточки), что и «Часто заказывают» */
 html.desk #s-rest .msec > .h.pad { padding-left: 16px; }
 html.desk #s-rest .item__body > b { font-size: 15.5px; min-width: 0; overflow-wrap: break-word; }
 /* рейтинг блюда на десктопе: крупнее мобильного (10 → 12 px), цифра оценки и число отзывов строго одного кегля */

@@ -863,14 +863,14 @@ a.btn2 { display: inline-flex; align-items: center; text-decoration: none; }   /
 .dcard__pic.is-round { background: var(--surface); }
 .dcard__pic img.round { width: 112px; height: 112px; object-fit: contain; }
 .dcard__body { display: grid; gap: 4px; min-width: 0; }
-.dcard b { font: 650 14px/1.22 var(--font); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-width: 0; }
+.dcard b { font: 650 14px/1.22 var(--font); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-width: 0; overflow-wrap: break-word; }
 .dcard small { color: var(--muted); font: 500 12.5px/1.25 var(--font); }
 .star-line svg { width: 12px; height: 12px; fill: var(--star); vertical-align: -1px; margin: 0 2px 0 1px; }
 .dcard__foot { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-top: auto; min-height: 34px; }
 .dcard__price { font-weight: 750; font-size: 15px; letter-spacing: -.01em; white-space: nowrap; transition: opacity .2s .12s; }
 .dcard__foot:has(> .adder.is-on) .dcard__price { opacity: 0; transition: opacity .12s; }
 /* «Снова хочется»: заведение — строкой над блюдом, под блюдом — состав; сколько раз заказывали — плашкой на фото */
-.dcard .dcard__rest { font: 650 10.5px/1.25 var(--font); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dcard .dcard__rest { font: 500 12px/1.25 var(--font); letter-spacing: 0; text-transform: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dcard .dcard__desc { font-size: 12px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 /* 17.11: метка «N раза» — своя кнопка поверх фото (не внутри кнопки фото): касание — шторка «Вы заказывали N раз» (againOpen),
    касание остального фото — шторка блюда, как было. Метка 24 px, зона касания — 42 px (::after); под пальцем чуть сжимается.
@@ -6787,7 +6787,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 17:16';
+    var BUILD = '27.11 · 17:51';
 
     /* ── состояние ── */
     var S = {
