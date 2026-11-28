@@ -2365,6 +2365,10 @@ html.kb-on .sheet.has-map > .sheet__foot { padding-bottom: 12px; }
 .dish__stage.is-round { background: radial-gradient(circle at 50% 58%, var(--brand-soft), var(--app-bg) 70%); }
 .dish__stage img { width: 100%; height: 100%; object-fit: cover; }
 .dish__stage img.round { width: 270px; height: 270px; object-fit: contain; border-radius: 50%; transition: transform .6s var(--pop); box-shadow: 0 16px 30px -10px rgba(60, 20, 10, .26); }   /* статичная: без «вкручивания» и без filter-обрезки в Safari; растёт только при смене размера */
+.dish__stage .dpz { position: relative; display: block; width: 270px; height: 270px; border-radius: 50%; transition: transform .52s var(--pop); box-shadow: 0 16px 30px -10px rgba(60, 20, 10, .26); }
+.dish__stage .dpz > img.dpz__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border-radius: 50%; box-shadow: none; opacity: 0; z-index: 0; transition: opacity .34s ease; pointer-events: none; }
+.dish__stage .dpz > img.dpz__img.is-prev { opacity: 1; z-index: 1; transition: none; }
+.dish__stage .dpz > img.dpz__img.is-on { opacity: 1; z-index: 2; }
 .dish__body { padding: 18px 20px 6px; display: grid; gap: 16px; }
 .dish__name { margin: 0; font: var(--display-weight) 26px/1.08 var(--font-display); letter-spacing: var(--display-track); }
 .app[data-skin="juicy"] .dish__name { font-size: 22px; }
@@ -6056,8 +6060,9 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
 
     /* ── данные ── */
     var IMG = 'img/';
-    function img(name) { return IMG + name + (name.indexOf('p-') === 0 || name.indexOf('u/') === 0 ? '.webp' : '.jpg') + (name.indexOf('u/r-') === 0 || name.indexOf('u/dish-') === 0 || name.indexOf('p-') === 0 ? '?v=2711d' : ''); }   // ?v — обложку или фото заменили под тем же именем: телефон не покажет прежнее из памяти
+    function img(name) { return IMG + name + (name.indexOf('p-') === 0 || name.indexOf('u/') === 0 ? '.webp' : '.jpg') + (name.indexOf('u/r-') === 0 || name.indexOf('u/dish-') === 0 || name.indexOf('p-') === 0 ? '?v=2811a' : ''); }   // ?v — обложку или фото заменили под тем же именем: телефон не покажет прежнее из памяти
     function isRound(name) { return name.indexOf('p-') === 0; }
+    function pizzaPic(pic, size) { return isRound(pic) && size && size !== 'M' ? pic + (size === 'S' ? '-s' : '-l') : pic; }
     /* фото блюд (u/dish-*) — квадратные кадры по блюду (tools/dish_pics.py, источники — img/u/SOURCES.md): блюдо — в центральных
        82% ширины и 74% высоты, поэтому целиком в любой рамке от 0,86 до 1,3 — от «Популярного» в меню до страницы блюда и
        «Добавить к заказу?». Где блюдо в кадре — img/u/dish-boxes.json, по нему проверка. Пиццы (p-*) — круглые, целиком (contain).
@@ -6302,9 +6307,9 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         raf: { name: 'Капучино спешелти', pic: 'u/dish-raf', price: 7.90, w: 300, ml: true, pop: true, desc: 'Свежеобжаренная арабика, шелковистая молочная пена и нежный сливочный вкус' },
         matcha: { name: 'Айс-матча с клубникой', pic: 'u/dish-matcha', price: 10.50, w: 350, ml: true, pop: true, desc: 'Церемониальный японский чай матча, холодное молоко, лёд и спелая клубника' },
         berrycake: { name: 'Ягодный чизкейк с клубникой', pic: 'u/dish-berrycake', price: 14.90, w: 190, pop: true, desc: 'Сливочный чизкейк на песочной основе со свежей клубникой, голубикой и ягодным кули' },
-        diavola: { name: 'Дьявола', pic: 'p-diavola', price: 24.90, w: 460, hot: true, desc: 'Острая пицца из печи: пепперони, чоризо, халапеньо, томатный соус и моцарелла' },
+        diavola: { name: 'Дьявола', pic: 'p-diavola', price: 21.99, w: 410, pizza: true, hot: true, desc: 'Острая пицца из печи: пепперони, чоризо, халапеньо, томатный соус и моцарелла' },
         prosciutto: { name: 'Прошутто Фунги', pic: 'u/dish-prosciutto', price: 25.90, w: 470, desc: 'Прошутто котто, шампиньоны, моцарелла, сливочно-трюфельный соус и руккола' },
-        carbonara_pizza: { name: 'Пицца Карбонара', pic: 'p-carbonara', price: 23.90, w: 455, desc: 'Хрустящий бекон, моцарелла, пармезан, сливочный соус, желток и чёрный перец' },
+        carbonara_pizza: { name: 'Пицца Карбонара', pic: 'p-carbonara', price: 20.99, w: 405, pizza: true, desc: 'Хрустящий бекон, моцарелла, пармезан, сливочный соус, желток и чёрный перец' },
         greek_salad: { name: 'Греческий салат', pic: 'u/dish-greek_salad', price: 14.50, w: 280, desc: 'Спелые томаты, огурцы, сладкий перец, сыр фета, оливки каламата, красный лук и оливковое масло' },
         burrata: { name: 'Буррата с томатами', pic: 'u/dish-burrata', price: 21.90, w: 260, pop: true, desc: 'Нежная буррата, спелые томаты, соус песто, кедровые орехи и свежий базилик' },
         salmon_grill: { name: 'Лосось на гриле', pic: 'u/dish-salmon_grill', price: 29.90, w: 310, pop: true, desc: 'Стейк атлантического лосося, спаржа и овощи на гриле, сливочно-лимонный соус' },
@@ -6787,7 +6792,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '27.11 · 21:13';
+    var BUILD = '28.11 · 12:06';
 
     /* ── состояние ── */
     var S = {
@@ -11885,8 +11890,16 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     var DISH_PICS = { wings: ['u/dish-wings', 'u/dish-wings2', 'u/dish-wings3'], steak: ['u/dish-steak', 'u/dish-steak2', 'u/dish-steak3'], sushi: ['u/dish-sushi', 'u/dish-sushi2', 'u/dish-sushi3'],
         caesar: ['u/dish-caesar', 'u/dish-caesar2'], shashlik: ['u/dish-shashlik', 'u/dish-shashlik2'] };
     function dishPics(id) { return (dcarOn() && DISH_PICS[id]) || [DISHES[id].pic]; }
-    function dishStage(id) {
+    function dishStage(id, size) {
         var d = DISHES[id], ps = dishPics(id);
+        if (d.pizza && isRound(d.pic)) {
+            var sz = size || 'M';
+            return '<span class="dpz" id="dishImg" data-sz="' + sz + '">' +
+                SIZES.map(function (s) {
+                    var on = s.k === sz;
+                    return '<img src="' + img(pizzaPic(d.pic, s.k)) + '" alt="' + (on ? esc(d.name) : '') + '" class="round dpz__img' + (on ? ' is-on' : '') + '" data-sz="' + s.k + '" decoding="async">';
+                }).join('') + '</span>';
+        }
         if (ps.length < 2) return picTag(d.pic, d.name, 390).replace('<img ', '<img id="dishImg" ');
         return '<div class="dph">' + ps.map(function (p, i) { return '<span class="dph__s">' + picTag(p, i ? '' : d.name, 390).replace('<img ', i ? '<img ' : '<img id="dishImg" ') + '</span>'; }).join('') + '</div>' +
             '<span class="dph__dots" aria-hidden="true">' + ps.map(function (p, i) { return '<i' + (i ? '' : ' class="is-on"') + '></i>'; }).join('') + '</span>';
@@ -12079,7 +12092,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var d = DISHES[x.id], size = d.pizza ? 'M' : null, base = d.pizza ? 'classic' : null;
         var meta = el.querySelector('[data-gid="dishMeta"]'); if (meta) meta.textContent = dishWeight(d, size) + (d.pizza ? ' · ' + SIZES[1].label : '');
         var add = el.querySelector('[data-gid="dishAdd"]'); if (add) add.innerHTML = 'Добавить <span class="cta__sum num">' + money(dishPrice(d, size, base)) + '</span>';
-        var im = el.querySelector('[data-gid="dishImg"]'); if (im && d.pizza) im.style.transform = 'scale(0.9)';
+        var im = el.querySelector('[data-gid="dishImg"]'); if (im && d.pizza) im.style.transform = 'scale(0.89)';
         var sg = el.querySelector('.cseg[data-key="size"]'); if (sg) sg.style.setProperty('--i', 1);
         var gs = el.querySelector('.dish__stage'); if (gs && cartCount() && FXV.dcart === 'photo') gs.appendChild(dcarCartEl());   // плашка корзины на фото — и у соседней
         return el;
@@ -12213,7 +12226,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var d = DISHES[o.id], ed = o.edit ? S.cart.filter(function (x) { return x.key === o.edit && !x.removed; })[0] : null;   // правка строки корзины (17.11): её размер, борт, добавки, исключения, количество
         dishState = { id: o.id, rest: o.rest, size: d.pizza ? (ed && ed.size || 'M') : null, base: d.pizza ? (ed && ed.base || 'classic') : null, addons: ed && ed.addons ? ed.addons.slice() : [], excludes: ed && ed.excludes ? ed.excludes.slice() : [], qty: ed ? ed.qty : 1, edit: ed ? ed.key : null };
         var h = '<button type="button" class="ibtn sheet__close" data-act="close-sheet" aria-label="Закрыть">' + ic('i-close') + '</button>' +
-            '<div class="scroll"><div class="dish__stage' + (isRound(d.pic) ? ' is-round' : '') + '">' + dishStage(o.id) + itemTags(d) + rateBadge(d, o.id, o.rest, 'dish__rb dish__rb--pic', 'dish', true) + '</div>' +
+            '<div class="scroll"><div class="dish__stage' + (isRound(d.pic) ? ' is-round' : '') + '">' + dishStage(o.id, dishState.size) + itemTags(d) + rateBadge(d, o.id, o.rest, 'dish__rb dish__rb--pic', 'dish', true) + '</div>' +
             '<div class="dish__body"><div>' + (d.rating ? '<span class="dish__rate">' + rateBadge(d, o.id, o.rest, 'dish__rb', 'dish', true) + '</span>' : '') + '<h2 class="dish__name">' + esc(d.name) + '</h2><div class="dish__line">' +
                 dishRate(d, true) + '<span class="dish__meta num" id="dishMeta"></span></div></div>' +
             '<p class="dish__desc">' + esc(d.desc) + '</p>';
@@ -12249,7 +12262,23 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
                 if (was !== si) { sg.style.setProperty('--i', si); segPlay(sg, segStart(was), si); }   // тот же бегунок и эффект, что «Доставка / Заберу сам»
             }
             var im = document.getElementById('dishImg');
-            if (im && im.classList.contains('round')) im.style.transform = 'scale(' + [0.8, 0.9, 1][si] + ')';
+            if (im && im.classList.contains('dpz')) {
+                im.style.transform = 'scale(' + [0.78, 0.89, 1][si] + ')';
+                var prevSz = im.dataset.sz;
+                if (prevSz && prevSz !== dishState.size) {
+                    im.dataset.sz = dishState.size;
+                    clearTimeout(im._pzt);
+                    $$('.dpz__img', im).forEach(function (el) {
+                        var sz = el.dataset.sz;
+                        el.classList.toggle('is-prev', sz === prevSz);
+                        el.classList.toggle('is-on', sz === dishState.size);
+                    });
+                    im._pzt = setTimeout(function () { $$('.dpz__img.is-prev', im).forEach(function (el) { el.classList.remove('is-prev'); }); }, 380);
+                } else {
+                    im.dataset.sz = dishState.size;
+                    $$('.dpz__img', im).forEach(function (el) { el.classList.toggle('is-on', el.dataset.sz === dishState.size); el.classList.remove('is-prev'); });
+                }
+            } else if (im && im.classList.contains('round')) im.style.transform = 'scale(' + [0.78, 0.89, 1][si] + ')';
         }
         if (!(deskOn() && Desk && Desk.syncDish)) document.getElementById('dishMeta').textContent = meta;
         if (deskOn() && Desk && Desk.syncDish) Desk.syncDish();
@@ -16044,7 +16073,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             '<span class="num">' + c.qty + '</span><button type="button" data-act="line" data-key="' + c.key + '" data-d="1" aria-label="Больше">' + ic('i-plus') + '</button></span>';
     }
     function cartRow(c) {
-        var d = DISHES[c.dish], pic = '<span class="citem__pic' + (isRound(d.pic) ? ' is-round' : '') + '">' + picTag(d.pic, d.name, 92) + '</span>';
+        var d = DISHES[c.dish], pic = '<span class="citem__pic' + (isRound(d.pic) ? ' is-round' : '') + '">' + picTag(d.pizza ? pizzaPic(d.pic, c.size) : d.pic, d.name, 92) + '</span>';
         if (c.removed) return '<div class="citem citem--off" data-key="' + c.key + '">' + pic + '<span class="citem__body"><b><span class="citem__nm">' + esc(d.name) + '</span></b><small>Убрали из заказа</small><span class="citem__price"><span class="citem__nm">' + money(c.price * c.qty) + '</span></span></span>' +
             '<button type="button" class="btn2 citem__back" data-act="restore-line" data-key="' + c.key + '">Вернуть</button></div>';
         pic = pic.replace('<span class="citem__pic', '<span data-act="cart-edit" data-key="' + c.key + '" role="button" tabindex="0" aria-label="Изменить: ' + esc(d.name) + '" class="citem__pic');   // 17.11: касание фото — шторка блюда этой строки
@@ -16263,6 +16292,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (!row) { refreshCart(); return; }
         var now = c.price * c.qty, k = now >= was ? 1 : -1;
         row.dataset.key = c.key; $$('[data-key]', row).forEach(function (e) { e.dataset.key = c.key; });
+        var cim = row.querySelector('.citem__pic img'); if (cim && DISHES[c.dish].pizza) cim.src = img(pizzaPic(DISHES[c.dish].pic, c.size));
         var sm = row.querySelector('.citem__body small'), ot = cartOpt(c);
         if (sm && nbs(sm.textContent) !== nbs(ot)) swapLabel(sm, ot, { outY: -5, inY: 6, outMs: 160, inMs: 340, inEase: 'cubic-bezier(.2, .8, .3, 1)' });   // подпись опций — сдвиг и прозрачность
         var n = row.querySelector('.stepper .num'); if (n && cntOf(n) !== c.qty) cntSet(n, c.qty);

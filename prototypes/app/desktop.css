@@ -826,6 +826,14 @@ html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage img.round {
     object-fit: contain; border-radius: 50%; filter: none;
     box-shadow: 0 22px 42px -12px rgba(45, 22, 10, .26);
 }
+html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage .dpz {
+    width: 84%; height: auto; aspect-ratio: 1; max-width: 420px;
+    box-shadow: 0 22px 42px -12px rgba(45, 22, 10, .26);
+}
+html.desk :is(#sheet, #sheetUnder).is-dish .dish__stage .dpz > img.dpz__img {
+    position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
+    border-radius: 50%; object-fit: contain; box-shadow: none; filter: none;
+}
 html.desk :is(#sheet, #sheetUnder).is-dish .dph { transition: transform .48s cubic-bezier(.22, .61, .36, 1); }
 html.desk :is(#sheet, #sheetUnder).is-dish .dph__s { position: relative; }
 html.desk :is(#sheet, #sheetUnder).is-dish .dph__dots {
