@@ -1931,6 +1931,127 @@ window.cleverDesk = function (A) {
         if (d.length > 7) out += '-' + d.slice(7, 9);
         return out;
     }
+    // 28.11: дискретизация iOS smooth-corner контура с 4 разными радиусами [лв, пв, пн, лн] и внешними нормалями — для «желе» баллонов чата
+    function dcSqPts4(W, H, rr) {
+        var bud = Math.min(W, H) / 2;
+        var kTL = dcSqCorner(rr[0], bud), kTR = dcSqCorner(rr[1], bud), kBR = dcSqCorner(rr[2], bud), kBL = dcSqCorner(rr[3], bud);
+        var pts = [], push = function (x, y, nx, ny) { var l = Math.hypot(nx, ny) || 1; pts.push([x, y, ny / l, nx / l]); };
+        var cubic = function (x0, y0, x1, y1, x2, y2, x3, y3, n, skipLast) {
+            var lim = skipLast ? n - 1 : n;
+            for (var i = 1; i <= lim; i++) {
+                var t = i / n, it = 1 - t;
+                var x = it * it * it * x0 + 3 * it * it * t * x1 + 3 * it * t * t * x2 + t * t * t * x3;
+                var y = it * it * it * y0 + 3 * it * it * t * y1 + 3 * it * t * t * y2 + t * t * t * y3;
+                var tx = 3 * it * it * (x1 - x0) + 6 * it * t * (x2 - x1) + 3 * t * t * (x3 - x2);
+                var ty = 3 * it * it * (y1 - y0) + 6 * it * t * (y2 - y1) + 3 * t * t * (y3 - y2);
+                push(x, y, ty, -tx);
+            }
+        };
+        var arcSeg = function (cx, cy, r, a0, a1, n) {
+            for (var i = 1; i <= n; i++) {
+                var a = a0 + (a1 - a0) * i / n;
+                push(cx + r * Math.cos(a), cy + r * Math.sin(a), Math.cos(a), Math.sin(a));
+            }
+        };
+        var nb = 4, na = 4, i;
+        var eT = Math.max(0, W - kTL.p - kTR.p), nT = Math.max(2, Math.round(eT / 6));
+        for (i = 0; i <= nT; i++) push(kTL.p + eT * i / nT, 0, 0, -1);
+        var tx = W - kTR.p, ty = 0, aR = kTR.be * Math.PI / 180;
+        cubic(tx, ty, tx + kTR.a, ty, tx + kTR.a + kTR.b, ty, tx + kTR.a + kTR.b + kTR.c, ty + kTR.d, nb);
+        arcSeg(tx + kTR.a + kTR.b + kTR.c - kTR.r * Math.sin(aR), ty + kTR.d + kTR.r * Math.cos(aR), kTR.r, -Math.PI / 2 + aR, -aR, na);
+        var trx2 = tx + kTR.a + kTR.b + kTR.c + kTR.L, try2 = ty + kTR.d + kTR.L;
+        cubic(trx2, try2, trx2 + kTR.d, try2 + kTR.c, trx2 + kTR.d, try2 + kTR.b + kTR.c, W, kTR.p, nb);
+        var eR = Math.max(0, H - kTR.p - kBR.p), nR = Math.max(1, Math.round(eR / 6));
+        for (i = 1; i <= nR; i++) push(W, kTR.p + eR * i / nR, 1, 0);
+        var brx = W, bry = H - kBR.p; aR = kBR.be * Math.PI / 180;
+        cubic(brx, bry, brx, bry + kBR.a, brx, bry + kBR.a + kBR.b, brx - kBR.d, bry + kBR.a + kBR.b + kBR.c, nb);
+        arcSeg(brx - kBR.d - kBR.r * Math.cos(aR), bry + kBR.a + kBR.b + kBR.c - kBR.r * Math.sin(aR), kBR.r, aR, Math.PI / 2 - aR, na);
+        var brx2 = brx - kBR.d - kBR.L, bry2 = bry + kBR.a + kBR.b + kBR.c + kBR.L;
+        cubic(brx2, bry2, brx2 - kBR.c, bry2 + kBR.d, brx2 - (kBR.b + kBR.c), bry2 + kBR.d, W - kBR.p, H, nb);
+        var eB = Math.max(0, W - kBR.p - kBL.p), nB = Math.max(2, Math.round(eB / 6));
+        for (i = 1; i <= nB; i++) push(W - kBR.p - eB * i / nB, H, 0, 1);
+        var blx = kBL.p, bly = H; aR = kBL.be * Math.PI / 180;
+        cubic(blx, bly, blx - kBL.a, bly, blx - (kBL.a + kBL.b), bly, blx - (kBL.a + kBL.b + kBL.c), bly - kBL.d, nb);
+        arcSeg(blx - (kBL.a + kBL.b + kBL.c) + kBL.r * Math.sin(aR), bly - kBL.d - kBL.r * Math.cos(aR), kBL.r, Math.PI / 2 + aR, Math.PI - aR, na);
+        var blx2 = blx - (kBL.a + kBL.b + kBL.c) - kBL.L, bly2 = bly - kBL.d - kBL.L;
+        cubic(blx2, bly2, blx2 - kBL.d, bly2 - kBL.c, blx2 - kBL.d, bly2 - (kBL.b + kBL.c), 0, H - kBL.p, nb);
+        var eL = Math.max(0, H - kBL.p - kTL.p), nL = Math.max(1, Math.round(eL / 6));
+        for (i = 1; i <= nL; i++) push(0, H - kBL.p - eL * i / nL, -1, 0);
+        var tlx = 0, tly = kTL.p; aR = kTL.be * Math.PI / 180;
+        cubic(tlx, tly, tlx, tly - kTL.a, tlx, tly - (kTL.a + kTL.b), tlx + kTL.d, tly - (kTL.a + kTL.b + kTL.c), nb);
+        arcSeg(tlx + kTL.d + kTL.r * Math.cos(aR), tly - (kTL.a + kTL.b + kTL.c) + kTL.r * Math.sin(aR), kTL.r, Math.PI + aR, 1.5 * Math.PI - aR, na);
+        var tlx2 = tlx + kTL.d + kTL.L, tly2 = tly - (kTL.a + kTL.b + kTL.c) - kTL.L;
+        cubic(tlx2, tly2, tlx2 + kTL.c, tly2 - kTL.d, tlx2 + (kTL.b + kTL.c), tly2 - kTL.d, kTL.p, 0, nb, true);
+        return pts;
+    }
+    // упругое колыхание новой реплики чата «как желе»: объёмное сжатие-растяжение + покачивание верха + мягкая кривизна граней
+    function msgJelly(el) {
+        if (!el || !el.isConnected || fxOff() || el._dJly) return;
+        var W = el.offsetWidth, H = el.offsetHeight;
+        if (W < 12 || H < 12) return;
+        var isTyping = el.classList.contains('msg--typing'), isMe = el.classList.contains('msg--me');
+        var rr = isTyping ? [15, 15, 15, 6] : isMe ? [18, 18, 6, 18] : [18, 18, 18, 6];
+        var pts = dcSqPts4(W, H, rr);
+        var PAD = 20, DUR = 1280, ax = isMe ? W : 0, ay = H, dir = isMe ? -1 : 1;
+        var bg = document.createElement('span');
+        bg.className = 'dmsg-bg';
+        bg.setAttribute('aria-hidden', 'true');
+        el.insertBefore(bg, el.firstChild);
+        el.classList.add('is-jelly');
+        var t0 = performance.now();
+        var ampY = Math.min(9.5, H * .145) * (isTyping ? .72 : 1);
+        var ampX = Math.min(8.2, W * .062) * (isTyping ? .75 : 1);
+        var ampSway = dir * Math.min(9.2, W * .052 + 3.2) * (isTyping ? .62 : 1);
+        var ampBY = Math.min(4.4, H * .072) * (isTyping ? .75 : 1);
+        var ampBX = Math.min(3.8, W * .034) * (isTyping ? .75 : 1);
+        var st = el._dJly = { raf: 0 };
+        var stop = function () {
+            cancelAnimationFrame(st.raf); st.raf = 0; el._dJly = null;
+            el.classList.remove('is-jelly');
+            el.style.opacity = '';
+            el.style.transform = '';
+            if (bg.parentNode) bg.remove();
+        };
+        var frame = function (now) {
+            if (!el.isConnected || !bg.isConnected) { stop(); return; }
+            var t = Math.max(0, now - t0);
+            if (t >= DUR) { stop(); return; }
+            var tail = 1 - dcSS((t - 920) / 360);
+            var pop = 1 - .19 * Math.exp(-t / 52) * Math.cos(t * .024);
+            var sq = Math.exp(-t / 380) * Math.sin(2 * Math.PI * 2.55 * t / 1000 - .3) * tail;
+            var sw = ampSway * Math.exp(-t / 420) * Math.sin(2 * Math.PI * 1.95 * t / 1000 - .75) * tail;
+            var bl = Math.exp(-t / 330) * Math.sin(2 * Math.PI * 3.25 * t / 1000 - .42) * tail;
+            var sy = 1 + (ampY / (H * .5)) * sq;
+            var sx = 1 - (ampX / (W * .5)) * sq;
+            var bY = ampBY * bl, bX = ampBX * bl;
+            var cp = '', j, p, u, v, px, py, x, y;
+            for (j = 0; j < pts.length; j++) {
+                p = pts[j];
+                u = p[0] / W; v = p[1] / H;
+                // 1) выход из уголка хвостика (pop) + объёмное сжатие-растяжение желе вокруг центра
+                px = ax + (p[0] - ax) * pop;
+                py = ay + (p[1] - ay) * pop;
+                x = W * .5 + (px - W * .5) * sx;
+                y = H * .5 + (py - H * .5) * sy;
+                // 2) упругое покачивание вершины (низ держится, верх колеблется как желе)
+                x += sw * Math.pow(1 - v, 1.25);
+                // 3) мягкая подушкообразная кривизна граней (объёмная противофаза по X и Y)
+                y += p[2] * bY * Math.sin(Math.PI * u);
+                x -= p[3] * bX * Math.sin(Math.PI * v);
+                // безопасный коридор внутри запасного поля PAD
+                x = Math.max(-PAD + 1, Math.min(W + PAD - 1, x));
+                y = Math.max(-PAD + 1, Math.min(H + PAD - 1, y));
+                cp += (j ? 'L' : 'M') + (x + PAD).toFixed(1) + ' ' + (y + PAD).toFixed(1);
+            }
+            bg.style.webkitClipPath = bg.style.clipPath = 'path("' + cp + 'Z")';
+            var op = .15 + .85 * Math.min(1, t / 55);
+            var lift = 7 * Math.exp(-t / 70) * Math.cos(t * .021) * tail;
+            el.style.opacity = op < .999 ? op.toFixed(3) : '';
+            el.style.transform = Math.abs(lift) > .08 ? 'translateY(' + lift.toFixed(2) + 'px)' : '';
+            st.raf = requestAnimationFrame(frame);
+        };
+        frame(t0);
+    }
     function deskSupportMount() {
         var scr = document.getElementById('s-chat');
         if (!scr || !deskOn() || S.stack.indexOf('chat') < 0) return;
@@ -2041,6 +2162,20 @@ window.cleverDesk = function (A) {
         wrap.appendChild(side);
         wrap.appendChild(chatCol);
         scr.appendChild(wrap);
+
+        // 28.11: желеобразное колыхание контура новых реплик в чате (тот же 60% iOS smooth-corner контур, что и у волны корзины)
+        var chatBox = document.getElementById('chatBox');
+        if (chatBox && window.MutationObserver && !chatBox._dJellyObs) {
+            chatBox._dJellyObs = new MutationObserver(function (ms) {
+                if (!deskOn() || fxOff()) return;
+                ms.forEach(function (m) {
+                    m.addedNodes.forEach(function (n) {
+                        if (n.nodeType === 1 && n.classList && n.classList.contains('msg')) msgJelly(n);
+                    });
+                });
+            });
+            chatBox._dJellyObs.observe(chatBox, { childList: true });
+        }
 
         // Копирование телефона
         side.addEventListener('click', function (e) {

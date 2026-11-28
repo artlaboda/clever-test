@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 16:01';
+    var BUILD = '28.11 · 16:03';
 
     /* ── состояние ── */
     var S = {
@@ -24040,7 +24040,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function sqSameLook(was, now, el) {
         var a = String(was || '').split(/\s+/), b = String(now || '').split(/\s+/), d = a.filter(function (x) { return x && b.indexOf(x) < 0; }).concat(b.filter(function (x) { return x && a.indexOf(x) < 0; }));
         var own = !el || !el.classList ? null : el === app ? SQ_SAME.app : el.id === 'sheet' || el.id === 'sheetUnder' ? SQ_SAME.sheet : el.classList.contains('screen') ? SQ_SAME.screen : el.id === 'tabbar' || el.id === 'cartbar' ? SQ_SAME.bar : (el.classList.contains('ddish-addon') || el.classList.contains('ddish-excl') || (el.classList.contains('opt') && el.closest('.ddish-crust'))) ? SQ_SAME.chip : null;
-        return d.every(function (x) { return x === 'is-typing' || x === 'is-back' || x === 'is-fwd' || x === 'is-wave' || (!!own && own.indexOf(x) >= 0); });
+        return d.every(function (x) { return x === 'is-typing' || x === 'is-back' || x === 'is-fwd' || x === 'is-wave' || x === 'is-jelly' || (!!own && own.indexOf(x) >= 0); });
     }
     new MutationObserver(function () { sqRefresh(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     if (window.matchMedia) { var sqMq = matchMedia('(prefers-color-scheme: dark)'); if (sqMq.addEventListener) sqMq.addEventListener('change', function () { sqRefresh(); }); }

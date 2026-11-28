@@ -975,12 +975,25 @@ html.desk #s-chat #chatScroll {
 }
 html.desk #s-chat .chat { padding: 20px 24px 12px; gap: 10px; }
 html.desk #s-chat .dsup__chat .msg {
+    position: relative; isolation: isolate;
     max-width: 82%; padding: 11px 15px; border-radius: 18px;
     font-size: 14.5px; line-height: 1.4; overflow-wrap: break-word;
 }
 html.desk #s-chat .dsup__chat .msg--them { border-bottom-left-radius: 6px; }
 html.desk #s-chat .dsup__chat .msg--me { border-bottom-right-radius: 6px; }
 html.desk #s-chat .dsup__chat .msg--typing { min-height: 36px; border-radius: 15px; border-bottom-left-radius: 6px; align-items: center; }
+html.desk #s-chat .dsup__chat .msg.is-jelly {
+    background: transparent !important;
+    -webkit-clip-path: none !important; clip-path: none !important;
+    overflow: visible !important;
+    animation: none !important;
+}
+html.desk #s-chat .dsup__chat .dmsg-bg {
+    position: absolute; inset: -20px; z-index: -1; pointer-events: none;
+    background: var(--surface);
+}
+html.desk #s-chat .dsup__chat .msg--me > .dmsg-bg { background: var(--brand); }
+html.desk .app[data-skin="premium"] #s-chat .dsup__chat .msg--me > .dmsg-bg { background: var(--ink); }
 html.desk #s-chat .quick { margin-top: auto; padding: 8px 24px 16px; gap: 7px; }
 html.desk #s-chat .dsup__chat .quick .chip {
     position: relative; height: 34px; padding: 0 13px; font-size: 13.5px;
