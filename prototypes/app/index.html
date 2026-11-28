@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 15:47';
+    var BUILD = '28.11 · 15:49';
 
     /* ── состояние ── */
     var S = {
@@ -20703,7 +20703,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         scr.innerHTML = '<div class="bar"><button type="button" class="ibtn" data-act="back" aria-label="Назад">' + ic('i-back') + '</button><div class="bar__title"><span class="ophead">' + pepDisc() + '<span style="text-align:left">Поддержка<small>Обычно отвечаем за 2 минуты</small></span></span></div><span></span></div>' +
             '<div class="scroll" id="chatScroll"><div class="chat" id="chatBox"></div><div class="quick" id="quick">' + Object.keys(REPLIES).map(function (k) { return '<button type="button" class="chip" data-act="quick" data-id="' + k + '">' + k + '</button>'; }).join('') + '</div></div>' +
             '<form class="chatin" id="chatForm"><input class="field" id="chatInput" placeholder="Сообщение" autocomplete="off" aria-label="Сообщение"><button type="submit" class="plus" aria-label="Отправить">' + ic('i-send') + '</button></form>';
-        drawChat();
+        drawChat(true);
         document.getElementById('chatForm').addEventListener('submit', function (e) {
             e.preventDefault();
             var v = document.getElementById('chatInput').value.trim();
@@ -20712,23 +20712,45 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             say(v, 'Спасибо! Передала вопрос старшему смены, ответим в течение пары минут.');
         });
     }
-    function drawChat() {
+    function chatMsgEl(m, noAnim) {
+        var d = document.createElement('div');
+        if (m.typing) {
+            d.className = 'msg msg--them msg--typing';
+            d.innerHTML = '<i></i><i></i><i></i>';
+        } else {
+            d.className = 'msg ' + (m.me ? 'msg--me' : 'msg--them');
+            d.innerHTML = esc(m.t) + '<small>' + m.time + '</small>';
+        }
+        if (noAnim) d.style.animation = 'none';
+        d._ck = m.typing ? 'T' : (m.me ? 'M:' : 'O:') + m.t + '|' + m.time;
+        return d;
+    }
+    function drawChat(initial) {
         var box = document.getElementById('chatBox');
         if (!box) return;
-        box.innerHTML = chatLog.map(function (m) {
-            if (m.typing) return '<div class="msg msg--them msg--typing"><i></i><i></i><i></i></div>';
-            return '<div class="msg ' + (m.me ? 'msg--me' : 'msg--them') + '">' + esc(m.t) + '<small>' + m.time + '</small></div>';
-        }).join('');
+        var kids = box.children;
+        for (var i = 0; i < chatLog.length; i++) {
+            var m = chatLog[i], key = m.typing ? 'T' : (m.me ? 'M:' : 'O:') + m.t + '|' + m.time;
+            if (kids[i] && kids[i]._ck === key) continue;
+            var el = chatMsgEl(m, initial);
+            if (kids[i]) box.replaceChild(el, kids[i]);
+            else box.appendChild(el);
+        }
+        while (box.children.length > chatLog.length) box.removeChild(box.lastChild);
         var sc = document.getElementById('chatScroll');
-        sc.scrollTop = sc.scrollHeight;
+        if (sc) sc.scrollTop = sc.scrollHeight;
     }
     function say(text, reply) {
+        var ti = chatLog.length - 1;
+        if (ti >= 0 && chatLog[ti].typing) chatLog.splice(ti, 1);
         chatLog.push({ me: true, t: text, time: '20:16' });
-        chatLog.push({ typing: true });
+        var typ = { typing: true };
+        chatLog.push(typ);
         drawChat();
         setTimeout(function () {
-            chatLog.pop();
-            chatLog.push({ me: false, t: reply, time: '20:16' });
+            var ix = chatLog.indexOf(typ);
+            if (ix >= 0) chatLog.splice(ix, 1, { me: false, t: reply, time: '20:16' });
+            else chatLog.push({ me: false, t: reply, time: '20:16' });
             drawChat();
         }, 1400);
     }

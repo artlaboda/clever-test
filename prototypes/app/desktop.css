@@ -1014,7 +1014,7 @@ html.desk #s-chat .chatin .field {
     background: transparent; box-shadow: none; font-size: 14.5px;
 }
 html.desk #s-chat .chatin .plus {
-    width: 46px; height: 46px; flex: none; border-radius: 15px;
+    width: 46px; height: 46px; flex: none; border-radius: 50%;
     transition: transform .18s var(--dease), opacity .2s ease;
 }
 html.desk #s-chat .chatin .plus:hover { opacity: .92; }
