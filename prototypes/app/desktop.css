@@ -203,12 +203,12 @@ html.desk .dscrim { display: block; position: absolute; inset: 0; z-index: 10; b
 html.desk .app[data-dtop="drawer"] .dscrim, html.desk .app[data-dtop="win"] .dscrim { opacity: 1; pointer-events: auto; }
 
 /* ── страницы ── */
-html.desk .screen.is-tab:not(#s-profile), html.desk #restScroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent; }
-html.desk .screen.is-tab:not(#s-profile) { overflow-y: auto; overflow-x: hidden; }
-html.desk .screen.is-tab:not(#s-profile) > .scroll { overflow: visible; flex: none; }
+html.desk .screen.is-tab:not(#s-profile):not(#s-fav), html.desk #restScroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent; }
+html.desk .screen.is-tab:not(#s-profile):not(#s-fav) { overflow-y: auto; overflow-x: hidden; }
+html.desk .screen.is-tab:not(#s-profile):not(#s-fav) > .scroll { overflow: visible; flex: none; }
 html.desk .app[data-back] .screen::after { display: none; }
 html.desk .screen.is-under { transform: none; }
-html.desk .screen.is-tab:not(#s-home):not(#s-profile) > .scroll { padding-top: 20px; padding-left: max(32px, calc((100% - 880px) / 2)); padding-right: max(32px, calc((100% - 880px) / 2)); }
+html.desk .screen.is-tab:not(#s-home):not(#s-profile):not(#s-fav) > .scroll { padding-top: 20px; padding-left: max(32px, calc((100% - 880px) / 2)); padding-right: max(32px, calc((100% - 880px) / 2)); }
 /* главная */
 html.desk #homeScroll { padding: 0 calc(var(--dg) - 16px); }
 html.desk #s-home .hero { padding-top: calc(var(--top) + 44px); gap: 0; overflow: visible; background: none; }
@@ -750,64 +750,296 @@ html.desk #s-cart .citem small { font-size: 13.5px; line-height: 1.32; margin-to
 html.desk #s-cart .citem__price { font-size: 14.5px; margin-top: 7px; }
 html.desk #s-cart .rcpt-w--cart { margin-top: 22px; }
 html.desk #s-cart > .scroll > div:last-child:not([class]) { height: 12px !important; }
-/* ── все экраны поверх (корзина, оформление, профиль, заказы и т. д.) — окна по центру ── */
+/* ── все экраны поверх (корзина, оформление, профиль, избранное, заказы и т. д.) — окна по центру ── */
+html.desk { --dblue: #0071e3; --dblue-bg: color-mix(in srgb, #0071e3 10%, var(--card)); --dblue-press: color-mix(in srgb, #0071e3 17%, var(--card)); }
+html.desk[data-theme="dark"] { --dblue: #2997ff; --dblue-bg: color-mix(in srgb, #2997ff 16%, var(--card)); --dblue-press: color-mix(in srgb, #2997ff 24%, var(--card)); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) { --dblue: #2997ff; --dblue-bg: color-mix(in srgb, #2997ff 16%, var(--card)); --dblue-press: color-mix(in srgb, #2997ff 24%, var(--card)); }
+}
 html.desk .screen:not(.is-tab):not(#s-rest),
-html.desk #s-profile {
+html.desk #s-profile,
+html.desk #s-fav {
     --top: 0px;
     left: 50%; right: auto; top: 50%; bottom: auto; width: 600px; height: min(920px, calc(100% - 40px)); translate: -50% -50%;
     border-radius: 30px; overflow: hidden; overflow: clip; box-shadow: 0 50px 120px -30px rgba(20, 12, 8, .6);
     transform: translateY(26px) scale(.96); opacity: 0; transition: transform .4s var(--dease), opacity .25s, visibility 0s linear .4s;
 }
 html.desk .screen:not(.is-tab):not(#s-rest):is(.is-on, .is-under),
-html.desk #s-profile:is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
+html.desk #s-profile:is(.is-on, .is-under),
+html.desk #s-fav:is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
 html.desk .screen:not(.is-tab):not(#s-rest) > .scroll,
-html.desk #s-profile > .scroll { overscroll-behavior: none; }
-/* ── профиль в модальном окне на десктопе (#s-profile, 28.11): шапка как у корзины — крупный заголовок слева, крестик справа ── */
-html.desk #s-profile .dprof__bar {
+html.desk #s-profile > .scroll,
+html.desk #s-fav > .scroll {
+    overscroll-behavior: none;
+    scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 20%, transparent) transparent;
+}
+
+/* ── профиль и все его подразделы на десктопе (28.11):
+   единые крупные заголовки, круглые кнопки назад/закрыть, чистая синяя подсветка в стиле apple.com
+   с аккуратным скруглением верхнего и нижнего слота без белой щели по краям ── */
+html.desk #s-profile .dprof__bar,
+html.desk #s-fav .dfav__bar {
     position: absolute; left: 0; right: 0; top: 0; z-index: 6;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    display: flex; align-items: center; gap: 12px;
     padding: 20px 20px 14px 20px;
-    background: color-mix(in srgb, var(--app-bg) 78%, transparent);
+    background: color-mix(in srgb, var(--app-bg) 82%, transparent);
     -webkit-backdrop-filter: blur(14px) saturate(1.8) brightness(1.06);
     backdrop-filter: blur(14px) saturate(1.8) brightness(1.06);
     box-shadow: 0 1px 0 transparent; transition: box-shadow .25s;
 }
-html.desk #s-profile .dprof__bar.is-over { box-shadow: 0 1px 0 var(--line); }
+html.desk #s-profile .dprof__bar { justify-content: space-between; }
+html.desk #s-profile .dprof__bar.is-over,
+html.desk #s-fav .dfav__bar.is-over { box-shadow: 0 1px 0 var(--line); }
 html.desk #s-profile .dprof__title {
-    margin: 0; font: var(--display-weight) 30px/1.1 var(--font-display);
+    margin: 0; font: var(--display-weight) 32px/1.08 var(--font-display);
     letter-spacing: var(--display-track); color: var(--ink);
 }
-html.desk #s-profile .dprof__close {
+html.desk #s-fav .dfav__title {
+    margin: 0; font: var(--display-weight) 28px/1.1 var(--font-display);
+    letter-spacing: var(--display-track); color: var(--ink);
+}
+html.desk #s-profile .dprof__close,
+html.desk #s-fav .dfav__back {
     flex: none; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
     display: grid; place-items: center; cursor: pointer;
     background: var(--surface); color: var(--ink);
-    transition: background-color .3s var(--dease), color .25s ease, transform .22s var(--dease);
+    transition: background-color .26s var(--dease), color .2s ease, transform .2s var(--dease);
 }
-html.desk #s-profile .dprof__close svg {
-    width: 18px; height: 18px; display: block; fill: none; stroke: currentColor;
-    stroke-width: 2.3; stroke-linecap: round;
-}
-html.desk #s-profile .dprof__close:hover { background: color-mix(in srgb, var(--ink) 11%, var(--surface)); }
-html.desk #s-profile .dprof__close:active { background: color-mix(in srgb, var(--ink) 16%, var(--surface)); transform: scale(.91); transition: transform .14s ease-out, background-color .16s ease-out; }
-html.desk[data-theme="dark"] #s-profile .dprof__close:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
-html.desk[data-theme="dark"] #s-profile .dprof__close:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+html.desk #s-profile .dprof__close svg { width: 18px; height: 18px; display: block; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; }
+html.desk #s-fav .dfav__back svg.i { width: 21px; height: 21px; stroke-width: 2.2; transform: translateX(-1px); }
+html.desk #s-profile .dprof__close:hover,
+html.desk #s-fav .dfav__back:hover { background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transform: none; }
+html.desk #s-profile .dprof__close:active,
+html.desk #s-fav .dfav__back:active { background: color-mix(in srgb, var(--ink) 16%, var(--surface)); transform: scale(.91); transition: transform .14s ease-out, background-color .16s ease-out; }
+html.desk[data-theme="dark"] :is(#s-profile .dprof__close, #s-fav .dfav__back):hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+html.desk[data-theme="dark"] :is(#s-profile .dprof__close, #s-fav .dfav__back):active { background: color-mix(in srgb, #000 34%, var(--surface)); }
 @media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) #s-profile .dprof__close:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
-    html.desk:not([data-theme="light"]) #s-profile .dprof__close:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+    html.desk:not([data-theme="light"]) :is(#s-profile .dprof__close, #s-fav .dfav__back):hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+    html.desk:not([data-theme="light"]) :is(#s-profile .dprof__close, #s-fav .dfav__back):active { background: color-mix(in srgb, #000 34%, var(--surface)); }
 }
-html.desk #s-profile > #profileScroll {
-    padding: 76px 4px 16px;
-    scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 20%, transparent) transparent;
+
+/* единая крупная десктопная шапка у всех подразделов профиля (#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) */
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 20px 14px 20px; min-height: 72px;
+    background: color-mix(in srgb, var(--app-bg) 82%, transparent);
 }
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar > .ibtn:first-child {
+    flex: none; width: 40px; height: 40px; margin-left: 0; border-radius: 50%;
+    display: grid; place-items: center; background: var(--surface); color: var(--ink);
+    transition: background-color .26s var(--dease), color .2s ease, transform .2s var(--dease);
+}
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar > .ibtn:first-child svg.i {
+    width: 21px; height: 21px; stroke-width: 2.2; translate: -1px 0;
+}
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar > .ibtn:first-child:hover {
+    background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transform: none;
+}
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar > .ibtn:first-child:active {
+    background: color-mix(in srgb, var(--ink) 16%, var(--surface)); transform: scale(.91); opacity: 1;
+}
+html.desk[data-theme="dark"] :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar > .bar__title {
+    flex: 1 1 auto; text-align: left; padding: 0;
+    font: var(--display-weight) 28px/1.1 var(--font-display);
+    letter-spacing: var(--display-track); color: var(--ink);
+}
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .bar > span:last-child { display: none; }
+html.desk :is(#s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) > .scroll {
+    padding-top: 84px; scroll-padding-top: 84px;
+    padding-left: 4px; padding-right: 4px;
+}
+html.desk #s-pay > .bar > .bar__act {
+    flex: none; padding: 8px 15px; border-radius: 999px; border: 0;
+    font: 600 14px/1.1 var(--font); color: var(--dblue); background: var(--dblue-bg);
+    cursor: pointer; transition: background-color .2s ease, transform .16s var(--dease);
+}
+html.desk #s-pay > .bar > .bar__act:hover { background: var(--dblue-press); }
+html.desk #s-pay > .bar > .bar__act:active { transform: scale(.95); }
+html.desk #s-notif > .bar > .bar__gear {
+    flex: none; width: 40px; height: 40px; padding: 0; border-radius: 50%;
+    display: grid; place-items: center; background: var(--surface); color: var(--ink);
+    transition: background-color .24s var(--dease), color .2s ease, transform .2s var(--dease);
+}
+html.desk #s-notif > .bar > .bar__gear:hover { background: var(--dblue-bg); color: var(--dblue); transform: none; }
+html.desk #s-notif > .bar > .bar__gear:active { background: var(--dblue-press); transform: scale(.92); }
+
+/* ── списки меню: без 4px белых зазоров сверху/снизу + синяя подсветка в стиле apple.com со скруглением крайних углов ── */
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .list {
+    padding: 0; overflow: hidden;
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .cgrp {
+    overflow: hidden;
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .list > .lrow:first-child {
+    border-top-left-radius: var(--r-card); border-top-right-radius: var(--r-card);
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .list > .lrow:last-child {
+    border-bottom-left-radius: var(--r-card); border-bottom-right-radius: var(--r-card);
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .list > .lrow:only-child {
+    border-radius: var(--r-card);
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow {
+    padding: 15px 18px; font-size: 15.5px;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow > svg.i,
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow small,
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lang__t b {
+    transition: color .18s ease, transform .22s var(--dease);
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow:not(.lrow--set):hover,
+html.desk #s-profile .me:hover {
+    background: var(--dblue-bg); color: var(--dblue);
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow:not(.lrow--set):hover + .lrow {
+    border-top-color: transparent;
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow:not(.lrow--set):active,
+html.desk #s-profile .me:active {
+    background: var(--dblue-press);
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow:not(.lrow--set):hover > svg.i,
+html.desk #s-profile .me:hover > svg.i {
+    color: var(--dblue);
+}
+html.desk :is(#s-profile, #s-me, #s-orders, #s-addrs, #s-pay, #s-notif, #s-dev) .lrow:not(.lrow--set):hover small {
+    color: color-mix(in srgb, var(--dblue) 76%, var(--muted));
+}
+html.desk #s-profile .me:hover b { color: var(--dblue); }
+html.desk #s-profile .lang:hover .lang__t b { color: var(--dblue); }
+html.desk #s-profile .lrow--set { padding: 15px 18px 16px; }
+html.desk #s-profile .lrow--set:hover { background: transparent; color: var(--ink); }
+html.desk #s-profile .lrow--set > span { font-size: 16px; font-weight: 600; }
+
+/* ── главный экран профиля (#s-profile) ── */
+html.desk #s-profile > #profileScroll { padding: 78px 4px 16px; }
 html.desk #s-profile #profileScroll > h1.ttl { display: none; }
 html.desk #s-profile #profileScroll > .me {
-    margin: 4px 16px 0; padding: 12px 14px; border-radius: var(--r-card);
+    margin: 4px 16px 0; padding: 14px 18px; border-radius: var(--r-card);
     background: var(--card);
+    transition: background-color .18s ease, color .18s ease;
 }
-html.desk #s-profile #profileScroll > .sec { padding-top: 18px; }
-html.desk #s-profile .bcard { min-height: 152px; }
+html.desk #s-profile #profileScroll > .me b { font-size: 21px; transition: color .18s ease; }
+html.desk #s-profile #profileScroll > .me small { font-size: 14px; margin-top: 2px; }
+html.desk #s-profile #profileScroll > .sec { padding-top: 16px; }
+html.desk #s-profile .bcard { min-height: 156px; padding: 22px 24px 20px; }
+html.desk #s-profile .bcard small { font-size: 14px; }
+html.desk #s-profile .bcard b { font-size: 44px; }
+html.desk #s-profile .bcard p { font-size: 13.5px; }
 html.desk #s-profile #profileScroll > .endnote { padding: 20px 16px 6px; }
 html.desk #s-profile #profileScroll > div:last-child:not([class]) { height: 8px !important; }
+
+/* ── «Мой профиль» (#s-me) ── */
+html.desk #s-me > .scroll { padding-bottom: 108px; }
+html.desk #s-me .me2 { padding: 4px 16px 12px; gap: 16px; }
+html.desk #s-me .me2__name { font-size: 25px; line-height: 1.15; margin-top: 10px; }
+html.desk #s-me .me2__pct { font-size: 14px; }
+html.desk #s-me .me2__miss { transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s var(--dease); }
+html.desk #s-me .me2__miss:hover { border-color: var(--dblue); background: var(--dblue-bg); color: var(--dblue); transform: translateY(-1px); }
+html.desk #s-me .ccell { transition: background-color .18s ease, box-shadow .18s ease; }
+html.desk #s-me .ccell:not(.ccell--ro):hover { background: color-mix(in srgb, var(--dblue) 4%, var(--card)); }
+html.desk #s-me .ccell:not(.ccell--ro):focus-within { background: var(--dblue-bg); box-shadow: inset 3px 0 0 var(--dblue); }
+html.desk #s-me .me2__q { font-size: 14px; line-height: 1.45; }
+html.desk #s-me .me2__q b { display: block; font-size: 19px; font-weight: 700; margin-bottom: 4px; color: var(--ink); }
+html.desk #s-me .me2__nope:hover { border-color: var(--dblue); background: var(--dblue-bg); color: var(--dblue); box-shadow: none; transform: none; }
+html.desk #s-me .me2__nope[aria-pressed="true"]:hover { background: var(--ink); color: var(--app-bg); border-color: var(--ink); }
+html.desk #s-me .pe__out { border-radius: 14px; padding: 13px 16px; transition: background-color .18s ease, color .18s ease; }
+html.desk #s-me .pe__out:hover { background: color-mix(in srgb, var(--brand) 10%, transparent); }
+html.desk #s-me > .foot { padding: 14px 20px 20px; }
+
+/* ── «Мои заказы» (#s-orders) ── */
+html.desk #s-orders .ords { padding: 2px 16px 0; }
+html.desk #s-orders .ostat { padding: 18px 20px; }
+html.desk #s-orders .ostat__n { font-size: 38px; }
+html.desk #s-orders .omon { font: var(--display-weight) 23px/1.15 var(--font-display); letter-spacing: var(--display-track); margin: 22px 2px 12px; color: var(--ink); }
+html.desk #s-orders .oc { padding: 18px 20px; transition: box-shadow .22s ease, transform .22s var(--dease); }
+html.desk #s-orders .oc:hover { box-shadow: 0 12px 28px -18px rgba(20, 12, 8, .28); }
+html.desk #s-orders .oc__name b { font-size: 17.5px; }
+html.desk #s-orders .oc__rc:hover { background: var(--dblue-bg); color: var(--dblue); }
+
+/* ── «Адреса» (#s-addrs) ── */
+html.desk #s-addrs .adrs { padding: 4px 16px 0; gap: 12px; }
+html.desk #s-addrs .bt--isle { min-height: 92px; padding: 18px 20px; transition: box-shadow .2s ease, background-color .2s ease, transform .2s var(--dease); }
+html.desk #s-addrs .bt--isle:not(.is-on):hover { box-shadow: inset 0 0 0 1.5px var(--dblue); background: var(--dblue-bg); }
+html.desk #s-addrs .bt--isle:not(.is-on):hover .bt__big { color: var(--dblue); }
+html.desk #s-addrs .bt__big { font-size: 19px; line-height: 1.22; }
+html.desk #s-addrs .bt__sub { font-size: 13.5px; margin-top: 4px; }
+html.desk #s-addrs .adrs__new { overflow: hidden; transition: box-shadow .2s ease, background-color .2s ease; }
+html.desk #s-addrs .adrs__map { height: 92px; min-height: 92px; aspect-ratio: auto; }
+html.desk #s-addrs .adrs__cap { padding: 15px 18px; }
+html.desk #s-addrs .adrs__cap b { font-size: 17px; transition: color .18s ease; }
+html.desk #s-addrs .adrs__new:hover { box-shadow: inset 0 0 0 1.5px var(--dblue); }
+html.desk #s-addrs .adrs__new:hover .adrs__cap { background: var(--dblue-bg); }
+html.desk #s-addrs .adrs__new:hover .adrs__cap b,
+html.desk #s-addrs .adrs__new:hover .adrs__cap svg.i { color: var(--dblue); }
+html.desk #s-addrs .adrs__new:hover .adrs__plus { background: var(--dblue); transform: scale(1.07); }
+html.desk #s-addrs .adrs__plus { transition: background-color .2s ease, transform .22s var(--dease); }
+
+/* ── «Оплата» (#s-pay) ── */
+html.desk #s-pay .pays { padding: 4px 16px 0; }
+html.desk #s-pay .pays__hero { padding: 2px 0 8px; }
+html.desk #s-pay .pays__card { max-width: 344px; margin: 0 auto; }
+html.desk #s-pay .co__h {
+    font: var(--display-weight) 19px/1.2 var(--font-display); letter-spacing: -.015em;
+    color: var(--ink); margin: 22px 4px 10px; text-transform: none;
+}
+html.desk #s-pay .cpays { padding: 0; overflow: hidden; }
+html.desk #s-pay .prow {
+    padding: 15px 18px; transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+html.desk #s-pay .prow:first-child { border-top-left-radius: var(--r-card); border-top-right-radius: var(--r-card); }
+html.desk #s-pay .prow:last-child { border-bottom-left-radius: var(--r-card); border-bottom-right-radius: var(--r-card); }
+html.desk #s-pay .prow:hover { background: var(--dblue-bg); }
+html.desk #s-pay .prow:hover + .prow { border-top-color: transparent; }
+html.desk #s-pay .prow:active { background: var(--dblue-press); }
+html.desk #s-pay .prow:hover .cpay__t b,
+html.desk #s-pay .prow:hover > svg.i:last-child { color: var(--dblue); }
+html.desk #s-pay .prow:hover > svg.i:last-child { transform: translateX(3px); }
+html.desk #s-pay .prow--add:hover .cpay__ic { background: var(--dblue); color: #fff; }
+html.desk #s-pay .prow--add .cpay__ic { transition: background-color .18s ease, color .18s ease; }
+html.desk #s-pay .ckeep { padding: 16px 18px; }
+html.desk #s-pay .ckeep__t b { font-size: 16px; }
+html.desk #s-pay .pays__safe { font-size: 13px; padding: 4px 4px 0; }
+
+/* ── «Уведомления» (#s-notif) ── */
+html.desk #s-notif .nts { padding: 2px 16px 0; }
+html.desk #s-notif .omon { font: var(--display-weight) 23px/1.15 var(--font-display); letter-spacing: var(--display-track); color: var(--ink); }
+html.desk #s-notif .nts__top { margin: 20px 2px 10px; }
+html.desk #s-notif .nts__list > .omon { margin: 22px 2px 10px; }
+html.desk #s-notif .nts__read {
+    font-size: 14px; font-weight: 600; color: var(--dblue); padding: 6px 12px; border-radius: 999px;
+    transition: background-color .18s ease;
+}
+html.desk #s-notif .nts__read:hover { background: var(--dblue-bg); text-decoration: none; }
+html.desk #s-notif .nt { transition: background-color .18s ease; }
+html.desk #s-notif .nt__head { padding: 15px 18px; }
+html.desk #s-notif .nt__t, html.desk #s-notif .nt__ic { transition: color .18s ease; }
+html.desk #s-notif .nt:hover { background: var(--dblue-bg); }
+html.desk #s-notif .nt:hover .nt__t,
+html.desk #s-notif .nt:hover .nt__ic { color: var(--dblue); }
+
+/* ── «Избранное» (#s-fav) в модальном окне поверх профиля ── */
+html.desk #s-fav > #favScroll { padding: 78px 4px 20px; }
+html.desk #s-fav #favScroll > h1.ttl { display: none; }
+html.desk #s-fav .favs__sub { text-align: left; padding: 0 20px; margin: 0 0 2px; font-size: 14.5px; color: var(--muted); }
+html.desk #s-fav .fgrp { padding: 20px 16px 0; }
+html.desk #s-fav .fgrp__h { margin-bottom: 12px; }
+html.desk #s-fav .fgrp__r { padding: 6px 10px 6px 6px; border-radius: 14px; }
+html.desk #s-fav .fgrp__r:hover { background: var(--dblue-bg); }
+html.desk #s-fav .fgrp__r:hover .fgrp__t b { color: var(--dblue); }
+html.desk #s-fav .fgrp__t b { font-size: 17.5px; transition: color .18s ease; }
+html.desk #s-fav .frow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; overflow: visible; padding: 0; }
+html.desk #s-fav .frow > .item { width: auto; max-width: none; min-width: 0; }
+html.desk #s-fav .rests { display: grid; grid-template-columns: 1fr; gap: 14px; padding: 0 16px; }
+html.desk #s-fav #favScroll > div:last-child:not([class]) { height: 12px !important; }
+
+/* ── шторки из профиля (условия сервиса, чек, настройки уведомлений, новая карта): крупнее заголовок ── */
+html.desk #sheet:not(.is-dish):not(.is-swap):not(.is-authkb):not(.is-deal):not(.has-map) { width: 560px; }
+html.desk #sheet:not(.is-dish):not(.is-swap):not(.is-authkb):not(.is-deal) .sheet__head h2 {
+    font: var(--display-weight) 26px/1.15 var(--font-display); letter-spacing: var(--display-track);
+}
 /* ── поддержка на десктопе (#s-chat, 28.11): двухколоночное окно (телефоны МТС/А1, обратный звонок, график + живой чат);
    везде в форме, включая саму рамку окна и баллоны переписки — гладкие углы (Apple smooth corners: SQ_X / SQ_RING) ── */
 html.desk #s-chat.screen:not(.is-tab) {

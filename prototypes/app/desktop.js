@@ -2336,11 +2336,60 @@ window.cleverDesk = function (A) {
         if (sc) bar.classList.toggle('is-over', sc.scrollTop > 4);
     }
 
+    /* 28.11: избранное (#s-fav) на десктопе — такое же модальное окно поверх профиля со стрелкой назад и крупным заголовком */
+    function deskFavMount() {
+        var scr = document.getElementById('s-fav');
+        if (!scr || !deskOn() || S.stack.indexOf('fav') < 0) return;
+        var bar = scr.querySelector(':scope > .dfav__bar');
+        var sc = document.getElementById('favScroll');
+        var tTxt = A.tr ? A.tr('Избранное') : 'Избранное';
+        var bTxt = A.tr ? A.tr('Назад') : 'Назад';
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.className = 'dh dfav__bar';
+            bar.innerHTML =
+                '<button type="button" class="ibtn dfav__back" data-act="back" aria-label="' + esc(bTxt) + '">' + ic('i-back') + '</button>' +
+                '<h2 class="dfav__title">' + esc(tTxt) + '</h2>';
+            var ttl = bar.querySelector('.dfav__title');
+            if (ttl && ttl.firstChild) { ttl.firstChild._ru = 'Избранное'; ttl.firstChild._tv = ttl.firstChild.nodeValue; }
+            var bk = bar.querySelector('.dfav__back');
+            if (bk) { bk._ra = { 'aria-label': 'Назад' }; bk._ta = { 'aria-label': bTxt }; }
+            scr.insertBefore(bar, scr.firstChild);
+            if (sc && !sc._dfavSc) {
+                sc._dfavSc = true;
+                sc.addEventListener('scroll', function () {
+                    var b = scr.querySelector(':scope > .dfav__bar');
+                    if (b) b.classList.toggle('is-over', sc.scrollTop > 4);
+                }, { passive: true });
+            }
+        }
+        if (sc) bar.classList.toggle('is-over', sc.scrollTop > 4);
+    }
+    // 28.11: на десктопе «Избранное» из профиля открывается модалкой поверх профиля; переход в ресторан из него — закрывает модалки
+    app.addEventListener('click', function (e) {
+        if (!deskOn()) return;
+        var gf = e.target.closest('[data-act="go-fav"]');
+        if (gf) {
+            e.stopPropagation(); e.preventDefault();
+            if (S.stack.indexOf('fav') < 0) pushScreen('fav');
+            return;
+        }
+        var fr = e.target.closest('#s-fav [data-act="open-rest"]');
+        if (fr && S.stack.indexOf('fav') >= 0) {
+            e.stopPropagation(); e.preventDefault();
+            var rid = fr.dataset.id;
+            deskClose();
+            if (rid) pushScreen('rest', rid);
+        }
+    }, true);
+
     function deskChrome() {
         if (!deskOn()) { homeFloatHide(true); deskAddrStop(); deskPlaceHead(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (mappEl) closeAppModal(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
-        if (S.tab === 'profile' && A.setTab) {
+        if ((S.tab === 'profile' || S.tab === 'fav') && A.setTab) {
+            var want = S.tab;
             A.setTab('home');
-            if (S.auth && S.stack.indexOf('profile') < 0) pushScreen('profile');
+            if (want === 'profile' && S.auth && S.stack.indexOf('profile') < 0) pushScreen('profile');
+            else if (want === 'fav' && S.stack.indexOf('fav') < 0) pushScreen('fav');
             return;
         }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
@@ -2352,7 +2401,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskRestScroll(); deskPop(); deskNavSync(); deskSupportMount(); deskProfileMount();
+        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskRestScroll(); deskPop(); deskNavSync(); deskSupportMount(); deskProfileMount(); deskFavMount();
         homeCartRingSync(document.getElementById('cartTab'));
         homeFloatScroll();
     }
@@ -2374,13 +2423,13 @@ window.cleverDesk = function (A) {
             else if (S.stack.length) { if (canHistBack()) history.back(); else popScreen(); e.preventDefault(); }
         } else if (e.key === '/' && !ed && !mappEl && !A.sheetKind() && !e.ctrlKey && !e.metaKey) { e.preventDefault(); document.getElementById('dSearch').click(); }
     });
-    // 28.11: пока открыто модальное окно (корзина, оформление, профиль, мобильное приложение и т. д.), не даём колесу/трекпаду тянуть пустоту за край списка или крутить фон
+    // 28.11: пока открыто модальное окно (корзина, оформление, профиль, избранное, мобильное приложение и т. д.), не даём колесу/трекпаду тянуть пустоту за край списка или крутить фон
     app.addEventListener('wheel', function (e) {
         if (!deskOn()) return;
         if (mappEl) { e.preventDefault(); return; }
         if (A.sheetKind() || !/win|drawer/.test(app.dataset.dtop || '')) return;
         if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
-        var win = e.target && e.target.closest ? e.target.closest('.screen:is(:not(.is-tab):not(#s-rest), #s-profile).is-on') : null;
+        var win = e.target && e.target.closest ? e.target.closest('.screen:is(:not(.is-tab):not(#s-rest), #s-profile, #s-fav).is-on') : null;
         var sc = win && e.target.closest ? e.target.closest('.scroll, .dsup__side') : null;
         if (!sc || !win.contains(sc)) { e.preventDefault(); return; }
         var max = sc.scrollHeight - sc.clientHeight;

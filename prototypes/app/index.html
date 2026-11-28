@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 17:03';
+    var BUILD = '28.11 · 17:27';
 
     /* ── состояние ── */
     var S = {
@@ -20472,8 +20472,11 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function notifRowS() { var u = notifUnread(); return u ? '<i class="lrow__new"></i>' + u + '\u00a0' + plural(u, 'новое', 'новых', 'новых') : 'промокоды и акции'; }
     function profSync() {
         var pp = document.querySelector('#profileScroll [data-act="go-pay"] small'), nn = document.querySelector('#profileScroll [data-act="go-notif"] small');
+        var ff = document.querySelector('#profileScroll [data-act="go-fav"] small'), aa = document.querySelector('#profileScroll [data-act="go-addrs"] small');
         if (pp) pp.textContent = cardLabel(mainCard());
         if (nn) nn.innerHTML = notifRowS();
+        if (ff) ff.textContent = String(Object.keys(S.favRest).filter(function (k) { return S.favRest[k]; }).length + Object.keys(S.fav).filter(function (k) { return S.fav[k]; }).length);
+        if (aa) aa.textContent = String(ADDRS.length);
     }
 
     /* ── профиль ── */
@@ -20843,6 +20846,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (id === 'notif') renderNotif();
         if (id === 'addrs') renderAddrs();
         if (id === 'profile') renderProfile();
+        if (id === 'fav') renderFav();
         var prev = S.stack[S.stack.length - 1], under = document.getElementById('s-' + (prev || S.tab)), el = document.getElementById('s-' + id);
         var deskPage = deskOn() && id === 'rest';
         var deskWin = deskOn() && !deskPage;
