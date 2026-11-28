@@ -2400,6 +2400,25 @@ html.kb-on .sheet.has-map > .sheet__foot { padding-bottom: 12px; }
 .radio { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--faint); transition: box-shadow .2s; }
 .opt input:checked + .radio { box-shadow: inset 0 0 0 7px var(--ink); }   /* 07.11: «радиобаттоны давай делать чёрными, а не красными» */
 .opt input:focus-visible + .radio { outline: 2.5px solid var(--ink); outline-offset: 2px; }
+/* 28.11: добавки и исключения на мобильной шторке блюда (у десктопа — свои .ddish-*) */
+.mopts { display: grid; gap: 2px; }
+.opt--chk { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); font: inherit; text-align: left; }
+.opt--chk:last-child { border-bottom: 0; }
+.opt--chk > span:first-child { font-weight: 500; }
+.opt--chk.is-on > span:first-child { font-weight: 600; }
+.mchk { width: 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; color: var(--app-bg); box-shadow: inset 0 0 0 2px var(--faint); transition: background-color .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--pop); }
+.mchk svg.i { width: 14px; height: 14px; stroke-width: 2.8; opacity: 0; transform: scale(.45); transition: opacity .16s ease, transform .24s var(--pop); }
+.opt--chk.is-on .mchk { background: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.opt--chk.is-on .mchk svg.i { opacity: 1; transform: scale(1); }
+.opt--chk:active .mchk { transform: scale(.86); }
+.mexcl__list { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.mexcl { display: inline-flex; align-items: center; gap: 0; height: 36px; padding: 0 13px; border: 0; border-radius: 12px; background: var(--card); color: var(--ink); font: 550 13.5px/1 var(--font); box-shadow: inset 0 0 0 1px var(--line); transition: background-color .2s, color .2s, box-shadow .2s, gap .2s var(--ease), padding-left .2s var(--ease), transform .16s var(--pop); }
+.mexcl:active { transform: scale(.94); }
+.mexcl__ic { display: grid; place-items: center; width: 0; height: 14px; overflow: hidden; opacity: 0; transition: width .2s var(--ease), opacity .16s ease; }
+.mexcl__ic svg.i { width: 12px; height: 12px; stroke-width: 2.4; }
+.mexcl.is-on { gap: 6px; padding-left: 10px; background: var(--ink); color: var(--app-bg); box-shadow: inset 0 0 0 1px var(--ink); }
+.mexcl.is-on .mexcl__ic { width: 14px; opacity: 1; }
+html.desk .mopts { display: none; }
 
 /* ── корзина и оформление ── */
 .citems { display: grid; gap: 0; padding: 4px 16px 0; }
@@ -6174,6 +6193,12 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (id === 'cinnabon' || id === 'pancakes' || id === 'syrniki' || id === 'bliny' || id === 'granola_bowl') return ADDON_SWEET;
         return [];
     }
+    function dishHasOpts(id) {
+        var k = typeof id === 'string' ? id : (id && id._id);
+        var d = typeof id === 'string' ? DISHES[id] : id;
+        if (!d || !k) return false;
+        return !!(d.pizza || dishAddons(k).length || dishExtras(k).length || dishExcludes(k).length);
+    }
     // КБЖУ на 100 г (или 100 мл для напитков): [ккал, белки, жиры, углеводы]
     var DISH_NUTR = {
         country: [200, 10.6, 6.1, 25.6], manhattan: [270, 11.9, 13.6, 25.1], ranch: [231, 11.1, 9.6, 25.1], chicken: [217, 13.3, 7.4, 24.3],
@@ -6376,6 +6401,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         benedict: [4.9, 286], shakshuka: [4.8, 214], croissant: [4.9, 342], tiramisu: [4.9, 295], sansebastian: [4.9, 311], berrychoc: [5.0, 274], bento: [4.9, 183], baklava: [4.9, 226], raf: [4.8, 318], matcha: [4.8, 209], berrycake: [4.9, 244], diavola: [4.8, 176], prosciutto: [4.9, 148], carbonara_pizza: [4.8, 212], greek_salad: [4.7, 194], burrata: [4.9, 163], salmon_grill: [4.9, 228], machanka: [4.9, 315], meat_pie: [4.8, 241], cabbage_pie: [4.8, 167], salmon_pie: [4.9, 152], california: [4.8, 289], baked_salmon: [4.9, 234], unagi_roll: [4.9, 187], miso_soup: [4.7, 142], edamame: [4.8, 118], chicken_shashlik: [4.9, 264], grill_veg: [4.8, 153], khachapuri_megrel: [4.9, 298], bolognese: [4.8, 221], risotto: [4.9, 164], pad_thai: [4.9, 247], bao_pork: [4.8, 139], onion_rings: [4.7, 205], double_chicken: [4.8, 276], quesadilla: [4.8, 183], shrimp_tempura: [4.9, 219], avocado_omelette: [4.9, 192], granola_bowl: [4.8, 158], latte_caramel: [4.9, 267], cheesecake_ny: [4.9, 231],
         pt_carbonara: [5.0, 148], pt_padthai_shrimp: [4.9, 214], pt_orange_chicken: [4.9, 176], pt_teriyaki_udon: [4.8, 263], pt_duck_shiitake: [4.9, 92], pt_salmon_udon: [4.9, 118], pt_cheese_ramen: [5.0, 184], pt_tomyum: [4.9, 205], pt_phobo: [4.8, 131], pt_poke_salmon: [4.9, 162], pt_gyoza: [4.8, 109], pt_bubble_mango: [4.9, 97] };
     Object.keys(DISH_RATE).forEach(function (k) { if (DISHES[k]) { DISHES[k].rating = DISH_RATE[k][0]; DISHES[k].votes = DISH_RATE[k][1]; } });
+    Object.keys(DISHES).forEach(function (k) { DISHES[k]._id = k; });
 
     var MENUS = {
         padthai: [
@@ -6792,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 12:06';
+    var BUILD = '28.11 · 12:23';
 
     /* ── состояние ── */
     var S = {
@@ -7203,9 +7229,9 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var ok = true;
         $$('#favScroll .item').forEach(function (el) {
             var id = el.dataset.item; if (!id || !DISHES[id]) return;
-            var q = dishQty(id), pill = el.querySelector('.qty'), cnt = el.querySelector('.item__count'), piz = DISHES[id].pizza;
+            var q = dishQty(id), pill = el.querySelector('.qty'), cnt = el.querySelector('.item__count'), opt = dishHasOpts(id);
             if (!q && !pill && !cnt) return;
-            if (q && (piz ? cnt && !pill : pill && !cnt)) { var num = piz ? cnt : pill.querySelector('.num'); if (num && q !== cntOf(num)) cntSet(num, q); return; }
+            if (q && (opt ? cnt && !pill : pill && !cnt)) { var num = opt ? cnt : pill.querySelector('.num'); if (num && q !== cntOf(num)) cntSet(num, q); return; }
             ok = false;
         });
         if (!ok) renderFav();
@@ -8335,6 +8361,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         a.onfinish = a.oncancel = function () { t._press = 0; done(); };
     }
     function quickAdd(t, id) {
+        if (dishHasOpts(id)) { dishFrom = t; openSheet('dish', { id: id, rest: t.dataset.rest }); return; }
         var ups = t.classList.contains('ups'), pk = pressKey(t);
         if (ups && !fxOff() && !t._pressed) { upsPress(t, function () { t._pressed = 1; try { if (t.isConnected) quickAdd(t, id); } finally { t._pressed = 0; } }); return; }
         if (ups && UPS_V[FXV.ups] && !fxOff()) { upsFly(t, id, FXV.ups); return; }   // все виды, кроме «Кометы»
@@ -9776,7 +9803,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             '<span class="adder__n num" aria-hidden="true"><b>' + (q || 1) + '</b></span>' +
             '<button type="button" class="adder__plus" data-act="' + adderAct(id, q) + '" data-id="' + id + '" data-rest="' + restId + '" aria-label="' + esc(adderLabel(id, q)) + '">' + ic('i-plus') + '</button></span>';
     }
-    function adderAct(id, q) { return DISHES[id].pizza && !q ? 'open-dish' : 'quick-add'; }   // пицца: сначала размер — на странице блюда
+    function adderAct(id, q) { return dishHasOpts(id) ? 'open-dish' : 'quick-add'; }   // есть опции или добавки — открываем карточку блюда
     function adderLabel(id, q) { return q ? 'Добавить ещё, сейчас ' + q : 'Добавить ' + DISHES[id].name; }
     // число в плашке меняется прокруткой: больше — старое уходит вверх, новое приходит снизу; меньше — наоборот
     function adderSet(el, q) {
@@ -10864,15 +10891,15 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var d = DISHES[id], q = dishQty(id);
         return '<div class="item" data-item="' + id + '">' +
             '<button type="button" class="item__pic' + (isRound(d.pic) ? ' is-round' : '') + '" style="border:0;padding:0" data-act="open-dish" data-id="' + id + '" data-rest="' + restId + '" aria-label="' + esc(d.name) + '">' + picTag(d.pic, d.name, 175) + '</button>' +
-            cardTags(d, id) + (q && d.pizza ? '<span class="item__count num">' + q + '</span>' : '') +   // число — в плашке «− n +»; у пиццы её нет — бейдж
+            cardTags(d, id) + (q && dishHasOpts(id) ? '<span class="item__count num">' + q + '</span>' : '') +   // число — в плашке «− n +»; у блюд с опциями её нет — бейдж
             '<button type="button" class="ibtn item__fav' + (S.fav[id] ? ' is-on' : '') + '" data-act="fav" data-id="' + id + '" data-rest="' + restId + '" aria-label="В избранное" aria-pressed="' + !!S.fav[id] + '">' + favIc() + '</button>' +
             '<span class="item__body">' + rateBadge(d, id, restId, 'item__rate', '', true) + cardTagLine(d) + '<b>' + esc(d.name) + '</b><small class="item__meta">' + dishRate(d) + '<span>' + dishWeight(d, 'S') + (d.pizza ? ' · 25 см' : '') + '</span><span class="item__mp num">' + priceHtml(d) + '</span></small></span>' +
             '<span class="item__foot"><span class="item__price num' + (d.sale ? ' is-sale' : '') + '">' + priceHtml(d) + '</span>' + itemAdd(id, restId, q) + '</span>' +
             '</div>';
     }
-    // цена на карточке: со скидкой — сверху старая (красная, зачёркнутая), под ней новая (чёрная)
+    // цена на карточке: со скидкой — сверху старая (красная, зачёркнутая), под ней новая (чёрная); «от» — если у блюда есть опции/добавки
     function priceHtml(d) {
-        var pre = d.pizza ? 'от ' : '', now = pre + moneyShort(dishPrice(d)) + '\u00a0' + BYN;   // со знаком рубля (07.11)
+        var pre = dishHasOpts(d) ? 'от ' : '', now = pre + moneyShort(dishPrice(d)) + '\u00a0' + BYN;   // со знаком рубля (07.11)
         return d.sale ? '<s class="pr-old strike">' + pre + moneyShort(d.price) + '\u00a0' + BYN + '</s><span class="pr-now">' + now + '</span>' : now;
     }
     // метки на фото — слева вверху, на одном уровне с сердцем; порядок — от самого важного
@@ -10936,8 +10963,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         $$('#s-rest .item .item__tags').forEach(function (t) { tagPeekIO.observe(t); });
     }
     function itemAdd(id, restId, q) {
-        var d = DISHES[id];
-        if (!q || d.pizza) return '<button type="button" class="plus" data-act="' + (d.pizza ? 'open-dish' : 'quick-add') + '" data-id="' + id + '" data-rest="' + restId + '" aria-label="Добавить ' + esc(d.name) + '">' + ic('i-plus') + '</button>';
+        var d = DISHES[id], opt = dishHasOpts(id);
+        if (!q || opt) return '<button type="button" class="plus" data-act="' + (opt ? 'open-dish' : 'quick-add') + '" data-id="' + id + '" data-rest="' + restId + '" aria-label="Добавить ' + esc(d.name) + '">' + ic('i-plus') + '</button>';
         return qtyPill(id, restId, q);
     }
     /* меню заведения: поменялось только количество — числа на месте, быстрым счётчиком; карточку не перерисовываем: плашка
@@ -10946,14 +10973,14 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         $$('#s-rest .item').forEach(function (el) {
             var id = el.dataset.item;
             var restId = curRest;
-            var q = dishQty(id), pill = el.querySelector('.qty'), cnt = el.querySelector('.item__count'), piz = DISHES[id].pizza;
+            var q = dishQty(id), pill = el.querySelector('.qty'), cnt = el.querySelector('.item__count'), opt = dishHasOpts(id);
             if (!q && !pill && !cnt) {   // не в заказе и не было — карточка та же; сердце — по избранному, на месте
                 var fv = el.querySelector('.item__fav'), on = !!S.fav[id];
                 if (fv && fv.classList.contains('is-on') !== on) { fv.classList.toggle('is-on', on); fv.setAttribute('aria-pressed', on); }
                 return;
             }
-            if (q && (piz ? cnt && !pill : pill && !cnt)) {   // вид тот же: у пиццы — бейдж, у остальных — плашка «− n +»
-                var num = piz ? cnt : pill.querySelector('.num');
+            if (q && (opt ? cnt && !pill : pill && !cnt)) {   // вид тот же: у блюд с опциями — бейдж, у остальных — плашка «− n +»
+                var num = opt ? cnt : pill.querySelector('.num');
                 if (q !== cntOf(num)) cntSet(num, q);
                 return;
             }
@@ -12103,7 +12130,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         el.classList.remove('is-ghost'); el.classList.add('is-cur'); el.removeAttribute('aria-hidden'); el.style.cssText = '';
         [].forEach.call(el.querySelectorAll('[data-gid]'), function (e) { e.id = e.dataset.gid; e.removeAttribute('data-gid'); });
         [].forEach.call(el.querySelectorAll('[name="gbase"]'), function (e) { e.name = 'base'; });
-        dishState = { id: x.id, rest: x.rest, size: d.pizza ? 'M' : null, base: d.pizza ? 'classic' : null, qty: 1 };
+        dishState = { id: x.id, rest: x.rest, size: d.pizza ? 'M' : null, base: d.pizza ? 'classic' : null, addons: [], excludes: [], qty: 1 };
         dcar.i = g.to; dcar.ph = 0;
         syncDish(); dcarBarSet(); footLine(sh);
         var f = $$('[data-act="open-dish"][data-id="' + x.id + '"]').filter(function (e) { return e.getClientRects().length; })[0]; if (f) dishFrom = f;   // полёт «в корзину» — от его карточки
@@ -12236,6 +12263,30 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
                     return '<label class="opt"><span>' + b.name + '</span><small>' + (b.add ? '+' + moneyShort(b.add) + '\u00a0' + BYN : 'бесплатно') + '</small><input type="radio" name="base" id="base-' + b.k + '" value="' + b.k + '"' + (b.k === dishState.base ? ' checked' : '') + ' data-act="base"><span class="radio"></span></label>';
                 }).join('') + '</div>';
         }
+        if (!deskOn()) {
+            var extKs = dishExtras(o.id), exKs = dishExcludes(o.id), adKs = dishAddons(o.id);
+            var mkMobAd = function (k) {
+                var a = ADDONS[k]; if (!a) return '';
+                var on = dishState.addons.indexOf(k) >= 0;
+                return '<button type="button" class="opt opt--chk' + (on ? ' is-on' : '') + '" data-act="addon" data-id="' + k + '" aria-pressed="' + on + '">' +
+                    '<span>' + esc(a.name) + '</span><small>+' + moneyShort(a.add) + '\u00a0' + BYN + '</small>' +
+                    '<span class="mchk" aria-hidden="true">' + ic('i-check') + '</span></button>';
+            };
+            if (extKs.length) h += '<div class="opts mopts"><h3>Дополнительно</h3>' + extKs.map(mkMobAd).join('') + '</div>';
+            if (exKs.length) {
+                h += '<div class="opts mopts"><h3>Убрать из состава</h3><div class="mexcl__list">' + exKs.map(function (k) {
+                    var ex = EXCLUDES[k]; if (!ex) return '';
+                    var on = dishState.excludes.indexOf(k) >= 0;
+                    return '<button type="button" class="mexcl' + (on ? ' is-on' : '') + '" data-act="exclude" data-id="' + k + '" aria-pressed="' + on + '">' +
+                        '<span class="mexcl__ic" aria-hidden="true">' + ic('i-close') + '</span><span>' + esc(ex.name) + '</span></button>';
+                }).join('') + '</div></div>';
+            }
+            if (adKs.length) {
+                var mSweet = o.id === 'cinnabon' || o.id === 'pancakes' || o.id === 'syrniki' || o.id === 'bliny' || o.id === 'granola_bowl';
+                var mTitle = mSweet ? 'Топпинги' : (o.id.indexOf('pt_') === 0 ? 'Начинка' : 'Добавки');
+                h += '<div class="opts mopts"><h3>' + mTitle + '</h3>' + adKs.map(mkMobAd).join('') + '</div>';
+            }
+        }
         h += '<div style="height:8px"></div></div></div>' +
             '<div class="sheet__foot dfoot"><span class="stepper"><button type="button" data-act="dqty" data-d="-1" aria-label="Меньше">' + ic('i-minus') + '</button><span class="num" id="dqty">' + dishState.qty + '</span><button type="button" data-act="dqty" data-d="1" aria-label="Больше">' + ic('i-plus') + '</button></span>' +
             '<button type="button" class="cta" data-act="dish-add" id="dishAdd" style="flex:1"></button></div>';
@@ -12279,6 +12330,14 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
                     $$('.dpz__img', im).forEach(function (el) { el.classList.toggle('is-on', el.dataset.sz === dishState.size); el.classList.remove('is-prev'); });
                 }
             } else if (im && im.classList.contains('round')) im.style.transform = 'scale(' + [0.78, 0.89, 1][si] + ')';
+        }
+        if (!deskOn()) {
+            var shCur = document.querySelector('#sheet .dpg.is-cur') || document.getElementById('sheet');
+            if (shCur) {
+                var ads = dishState.addons || [], exs = dishState.excludes || [];
+                $$('.mopts .opt--chk', shCur).forEach(function (b) { var on = ads.indexOf(b.dataset.id) >= 0; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
+                $$('.mopts .mexcl', shCur).forEach(function (b) { var on = exs.indexOf(b.dataset.id) >= 0; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
+            }
         }
         if (!(deskOn() && Desk && Desk.syncDish)) document.getElementById('dishMeta').textContent = meta;
         if (deskOn() && Desk && Desk.syncDish) Desk.syncDish();
@@ -15999,8 +16058,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (ups.length) {
             h += '<div class="sec"><div class="sec__head pad"><h2 class="h">Добавить к заказу?</h2></div><div class="hscroll">' + ups.map(function (id) {
                 var d = DISHES[id];
-                // вся карточка — кнопка «добавить» (без отдельного «+»); пицца — сначала размер, на странице блюда
-                return '<button type="button" class="ups" data-act="' + (d.pizza ? 'open-dish' : 'quick-add') + '" data-id="' + id + '" data-rest="' + r.id + '" aria-label="Добавить ' + esc(d.name) + ', ' + moneyShort(d.price) + ' руб.">' +
+                // вся карточка — кнопка «добавить» (без отдельного «+»); есть опции/добавки — открываем карточку блюда
+                return '<button type="button" class="ups" data-act="' + (dishHasOpts(id) ? 'open-dish' : 'quick-add') + '" data-id="' + id + '" data-rest="' + r.id + '" aria-label="Добавить ' + esc(d.name) + ', ' + moneyShort(d.price) + ' руб.">' +
                     '<span class="ups__pic' + (isRound(d.pic) ? ' is-round' : '') + '">' + picTag(d.pic, d.name, 104) + '</span><b>' + esc(d.name) + '</b>' +
                     '<span class="ups__price num' + (d.sale ? ' is-sale' : '') + '">' + priceHtml(d) + '</span></button>';
             }).join('') + '</div></div>';
@@ -20078,10 +20137,10 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             return '<button type="button" class="resrow sq__row" data-act="open-rest" data-id="' + r.id + '"><span class="resrow__pic sq__cv">' + picTag(r.cover) + '</span><span class="sq__t"><b>' + hl(r.name, raw) + '</b><small><span class="sq__st">' + STAR + r.rating.toFixed(1).replace('.', ',') + '</span> · ' + r.time + ' мин' + (r.fee ? '' : ' · доставка 0 ' + BYN) + '</small></span>' + ic('i-right') + '</button>';
         }).join('') + '</div></div>';
         if (ds.length) h += '<div class="sq__sec"><p class="co__h">Блюда</p><div class="cgrp sq__res">' + ds.slice(0, 14).map(function (x) {
-            var d = DISHES[x.id];
+            var d = DISHES[x.id], opt = dishHasOpts(x.id);
             return '<div class="sq__dish"><button type="button" class="resrow sq__row" data-act="open-dish" data-id="' + x.id + '" data-rest="' + x.rest + '"><span class="resrow__pic sq__dp">' + picTag(d.pic, '', 64) + '</span><span class="sq__t"><b>' + hl(d.name, raw) + '</b><small>' + esc(rest(x.rest).name) + ' · ' + hl(x.sec, raw) + '</small>' +
-                '<span class="sq__pr num">' + (d.pizza ? 'от ' : '') + moneyShort(dishPrice(d)) + ' ' + BYN + '</span></span></button>' +
-                '<button type="button" class="sq__add" data-act="quick-add" data-id="' + x.id + '" data-rest="' + x.rest + '" aria-label="Добавить «' + esc(d.name) + '»">' + ic('i-plus') + '</button></div>';
+                '<span class="sq__pr num">' + (opt ? 'от ' : '') + moneyShort(dishPrice(d)) + ' ' + BYN + '</span></span></button>' +
+                '<button type="button" class="sq__add" data-act="' + (opt ? 'open-dish' : 'quick-add') + '" data-id="' + x.id + '" data-rest="' + x.rest + '" aria-label="Добавить «' + esc(d.name) + '»">' + ic('i-plus') + '</button></div>';
         }).join('') + '</div></div>';
         if (!h) h = '<div class="empty sq__none">' + pepDisc() + '<b>Ничего не нашли</b><p>Попробуйте иначе — например:</p><div class="sq__chips">' + SQ_HOT.map(function (w) { return '<span class="sq__chip"><button type="button" data-act="search-word" data-id="' + w + '"><span>' + w + '</span></button></span>'; }).join('') + '</div></div>';
         box.innerHTML = h;
@@ -20753,9 +20812,10 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (id === 'addrs') renderAddrs();
         var prev = S.stack[S.stack.length - 1], under = document.getElementById('s-' + (prev || S.tab)), el = document.getElementById('s-' + id);
         var deskPage = deskOn() && id === 'rest';
-        var soft = !deskPage && FXV.fwd !== 'old' && !fxOff();
+        var deskWin = deskOn() && !deskPage;
+        var soft = !deskPage && !deskWin && FXV.fwd !== 'old' && !fxOff();
         el.classList.remove('is-under');
-        if (!deskPage) { el.style.transition = 'none'; el.style.transform = 'translateX(100%)'; el.style.visibility = 'visible'; }
+        if (!deskPage && !deskWin) { el.style.transition = 'none'; el.style.transform = 'translateX(100%)'; el.style.visibility = 'visible'; }
         S.stack.push(id);
         /* поверх — по месту в стопке (08.11: «когда нажал на «Повторить заказ» — всё съехало некрасиво»): у всех экранов один
            z-index, и выше был тот, что позже в разметке. «Мои заказы», «Оплата», «Уведомления» стоят после корзины, витрины и
@@ -20901,7 +20961,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var under = document.getElementById('s-' + (prev || S.tab));
         var bar = document.getElementById('cartbar');   // плашка заказа: с витрины уходит вместе с ней; из корзины на витрину — появляется
         var deskPageBack = deskOn() && id === 'rest';
-        if (!deskPageBack) backMark([el, under, prev ? null : document.getElementById('tabbar'), bar.classList.contains('is-hidden') && id !== 'cart' ? null : bar]);
+        if (!deskOn()) backMark([el, under, prev ? null : document.getElementById('tabbar'), bar.classList.contains('is-hidden') && id !== 'cart' ? null : bar]);
         el.classList.remove('is-on');
         under.classList.remove('is-under');
         // экран под уходящим — как был: меняем только то, что поменялось (soft). Пересборка здесь — это работа в первом кадре

@@ -6,8 +6,8 @@ window.cleverDesk = function (A) {
     'use strict';
     var S = A.S, app = A.app, $$ = A.$$, ic = A.ic, esc = A.esc, addr = A.addr, city = A.city, Splash = A.Splash, deskOn = A.deskOn, standOn = A.standOn, popScreen = A.popScreen, pushScreen = A.pushScreen, renderHome = A.renderHome, syncChrome = A.syncChrome, syncDish = A.syncDish, cntSet = A.cntSet, closeSheetNice = A.closeSheetNice, fxFly = A.fxFly, fxPt = A.fxPt, fxOff = A.fxOff;
 
-    // что за экран наверху: страница под шапкой, панель справа или окно по центру
-    function deskKind(id) { return !id ? '' : id === 'rest' ? 'page' : id === 'cart' || id === 'checkout' ? 'drawer' : 'win'; }
+    // что за экран наверху: страница под шапкой или окно по центру
+    function deskKind(id) { return !id ? '' : id === 'rest' ? 'page' : 'win'; }
     // шапка: адрес, поле поиска, «Войти» — перерисовываем, только если что-то сменилось
     /* 21.11: «верх очень хороший у Клевера. Я только про десктоп. Сделай такой же». Шапка по образцу clever.by: серая полоса
        со ссылками сверху; ниже — логотип, переключатель «Доставка / Навынос», адрес в рамке («📍 Минск ▾ ул. …» или зелёное
@@ -558,6 +558,15 @@ window.cleverDesk = function (A) {
         e.preventDefault();
         history.back();
     }, true);
+    /* 28.11: на десктопе клик по любой некнопочной области карточки блюда (.item или .dcard) открывает карточку товара */
+    app.addEventListener('click', function (e) {
+        if (!deskOn() || e.defaultPrevented) return;
+        if (e.target.closest('button, a, [data-act]')) return;
+        var card = e.target.closest('.item, .dcard');
+        if (!card) return;
+        var open = card.querySelector('[data-act="open-dish"]');
+        if (open) open.click();
+    });
     /* 24.11: шапка — статичный блок в потоке активной страницы (не плавает и не догоняет скролл через JS) */
     var lastHeadTab = '';
     function deskPlaceHead() {

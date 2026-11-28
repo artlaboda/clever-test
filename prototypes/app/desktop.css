@@ -147,7 +147,7 @@ html.desk .dfcart {
     will-change: transform, left, top, opacity;
 }
 html.desk .dfcart[hidden] { display: none; }
-html.desk .app[data-dtop="drawer"] .dfcart { opacity: 0; pointer-events: none; }
+html.desk .app:is([data-dtop="drawer"], [data-dtop="win"]) .dfcart { opacity: 0; pointer-events: none; }
 html.desk .dfcart__in {
     position: relative; display: block; width: 100%; height: 100%; overflow: visible;
     transition: transform .24s var(--dease);
@@ -349,6 +349,9 @@ html.desk .rest__meta .dcr--own [data-part="logo"] { display: none; }
 html.desk .rest:hover .rest__meta .dcr { display: block; }
 html.desk .rest:hover .rest__meta > span:first-child > svg.i, html.desk .rest:hover .rest__meta .cour > svg.i { display: none; }
 html.desk .rest__txt b, html.desk .rest__txt > :first-child { transition: color .2s; }
+html.desk .dcard, html.desk .item { cursor: pointer; }
+html.desk .item { box-shadow: 0 1px 0 var(--line); }
+html.desk .app[data-skin="juicy"] .item { box-shadow: none; }
 html.desk .dcard, html.desk .item, html.desk .ups { transition: transform .3s var(--dease), box-shadow .3s; }
 html.desk .dcard:hover, html.desk .item:hover { transform: translateY(-4px); box-shadow: 0 20px 34px -22px rgba(40, 24, 12, .5), 0 0 0 1px var(--line); }
 html.desk .dcard:hover img, html.desk .item:hover .item__pic img { transform: scale(1.05); }
@@ -384,7 +387,14 @@ html.desk .ibtn { transition: transform .2s var(--dease), background-color .2s, 
 html.desk .ibtn:hover { transform: scale(1.08); }
 html.desk .ibtn:active { transform: scale(.94); }
 html.desk .plus, html.desk .adder__plus, html.desk .stepper button, html.desk .adder__minus { transition: transform .2s var(--dease), background-color .2s, color .2s; }
-html.desk .plus:hover, html.desk .adder__plus:hover { transform: scale(1.12); }
+html.desk .plus:hover { transform: scale(1.12); }
+/* 28.11: на странице заведения кнопка «+» (.item .plus) и счётчик (.qty) при ховере ведут себя так же, как .adder на главной —
+   кружок остаётся на месте, аккуратно увеличивается сам знак внутри, а при нажатии кружок сжимается (.88) */
+html.desk .item .plus:hover { transform: none; }
+html.desk .item .plus:active { transform: scale(.88); }
+html.desk .item .plus svg.i, html.desk .qty button svg.i { transition: transform .2s var(--dease); }
+html.desk .item .plus:hover svg.i, html.desk .qty button:hover svg.i, html.desk .adder__plus:hover, html.desk .adder__minus:hover { transform: scale(1.12); }
+html.desk .item .plus:active svg.i, html.desk .qty button:active svg.i { transform: scale(.78); }
 html.desk .stepper button:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); border-radius: 50%; }
 /* окно блюда на десктопе (12.11): корзины в окне нет — она в шапке; «Добавлено» не зеленеет; у степпера при наведении и нажатии
    — без кружка, остаётся только градиент нажатия */
@@ -681,13 +691,7 @@ html.desk .app .rbadge svg { width: 10.5px; height: 10.5px; }
 html.desk .app .rbadge b { display: inline; font: inherit; letter-spacing: inherit; font-variant-numeric: proportional-nums; }
 html.desk .app[data-drate="photo"] .item__rate { margin-top: calc(100% - 37px); }
 
-/* ── корзина и оформление — панель справа ── */
-html.desk #s-cart, html.desk #s-checkout {
-    left: auto; right: 0; top: 0; bottom: 0; width: 480px; border-radius: 28px 0 0 28px; overflow: hidden;
-    box-shadow: -30px 0 80px -30px rgba(20, 12, 8, .45);
-    transition: transform .5s var(--dease), visibility 0s linear .5s;
-}
-html.desk #s-cart.is-on, html.desk #s-cart.is-under, html.desk #s-checkout.is-on { transition: transform .5s var(--dease), visibility 0s; }
+/* ── корзина и оформление — модальные окна по центру (28.11), как остальные экраны поверх ── */
 /* «Добавить к заказу?» в корзине (20.11: «промокод прилип к кросс-селлу; кросс-селл в корзине выглядит не очень — надо красиво»).
    Прилипал из-за общего запаса лент (снизу 40 px, забранных полем −40 px): в корзине карточки ниже, и блок промокода наезжал на
    ленту. Здесь у ленты свой запас без отрицательных полей. Карточка — белая, с мягкой тенью: фото со скруглением внутри,
@@ -713,18 +717,18 @@ html.desk #s-cart .ups:hover::after { background: var(--brand); transform: scale
 html.desk #s-cart .ups:hover::before { transform: scale(1.1); background: #fff; }
 html.desk #s-cart .ups:active { transform: translateY(-1px) scale(.97); transition: transform .15s var(--dease); }
 html.desk #s-cart .citem:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
-/* стрелка «назад» у первой панели или окна — крестик: это закрытие, а не шаг назад (в оформлении — назад в корзину) */
+/* стрелка «назад» у первого окна поверх — крестик: это закрытие, а не шаг назад (в оформлении — назад в корзину) */
 html.desk .screen.dk-first > .bar > .ibtn:first-child svg { display: none; }
 html.desk .screen.dk-first > .bar > .ibtn:first-child::before { content: ''; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; }
 html.desk .screen.dk-first > .bar > .ibtn:first-child { display: grid; place-items: center; width: 40px; height: 40px; margin-left: 10px; border-radius: 50%; }
 html.desk .screen.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); transform: rotate(90deg); }
-/* ── остальные экраны поверх — окна по центру ── */
-html.desk .screen:not(.is-tab):not(#s-rest):not(#s-cart):not(#s-checkout) {
+/* ── все экраны поверх (корзина, оформление, заказы и т. д.) — окна по центру ── */
+html.desk .screen:not(.is-tab):not(#s-rest) {
     left: 50%; right: auto; top: 50%; bottom: auto; width: 600px; height: min(820px, calc(100% - 64px)); translate: -50% -50%;
     border-radius: 30px; overflow: hidden; box-shadow: 0 50px 120px -30px rgba(20, 12, 8, .6);
     transform: translateY(26px) scale(.96); opacity: 0; transition: transform .4s var(--dease), opacity .25s, visibility 0s linear .4s;
 }
-html.desk .screen:not(.is-tab):not(#s-rest):not(#s-cart):not(#s-checkout):is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
+html.desk .screen:not(.is-tab):not(#s-rest):is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
 
 /* ── шторки — окна по центру ── */
 html.desk .scrim { z-index: 70; }
