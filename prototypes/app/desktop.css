@@ -920,12 +920,12 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__info {
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__title { color: color-mix(in srgb, var(--ink) 68%, var(--muted)); }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__dot { margin-inline: 5px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__b {
-    display: inline-flex; align-items: flex-start; height: 16px; font-weight: 700; color: var(--ink); white-space: pre;
+    display: inline-block; height: 16px; line-height: 16px; vertical-align: top; font-weight: 700; color: var(--ink); white-space: nowrap;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__wwrap { display: inline-flex; align-items: flex-start; height: 16px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__wwrap[hidden] { display: none; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__w {
-    display: inline-flex; align-items: flex-start; height: 16px; font-size: 12.5px; line-height: 16px; color: var(--muted); white-space: pre;
+    display: inline-block; height: 16px; line-height: 16px; vertical-align: top; font-size: 12.5px; color: var(--muted); white-space: nowrap;
 }
 /* капсульный переключатель «На 100 г / На порцию» на движке .cseg — с линзой, стеклом и перетягиванием */
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg {
@@ -940,6 +940,9 @@ html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg .cseg__c {
     gap: 0; min-width: 82px; padding: 0 11px; border-radius: 999px;
     font: 600 12px/1 var(--font); white-space: nowrap;
 }
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__t {
+    display: inline-block; height: 14px; line-height: 14px;
+}
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg > button[aria-pressed="true"],
 html.desk :is(#sheet, #sheetUnder).is-dish .cseg.ddish-nutr__seg .cseg__c.is-on {
     color: var(--ink); font-weight: 650;
@@ -951,8 +954,8 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c {
     display: grid; gap: 2px; min-width: 0;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__c > b {
-    display: inline-flex; align-items: flex-start; height: 22px;
-    font: 700 18px/22px var(--font); letter-spacing: -.015em; color: var(--ink); white-space: pre;
+    display: block; height: 22px;
+    font: 700 18px/22px var(--font); letter-spacing: -.015em; color: var(--ink); white-space: nowrap;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-cfg .ddish-nutr__c > b { height: 20px; font-size: 16.5px; line-height: 20px; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__lbl {
@@ -962,12 +965,12 @@ html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__lbl > span {
     font: 500 12.5px/15px var(--font); color: var(--muted);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__pct {
-    display: inline-flex; align-items: flex-start; height: 15px;
+    display: inline-block; height: 15px; vertical-align: top;
     font-style: normal; font: 600 11.5px/15px var(--font);
     color: color-mix(in srgb, var(--ink) 42%, var(--muted));
-    font-variant-numeric: tabular-nums; white-space: pre;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr :is(.dd, .dd--edge) {
+html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr :is(.ddish-nutr__b, .ddish-nutr__w, .ddish-nutr__c > b, .ddish-nutr__pct, .ddish-nutr__t) :is(.dd, .dd--edge) {
     height: 100%; line-height: inherit; vertical-align: top;
 }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-nutr__track {

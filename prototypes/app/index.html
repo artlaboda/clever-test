@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 12:23';
+    var BUILD = '28.11 · 12:25';
 
     /* ── состояние ── */
     var S = {
@@ -7583,7 +7583,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (nbs(was) === nbs(text) || fxOff() || !el.isConnected || !el.animate) { el.textContent = text; return; }
         ddFilter();
         var A = nbs(was), B = nbs(text), la = A.length, lb = B.length, n = Math.max(la, lb), nodes = [], slots = [], i;
-        var ch = function (v) { return v === ' ' ? ' ' : v; };
+        var ch = function (v) { return v === ' ' ? '\u00a0' : v; };
         for (i = 1; i <= n; i++) {   // справа налево: так совпадают разряды (копейки с копейками)
             var a = i <= la ? A.charAt(la - i) : '', b = i <= lb ? B.charAt(lb - i) : '';
             if (a === b) { nodes.unshift(document.createTextNode(ch(b))); continue; }
