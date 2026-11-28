@@ -1920,6 +1920,8 @@ html.desk .tab[data-tab="fav"], html.desk .dh-login { display: none !important; 
 html.desk .tab[data-tab="profile"] { width: 46px; height: 46px; padding: 0; justify-content: center; border-radius: 50%; }
 html.desk .tab[data-tab="profile"] > span:last-child { display: none; }
 html.desk .tab[data-tab="profile"] svg.i { width: 24px; height: 24px; }
+html.desk .tab[data-tab="profile"] svg.tbi { display: none; }
+html.desk .tab[data-tab="profile"] svg.dh-user__ic { display: block; stroke-width: 1.9; }
 html.desk #cartTab { margin-left: 14px; }
 /* главная: без приветствия, сразу категории текстом */
 html.desk #s-home .hero { display: none; }

@@ -15,6 +15,10 @@ window.cleverDesk = function (A) {
        текстом в строку («Все» на красной плашке). Профиль без входа — значок открывает вход (кнопки «Войти» в шапке больше нет) */
     var PIN = '<svg class="dh-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2s-6.8-5.9-6.8-11.4a6.8 6.8 0 0 1 13.6 0c0 5.5-6.8 11.4-6.8 11.4z"/><circle cx="12" cy="9.9" r="2.4"/></svg>';
     var TEL = '<svg class="i dh-tel__ic" viewBox="0 0 24 24" aria-hidden="true"><path class="dh-tel__hand" d="M3.9 8.4c0-.92.7-1.68 1.62-1.74l1.55-.1c.54-.04 1.03.32 1.17.85l.65 2.45a1.08 1.08 0 0 1-.46 1.18l-1.14.72a8.9 8.9 0 0 0 4.95 4.95l.72-1.14a1.08 1.08 0 0 1 1.18-.46l2.45.65c.53.14.89.63.85 1.17l-.1 1.55c-.06.92-.82 1.62-1.74 1.62C9.05 20.1 3.9 14.95 3.9 8.4z"/><path class="dh-tel__bub" d="M12.5 7A3 3 0 0 1 15.5 4h2a3 3 0 0 1 3 3v.9a3 3 0 0 1-3 3h-2.7L12.5 12.5V7z"/></svg>';
+    /* 28.11: «л2, с1, п1… по толщине линий одинаковые и стоят по высоте (по массе) одинаково» — поиск, поддержка и профиль в шапке:
+       линия 1,9, рисунок ~18,5 px в квадрате 24 и по центру (лупа сдвинута вверх-влево, круг профиля уменьшен до r 8,3) */
+    var SRCH = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.7" cy="10.7" r="6.75"/><path d="m15.5 15.5 5.1 5.1"/></svg>';
+    var USR = '<svg class="i dh dh-user__ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.3"/><circle cx="12" cy="9.9" r="2.75"/><path d="M6.9 18c1.13-1.95 2.92-2.9 5.1-2.9s3.97.95 5.1 2.9"/></svg>';
     /* 23.11: бегущая строка длинного адреса в десктопной шапке — по образцу мобильной headRun/headEdge:
        края мягко тают маской (mask-image), работает одинаково чисто и в светлой, и в тёмной теме */
     function deskAddrEdge(t, l, r, now) {
@@ -79,7 +83,7 @@ window.cleverDesk = function (A) {
                 (a ? '<span class="dh-st"><span class="dh-st__run">' + esc(a.street) + '</span></span>' : '<span class="dh-tag">Укажите адрес</span>') +
             '</button>';
         var s = document.getElementById('dSearch');
-        if (!s.firstChild) { s.innerHTML = ic('i-search'); s.setAttribute('aria-label', 'Поиск блюд и ресторанов'); }
+        if (!s.firstChild) { s.innerHTML = SRCH; s.setAttribute('aria-label', 'Поиск блюд и ресторанов'); }
         var lg = document.getElementById('dLogin'); lg.hidden = true;
         requestAnimationFrame(deskAddrRun);
         if (askEl) placeAskAddr();
@@ -626,6 +630,8 @@ window.cleverDesk = function (A) {
         tb.insertBefore(seg, document.getElementById('dAddr'));
         var tel = document.createElement('button'); tel.type = 'button'; tel.className = 'dh dh-ic dh-tel'; tel.dataset.act = 'open-chat'; tel.setAttribute('aria-label', 'Поддержка'); tel.innerHTML = TEL;
         tb.insertBefore(tel, document.getElementById('dSearch').nextSibling);
+        var pf = tb.querySelector('.tab[data-tab="profile"]');
+        if (pf && !pf.querySelector('.dh-user__ic')) pf.insertAdjacentHTML('afterbegin', USR);
         // профиль без входа — сразу вход
         tb.addEventListener('click', function (e) {
             var t = e.target.closest('.tab[data-tab="profile"]'); if (!t || !deskOn() || S.auth) return;
