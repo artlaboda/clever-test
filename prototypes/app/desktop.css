@@ -849,7 +849,8 @@ html.desk #s-chat .dsup__copied {
 }
 html.desk #s-chat .dsup__prow.is-copied .dsup__copied { opacity: 1; transform: translateY(0); }
 /* обратный звонок */
-html.desk #s-chat .dsup__cb { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+html.desk #s-chat .kbpad { display: none !important; }
+html.desk #s-chat .dsup__cb { margin: 22px 0 20px; padding-top: 20px; border-top: 1px solid var(--line); }
 html.desk #s-chat .dsup__cb-h {
     margin: 0 0 12px; font: 600 16px/1.25 var(--font); color: var(--ink);
     transition: color .2s ease;
@@ -906,11 +907,11 @@ html.desk #s-chat .dsup__cb-again {
 html.desk #s-chat .dsup__cb-again:hover { color: var(--ink); }
 /* время работы */
 html.desk #s-chat .dsup__sched {
-    margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line);
-    display: flex; flex-direction: column; gap: 5px;
+    margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line);
+    display: flex; flex-direction: column; gap: 4px;
 }
 html.desk #s-chat .dsup__sched-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-html.desk #s-chat .dsup__sched-h { font: 600 13.5px/1.2 var(--font); color: var(--muted); }
+html.desk #s-chat .dsup__sched-h { font: 600 13.5px/1.25 var(--font); color: var(--muted); }
 html.desk #s-chat .dsup__online {
     display: inline-flex; align-items: center; gap: 6px;
     font: 600 12.5px/1 var(--font); color: var(--ok);
@@ -919,10 +920,10 @@ html.desk #s-chat .dsup__online i {
     width: 7px; height: 7px; border-radius: 50%; background: var(--ok);
     box-shadow: 0 0 0 3px var(--ok-soft);
 }
-html.desk #s-chat .dsup__sched-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 3px; }
-html.desk #s-chat .dsup__sched-days { font: 500 15px/1.25 var(--font); color: var(--muted); }
-html.desk #s-chat .dsup__sched-time { font: 600 15px/1.25 var(--font); font-variant-numeric: tabular-nums; color: var(--ink); }
-html.desk #s-chat .dsup__sched-note { margin: 2px 0 0; font: 450 12.5px/1.35 var(--font); color: var(--faint); }
+html.desk #s-chat .dsup__sched-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 2px; }
+html.desk #s-chat .dsup__sched-days { font: 500 13.5px/1.25 var(--font); color: var(--muted); }
+html.desk #s-chat .dsup__sched-time { font: 600 13.5px/1.25 var(--font); font-variant-numeric: tabular-nums; color: var(--ink); }
+html.desk #s-chat .dsup__sched-note { margin: 4px 0 0; font: 450 12.5px/1.4 var(--font); color: var(--faint); }
 /* правая колонка: живой чат */
 html.desk #s-chat .dsup__chat {
     display: flex; flex-direction: column; min-width: 0; min-height: 0; height: 100%;

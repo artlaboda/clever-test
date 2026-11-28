@@ -1975,7 +1975,7 @@ window.cleverDesk = function (A) {
         wrap.appendChild(closeBtn);
 
         var side = document.createElement('aside');
-        side.className = 'dsup__side scroll';
+        side.className = 'dsup__side';
         side.innerHTML =
             '<div class="dsup__head">' +
                 '<h2 class="dsup__title">Служба поддержки</h2>' +
@@ -2026,7 +2026,7 @@ window.cleverDesk = function (A) {
                     '<span class="dsup__sched-days">Пн–Вс</span>' +
                     '<span class="dsup__sched-time" translate="no">09:00 – 01:00</span>' +
                 '</div>' +
-                '<p class="dsup__sched-note">Заказы на сайте — круглосуточно</p>' +
+                '<p class="dsup__sched-note">Заказы и предзаказы на сайте и в мобильном приложении принимаются круглосуточно</p>' +
             '</div>';
 
         var chatCol = document.createElement('div');
@@ -2180,7 +2180,7 @@ window.cleverDesk = function (A) {
         if (A.sheetKind() || !/win|drawer/.test(app.dataset.dtop || '')) return;
         if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
         var win = e.target && e.target.closest ? e.target.closest('.screen:not(.is-tab):not(#s-rest).is-on') : null;
-        var sc = win && e.target.closest ? e.target.closest('.scroll') : null;
+        var sc = win && e.target.closest ? e.target.closest('.scroll, .dsup__side') : null;
         if (!sc || !win.contains(sc)) { e.preventDefault(); return; }
         var max = sc.scrollHeight - sc.clientHeight;
         if (max <= 1 || (e.deltaY > 0 && sc.scrollTop >= max - 1) || (e.deltaY < 0 && sc.scrollTop <= 1)) e.preventDefault();
