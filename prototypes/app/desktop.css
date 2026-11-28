@@ -730,25 +730,25 @@ html.desk #s-cart .sec:has(> .hscroll) h2.h { font-size: 24px; }
 html.desk #s-cart .hscroll { gap: 7px; padding: 2px 16px 10px; margin: 0; scroll-padding: 16px; justify-content: safe center; }
 html.desk #s-cart .ups { position: relative; width: 108px; padding: 0 0 11px; gap: 7px; border-radius: 16px; overflow: hidden;
     align-items: center; text-align: center; background: var(--surface); box-shadow: none;
-    transition: background-color .55s var(--dease), transform .32s var(--dease); }
+    transition: background-color .8s cubic-bezier(.22, 1, .36, 1), transform .32s var(--dease); }
 html.desk #s-cart .ups__pic { width: 100%; height: 86px; border-radius: 0; background: var(--tile); overflow: hidden; }
 html.desk #s-cart .ups__pic.is-round { background: transparent; }
 html.desk #s-cart .ups__pic img.round { width: 72px; height: 72px; }
-html.desk #s-cart .ups b { width: 100%; font: 550 12.5px/1.24 var(--font); padding: 0 6px; margin: 1px 0 0; min-height: 31px; text-align: center; }
-html.desk #s-cart .ups__price { width: 100%; margin-top: auto; padding: 0 5px; font: 700 14.5px/1.18 var(--font); text-align: center; }
+html.desk #s-cart .ups b { width: 100%; font: 550 11.5px/1.22 var(--font); padding: 0 6px; margin: 1px 0 0; min-height: 43px; -webkit-line-clamp: 3; overflow-wrap: break-word; text-align: center; }
+html.desk #s-cart .ups__price { width: 100%; margin-top: auto; padding: 0 5px; font: 700 13px/1.18 var(--font); text-align: center; }
 html.desk #s-cart .ups .is-sale { justify-items: center; }
 html.desk #s-cart .ups .is-sale .pr-old { justify-self: center; }
-html.desk #s-cart .ups:hover { transform: none; box-shadow: none; background: color-mix(in srgb, var(--ink) 7%, var(--surface)); }
-html.desk #s-cart .ups:active { transform: scale(.97); background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transition: transform .18s ease-out, background-color .22s ease-out; }
-html.desk[data-theme="dark"] #s-cart .ups:hover { background: color-mix(in srgb, #000 22%, var(--surface)); }
-html.desk[data-theme="dark"] #s-cart .ups:active { background: color-mix(in srgb, #000 30%, var(--surface)); }
+html.desk #s-cart .ups:hover { transform: none; box-shadow: none; background: color-mix(in srgb, #8c5f34 11%, var(--surface)); }
+html.desk #s-cart .ups:active { transform: scale(.97); background: color-mix(in srgb, #8c5f34 17%, var(--surface)); transition: transform .18s ease-out, background-color .22s ease-out; }
+html.desk[data-theme="dark"] #s-cart .ups:hover { background: color-mix(in srgb, #140c06 30%, var(--surface)); }
+html.desk[data-theme="dark"] #s-cart .ups:active { background: color-mix(in srgb, #140c06 42%, var(--surface)); }
 @media (prefers-color-scheme: dark) {
-    html.desk:not([data-theme="light"]) #s-cart .ups:hover { background: color-mix(in srgb, #000 22%, var(--surface)); }
-    html.desk:not([data-theme="light"]) #s-cart .ups:active { background: color-mix(in srgb, #000 30%, var(--surface)); }
+    html.desk:not([data-theme="light"]) #s-cart .ups:hover { background: color-mix(in srgb, #140c06 30%, var(--surface)); }
+    html.desk:not([data-theme="light"]) #s-cart .ups:active { background: color-mix(in srgb, #140c06 42%, var(--surface)); }
 }
 html.desk #s-cart .citem b { font-size: 17.5px; line-height: 22px; }
 html.desk #s-cart .citem small { font-size: 13.5px; line-height: 1.32; margin-top: 3px; }
-html.desk #s-cart .citem__price { font-size: 16px; margin-top: 8px; }
+html.desk #s-cart .citem__price { font-size: 14.5px; margin-top: 7px; }
 html.desk #s-cart .rcpt-w--cart { margin-top: 22px; }
 html.desk #s-cart > .scroll > div:last-child:not([class]) { height: 12px !important; }
 /* ── все экраны поверх (корзина, оформление, заказы и т. д.) — окна по центру ── */

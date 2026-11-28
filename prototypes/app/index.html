@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 14:01';
+    var BUILD = '28.11 · 14:49';
 
     /* ── состояние ── */
     var S = {
@@ -23499,7 +23499,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (r == null) r = trSplit(core);
         return (C[src] = r == null ? src : m[1] + r + m[3]);
     }
-    function typoNew(n) { var p = n.parentNode; return !trSkip(n) && !(p && p.closest && p.closest('.has-map, .csheet, .scroll--ghost')) && (p && p.closest && p.closest('.dls__t, .promo__sub') ? 'bal' : true); }   // 'bal' — строки в акции переносим без склейки последнего слова   // правила типографики 17.11 (typo, wid)
+    function typoNew(n) { var p = n.parentNode; return !trSkip(n) && !(p && p.closest && p.closest('.has-map, .csheet, .scroll--ghost')) && (p && p.closest && p.closest('.dls__t, .promo__sub, .ups b') ? 'bal' : true); }   // 'bal' — узкие заголовки без склейки последнего слова с предыдущим   // правила типографики 17.11 (typo, wid)
     function trSkip(n) { var p = n.parentNode; return !!(p && p.closest && p.closest('[translate="no"], [data-st], .addr__run')); }   // адрес, который раскладываем сами (stFit, headLayout), — уже на языке приложения
     // текстовый узел: перевод (кроме русского) и типографика; оригинал — в _ru, наше значение — в _tv (его не трогаем повторно)
     // буква в кружке аватара — первая буква имени на языке приложения
