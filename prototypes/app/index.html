@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 16:55';
+    var BUILD = '28.11 · 17:03';
 
     /* ── состояние ── */
     var S = {
@@ -19493,6 +19493,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     }
     function authOut() {
         S.auth = false; try { localStorage.setItem('clever2-auth', '0'); } catch (e) {}
+        if (deskOn() && S.stack.indexOf('profile') >= 0 && Desk) Desk.close();
         var pa = profAuthSnap();
         rerenderAll(); profAuthFx(pa); toast('Вы вышли');
     }
@@ -19672,7 +19673,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         try { localStorage.setItem('clever2-addr', id); } catch (e) {}
         saveLastAddr();
         syncChrome();
-        if (S.tab === 'home') renderHome(); else if (S.tab === 'profile') profSync();
+        if (S.tab === 'home') renderHome();
+        if (profileOn()) profSync();
     }
     // снимок карты вне экрана: центр ll, остриё метки — в точке (px, py) снимка; cb(url | null)
     function mapShot(ll, w, h, zoom, px, py, cb) {
@@ -20475,6 +20477,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     }
 
     /* ── профиль ── */
+    function profileOn() { return S.tab === 'profile' || S.stack.indexOf('profile') >= 0; }
     function renderProfile() {
         var theme = document.documentElement.getAttribute('data-theme') || 'auto';
         var h = '<h1 class="ttl">Профиль</h1>' +
@@ -20839,6 +20842,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (id === 'pay') renderPay();
         if (id === 'notif') renderNotif();
         if (id === 'addrs') renderAddrs();
+        if (id === 'profile') renderProfile();
         var prev = S.stack[S.stack.length - 1], under = document.getElementById('s-' + (prev || S.tab)), el = document.getElementById('s-' + id);
         var deskPage = deskOn() && id === 'rest';
         var deskWin = deskOn() && !deskPage;
@@ -20997,6 +21001,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         // движения: экран ждёт, а потом прыгает
         if (prev === 'rest') updateRestItems();
         if (prev === 'cart') renderCart(true);
+        if (prev === 'profile') profSync();
         if (!prev && S.tab === 'home') renderHome(true);
         if (!prev && S.tab === 'orders') renderOrders(true);
         if (!prev && S.tab === 'fav') renderFav(true);
@@ -21062,7 +21067,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         else document.documentElement.setAttribute('data-theme', k);
         $$('#standTheme button', document).forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.themeSet === k); });
         try { localStorage.setItem('clever2-theme', k); } catch (e) {}
-        if (S.tab === 'profile') renderProfile();
+        if (profileOn()) renderProfile();
         syncChrome();
     }
     // цвет вокруг приложения — фон страницы под ним и панели Safari (theme-color) — по фону самого приложения: светлая или
@@ -21093,7 +21098,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function setOldIos(k) {
         if (k) app.dataset.oldios = '1'; else delete app.dataset.oldios;
         try { localStorage.setItem('clever2-oldios', k || ''); } catch (e) {}
-        if (S.tab === 'profile') renderProfile();
+        if (profileOn()) renderProfile();
     }
     try { var oi = localStorage.getItem('clever2-oldios'); if (oi == null || oi) app.dataset.oldios = '1'; } catch (e) {}   // 10.11: включено по умолчанию (выбор владельца)
     // «Длинный адрес на главной»: сокращать / в две строки / авто (сокращаем, не влез — в две строки). Шапку перестроит renderHome
@@ -21277,12 +21282,12 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if ((k === 'co' || k === 'seg') && S.stack[S.stack.length - 1] === 'checkout') renderCheckout();   // открытое оформление — сразу в новом виде
         if (k === 'pcode') { promoOpen = false; if (document.querySelector('#s-cart .pcode')) renderCart(); }   // корзина — сразу в новом виде
         if (k === 'dtags') { app.dataset.dtags = v; tagPeekInit(); }   // витрина — на месте, в новом виде   // меню и шторка — на месте
-        if (S.tab === 'profile' && !quiet) renderProfile();
+        if (profileOn() && !quiet) renderProfile();
     }
     function setHeadAddr(k) {
         app.dataset.headaddr = k;
         try { localStorage.setItem('clever2-headaddr', k); } catch (e) {}
-        if (S.tab === 'profile') renderProfile();
+        if (profileOn()) renderProfile();
     }
     try { app.dataset.headaddr = localStorage.getItem('clever2-headaddr') || 'short'; } catch (e) { app.dataset.headaddr = 'short'; }
     /* «Плавность»: «Как было» — шторку, метку и карту ведёт скрипт кадр за кадром; «Быстрая» — то же движение ведёт браузер
@@ -21298,7 +21303,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         vpW = innerWidth; vpH = document.documentElement.clientHeight; kbSaved = {};
         fitViewport();
         if (k === 'fast') preloadMap();
-        if (S.tab === 'profile') renderProfile();
+        if (profileOn()) renderProfile();
     }
     try { var pf = localStorage.getItem('clever2-perf'); if (pf == null || pf === 'fast') app.dataset.perf = 'fast'; } catch (e) { app.dataset.perf = 'fast'; }   // 10.11: «Быстрая» — по умолчанию (выбор владельца)
     // карту (библиотеку и стиль) — заранее, пока человек на главной: открытие шторки адреса без загрузки на ходу
@@ -21369,13 +21374,13 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             })(performance.now());
         }
         if (!on && fpsEl) { cancelAnimationFrame(fpsRaf); fpsEl.remove(); fpsEl = null; }
-        if (S.tab === 'profile') renderProfile();
+        if (profileOn()) renderProfile();
     }
     function setFont(k) {
         app.dataset.font = k; stGen++; stFitAll();
         $$('#standFont button', document).forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.fontSet === k); });
         try { localStorage.setItem('clever2-font', k); } catch (e) {}
-        if (S.tab === 'profile') renderProfile();
+        if (profileOn()) renderProfile();
     }
     /* «Быстрая плавность»: главную под шторкой (её не видно) перерисовываем, когда карта долетела и шторка не едет — иначе
        перерисовка (50+ мс) попадает посреди перелёта. Шторку закрыли раньше — перерисовываем сразу, до того как главную увидят */
@@ -21390,7 +21395,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function rerenderAll() {
         if (S.stack.indexOf('addrs') !== -1) renderAddrs(true);   // адрес добавили или сменили в шторке — список в профиле обновляется
         if (S.tab === 'home') renderHome();
-        if (S.tab === 'profile') renderProfile();
+        if (profileOn()) renderProfile();
         if (S.tab === 'orders') renderOrders();
         syncChrome();
     }

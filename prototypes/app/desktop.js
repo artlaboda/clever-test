@@ -656,10 +656,13 @@ window.cleverDesk = function (A) {
         tb.insertBefore(tel, document.getElementById('dSearch').nextSibling);
         var pf = tb.querySelector('.tab[data-tab="profile"]');
         if (pf && !pf.querySelector('.dh-user__ic')) pf.insertAdjacentHTML('afterbegin', USR);
-        // профиль без входа — сразу вход
+        // профиль на десктопе: без входа — сразу авторизация, со входом — модальное окно поверх текущей страницы
         tb.addEventListener('click', function (e) {
-            var t = e.target.closest('.tab[data-tab="profile"]'); if (!t || !deskOn() || S.auth) return;
-            e.stopPropagation(); e.preventDefault(); document.getElementById('dLogin').click();
+            var t = e.target.closest('.tab[data-tab="profile"]'); if (!t || !deskOn()) return;
+            e.stopPropagation(); e.preventDefault();
+            if (!S.auth) { document.getElementById('dLogin').click(); return; }
+            if (S.stack.indexOf('profile') >= 0) { deskClose(); return; }
+            deskClose(); pushScreen('profile');
         }, true);
     })();
     // категории на главной — текстом: «Все» и «Акции» впереди (их нет в разметке главной — добавляем после каждой отрисовки)
@@ -2300,8 +2303,46 @@ window.cleverDesk = function (A) {
         });
     }
 
+    /* 28.11: профиль (#s-profile) на десктопе — центрированное модальное окно (как корзина и заказы)
+       с липкой стеклянной шапкой, заголовком «Профиль» слева и круглым крестиком справа */
+    function deskProfileMount() {
+        var scr = document.getElementById('s-profile');
+        if (!scr || !deskOn() || S.stack.indexOf('profile') < 0) return;
+        var bar = scr.querySelector(':scope > .dprof__bar');
+        var sc = document.getElementById('profileScroll');
+        var tTxt = A.tr ? A.tr('Профиль') : 'Профиль';
+        var cTxt = A.tr ? A.tr('Закрыть') : 'Закрыть';
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.className = 'dh dprof__bar';
+            bar.innerHTML =
+                '<h2 class="dprof__title">' + esc(tTxt) + '</h2>' +
+                '<button type="button" class="dprof__close" data-act="back" aria-label="' + esc(cTxt) + '">' +
+                    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>' +
+                '</button>';
+            var ttl = bar.querySelector('.dprof__title');
+            if (ttl && ttl.firstChild) { ttl.firstChild._ru = 'Профиль'; ttl.firstChild._tv = ttl.firstChild.nodeValue; }
+            var cls = bar.querySelector('.dprof__close');
+            if (cls) { cls._ra = { 'aria-label': 'Закрыть' }; cls._ta = { 'aria-label': cTxt }; }
+            scr.insertBefore(bar, scr.firstChild);
+            if (sc && !sc._dprofSc) {
+                sc._dprofSc = true;
+                sc.addEventListener('scroll', function () {
+                    var b = scr.querySelector(':scope > .dprof__bar');
+                    if (b) b.classList.toggle('is-over', sc.scrollTop > 4);
+                }, { passive: true });
+            }
+        }
+        if (sc) bar.classList.toggle('is-over', sc.scrollTop > 4);
+    }
+
     function deskChrome() {
         if (!deskOn()) { homeFloatHide(true); deskAddrStop(); deskPlaceHead(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (mappEl) closeAppModal(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
+        if (S.tab === 'profile' && A.setTab) {
+            A.setTab('home');
+            if (S.auth && S.stack.indexOf('profile') < 0) pushScreen('profile');
+            return;
+        }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
         var top = S.stack[S.stack.length - 1];
         app.dataset.dtop = deskKind(top);
@@ -2311,7 +2352,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskRestScroll(); deskPop(); deskNavSync(); deskSupportMount();
+        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskRestScroll(); deskPop(); deskNavSync(); deskSupportMount(); deskProfileMount();
         homeCartRingSync(document.getElementById('cartTab'));
         homeFloatScroll();
     }
@@ -2333,13 +2374,13 @@ window.cleverDesk = function (A) {
             else if (S.stack.length) { if (canHistBack()) history.back(); else popScreen(); e.preventDefault(); }
         } else if (e.key === '/' && !ed && !mappEl && !A.sheetKind() && !e.ctrlKey && !e.metaKey) { e.preventDefault(); document.getElementById('dSearch').click(); }
     });
-    // 28.11: пока открыто модальное окно (корзина, оформление, мобильное приложение и т. д.), не даём колесу/трекпаду тянуть пустоту за край списка или крутить фон
+    // 28.11: пока открыто модальное окно (корзина, оформление, профиль, мобильное приложение и т. д.), не даём колесу/трекпаду тянуть пустоту за край списка или крутить фон
     app.addEventListener('wheel', function (e) {
         if (!deskOn()) return;
         if (mappEl) { e.preventDefault(); return; }
         if (A.sheetKind() || !/win|drawer/.test(app.dataset.dtop || '')) return;
         if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
-        var win = e.target && e.target.closest ? e.target.closest('.screen:not(.is-tab):not(#s-rest).is-on') : null;
+        var win = e.target && e.target.closest ? e.target.closest('.screen:is(:not(.is-tab):not(#s-rest), #s-profile).is-on') : null;
         var sc = win && e.target.closest ? e.target.closest('.scroll, .dsup__side') : null;
         if (!sc || !win.contains(sc)) { e.preventDefault(); return; }
         var max = sc.scrollHeight - sc.clientHeight;

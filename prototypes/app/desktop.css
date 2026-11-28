@@ -203,12 +203,12 @@ html.desk .dscrim { display: block; position: absolute; inset: 0; z-index: 10; b
 html.desk .app[data-dtop="drawer"] .dscrim, html.desk .app[data-dtop="win"] .dscrim { opacity: 1; pointer-events: auto; }
 
 /* ── страницы ── */
-html.desk .screen.is-tab, html.desk #restScroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent; }
-html.desk .screen.is-tab { overflow-y: auto; overflow-x: hidden; }
-html.desk .screen.is-tab > .scroll { overflow: visible; flex: none; }
+html.desk .screen.is-tab:not(#s-profile), html.desk #restScroll { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent; }
+html.desk .screen.is-tab:not(#s-profile) { overflow-y: auto; overflow-x: hidden; }
+html.desk .screen.is-tab:not(#s-profile) > .scroll { overflow: visible; flex: none; }
 html.desk .app[data-back] .screen::after { display: none; }
 html.desk .screen.is-under { transform: none; }
-html.desk .screen.is-tab:not(#s-home) > .scroll { padding-top: 20px; padding-left: max(32px, calc((100% - 880px) / 2)); padding-right: max(32px, calc((100% - 880px) / 2)); }
+html.desk .screen.is-tab:not(#s-home):not(#s-profile) > .scroll { padding-top: 20px; padding-left: max(32px, calc((100% - 880px) / 2)); padding-right: max(32px, calc((100% - 880px) / 2)); }
 /* главная */
 html.desk #homeScroll { padding: 0 calc(var(--dg) - 16px); }
 html.desk #s-home .hero { padding-top: calc(var(--top) + 44px); gap: 0; overflow: visible; background: none; }
@@ -750,14 +750,64 @@ html.desk #s-cart .citem small { font-size: 13.5px; line-height: 1.32; margin-to
 html.desk #s-cart .citem__price { font-size: 14.5px; margin-top: 7px; }
 html.desk #s-cart .rcpt-w--cart { margin-top: 22px; }
 html.desk #s-cart > .scroll > div:last-child:not([class]) { height: 12px !important; }
-/* ── все экраны поверх (корзина, оформление, заказы и т. д.) — окна по центру ── */
-html.desk .screen:not(.is-tab):not(#s-rest) {
+/* ── все экраны поверх (корзина, оформление, профиль, заказы и т. д.) — окна по центру ── */
+html.desk .screen:not(.is-tab):not(#s-rest),
+html.desk #s-profile {
+    --top: 0px;
     left: 50%; right: auto; top: 50%; bottom: auto; width: 600px; height: min(920px, calc(100% - 40px)); translate: -50% -50%;
     border-radius: 30px; overflow: hidden; overflow: clip; box-shadow: 0 50px 120px -30px rgba(20, 12, 8, .6);
     transform: translateY(26px) scale(.96); opacity: 0; transition: transform .4s var(--dease), opacity .25s, visibility 0s linear .4s;
 }
-html.desk .screen:not(.is-tab):not(#s-rest):is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
-html.desk .screen:not(.is-tab):not(#s-rest) > .scroll { overscroll-behavior: none; }
+html.desk .screen:not(.is-tab):not(#s-rest):is(.is-on, .is-under),
+html.desk #s-profile:is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
+html.desk .screen:not(.is-tab):not(#s-rest) > .scroll,
+html.desk #s-profile > .scroll { overscroll-behavior: none; }
+/* ── профиль в модальном окне на десктопе (#s-profile, 28.11): шапка как у корзины — крупный заголовок слева, крестик справа ── */
+html.desk #s-profile .dprof__bar {
+    position: absolute; left: 0; right: 0; top: 0; z-index: 6;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 20px 20px 14px 20px;
+    background: color-mix(in srgb, var(--app-bg) 78%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.8) brightness(1.06);
+    backdrop-filter: blur(14px) saturate(1.8) brightness(1.06);
+    box-shadow: 0 1px 0 transparent; transition: box-shadow .25s;
+}
+html.desk #s-profile .dprof__bar.is-over { box-shadow: 0 1px 0 var(--line); }
+html.desk #s-profile .dprof__title {
+    margin: 0; font: var(--display-weight) 30px/1.1 var(--font-display);
+    letter-spacing: var(--display-track); color: var(--ink);
+}
+html.desk #s-profile .dprof__close {
+    flex: none; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
+    display: grid; place-items: center; cursor: pointer;
+    background: var(--surface); color: var(--ink);
+    transition: background-color .3s var(--dease), color .25s ease, transform .22s var(--dease);
+}
+html.desk #s-profile .dprof__close svg {
+    width: 18px; height: 18px; display: block; fill: none; stroke: currentColor;
+    stroke-width: 2.3; stroke-linecap: round;
+}
+html.desk #s-profile .dprof__close:hover { background: color-mix(in srgb, var(--ink) 11%, var(--surface)); }
+html.desk #s-profile .dprof__close:active { background: color-mix(in srgb, var(--ink) 16%, var(--surface)); transform: scale(.91); transition: transform .14s ease-out, background-color .16s ease-out; }
+html.desk[data-theme="dark"] #s-profile .dprof__close:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+html.desk[data-theme="dark"] #s-profile .dprof__close:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #s-profile .dprof__close:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+    html.desk:not([data-theme="light"]) #s-profile .dprof__close:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+}
+html.desk #s-profile > #profileScroll {
+    padding: 76px 4px 16px;
+    scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 20%, transparent) transparent;
+}
+html.desk #s-profile #profileScroll > h1.ttl { display: none; }
+html.desk #s-profile #profileScroll > .me {
+    margin: 4px 16px 0; padding: 12px 14px; border-radius: var(--r-card);
+    background: var(--card);
+}
+html.desk #s-profile #profileScroll > .sec { padding-top: 18px; }
+html.desk #s-profile .bcard { min-height: 152px; }
+html.desk #s-profile #profileScroll > .endnote { padding: 20px 16px 6px; }
+html.desk #s-profile #profileScroll > div:last-child:not([class]) { height: 8px !important; }
 /* ── поддержка на десктопе (#s-chat, 28.11): двухколоночное окно (телефоны МТС/А1, обратный звонок, график + живой чат);
    везде в форме, включая саму рамку окна и баллоны переписки — гладкие углы (Apple smooth corners: SQ_X / SQ_RING) ── */
 html.desk #s-chat.screen:not(.is-tab) {
