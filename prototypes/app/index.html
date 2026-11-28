@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 12:53';
+    var BUILD = '28.11 · 13:48';
 
     /* ── состояние ── */
     var S = {
@@ -14013,7 +14013,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function footWatch(scr) {
         var f = scr.querySelector(':scope > .foot');
         if (!f) { scr.style.removeProperty('--foot-h'); return; }
-        if (!f._ro) { f._ro = 1; if (footRO) footRO.observe(f); else scr.style.setProperty('--foot-h', f.offsetHeight + 'px'); }
+        if (f.offsetHeight) scr.style.setProperty('--foot-h', f.offsetHeight + 'px');
+        if (!f._ro) { f._ro = 1; if (footRO) footRO.observe(f); }
         footEdge(scr);
     }
     // верхний бар — тоже стекло поверх ленты (06.11): лента знает его высоту (--bar-h), линия под ним — когда под ним есть лента
@@ -14027,7 +14028,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     }
     function barWatch(scr) {
         var b = scr.querySelector(':scope > .bar'); if (!b) return;
-        if (!b._ro) { b._ro = 1; if (barRO) barRO.observe(b); else scr.style.setProperty('--bar-h', b.offsetHeight + 'px'); }
+        if (b.offsetHeight) scr.style.setProperty('--bar-h', b.offsetHeight + 'px');
+        if (!b._ro) { b._ro = 1; if (barRO) barRO.observe(b); }
         barEdge(scr);
     }
     $$('.screen').forEach(function (scr) { new MutationObserver(function () { footWatch(scr); barWatch(scr); }).observe(scr, { childList: true }); footWatch(scr); barWatch(scr); });

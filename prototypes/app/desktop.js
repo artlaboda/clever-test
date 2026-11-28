@@ -1581,6 +1581,16 @@ window.cleverDesk = function (A) {
             else if (S.stack.length) { if (canHistBack()) history.back(); else popScreen(); e.preventDefault(); }
         } else if (e.key === '/' && !ed && !A.sheetKind() && !e.ctrlKey && !e.metaKey) { e.preventDefault(); document.getElementById('dSearch').click(); }
     });
+    // 28.11: пока открыто модальное окно (корзина, оформление и т. д.), не даём колесу/трекпаду тянуть пустоту за край списка или крутить фон
+    app.addEventListener('wheel', function (e) {
+        if (!deskOn() || A.sheetKind() || !/win|drawer/.test(app.dataset.dtop || '')) return;
+        if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+        var win = e.target && e.target.closest ? e.target.closest('.screen:not(.is-tab):not(#s-rest).is-on') : null;
+        var sc = win && e.target.closest ? e.target.closest('.scroll') : null;
+        if (!sc || !win.contains(sc)) { e.preventDefault(); return; }
+        var max = sc.scrollHeight - sc.clientHeight;
+        if (max <= 1 || (e.deltaY > 0 && sc.scrollTop >= max - 1) || (e.deltaY < 0 && sc.scrollTop <= 1)) e.preventDefault();
+    }, { passive: false });
     /* 26.11: добавление из окна блюда на десктопе — кнопка мягко продавливается, комета летит прямо в корзину в шапке
        (без портала на краю окна, ныряния под затемнение и прорезания вуали), пакет ловит комету лёгким отскоком */
     function deskDishAdded(btn, q, from) {
