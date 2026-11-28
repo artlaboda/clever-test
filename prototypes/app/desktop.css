@@ -1901,8 +1901,6 @@ html.desk .dh-place:hover .dh-tag { color: color-mix(in srgb, var(--ok) 82%, var
 html.desk .dh-search, html.desk .dh-tel { order: 4; flex: none; width: 46px; height: 46px; min-width: 0; max-width: none; margin: 0; padding: 0; justify-content: center;
     border-radius: 50%; background: none; box-shadow: none; color: var(--ink); }
 html.desk .dh-search svg.i, html.desk .dh-tel svg.i { width: 24px; height: 24px; color: var(--ink); }
-html.desk .dh-tel svg.i { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-html.desk .dh-tel .dh-tel__hand { fill: currentColor; stroke: none; }
 html.desk .dh-search:hover, html.desk .dh-tel:hover { box-shadow: none; background: color-mix(in srgb, var(--ink) 7%, transparent); }
 html.desk .dh-search kbd, html.desk .dh-search > span { display: none; }
 html.desk .tab[data-tab="fav"], html.desk .dh-login { display: none !important; }
