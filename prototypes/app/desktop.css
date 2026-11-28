@@ -693,46 +693,60 @@ html.desk .app[data-drate="photo"] .item__rate { margin-top: calc(100% - 37px); 
 /* стрелка «назад» у первого окна поверх — крестик: это закрытие, а не шаг назад (в оформлении — назад в корзину) */
 html.desk .screen.dk-first > .bar > .ibtn:first-child svg { display: none; }
 html.desk .screen.dk-first > .bar > .ibtn:first-child::before { content: ''; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; }
-html.desk .screen.dk-first > .bar > .ibtn:first-child { display: grid; place-items: center; width: 40px; height: 40px; margin-left: 10px; border-radius: 50%; }
-html.desk .screen.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); transform: rotate(90deg); }
+html.desk .screen.dk-first > .bar > .ibtn:first-child { display: grid; place-items: center; width: 40px; height: 40px; margin-left: 10px; border-radius: 50%;
+    transition: background-color .3s var(--dease), color .25s ease, transform .22s var(--dease); }
+html.desk .screen.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); transform: none; }
+html.desk .screen.dk-first > .bar > .ibtn:first-child:active { transform: scale(.91); opacity: 1; transition: transform .14s ease-out, background-color .16s ease-out; }
 /* ── корзина и оформление — модальные окна по центру (28.11), как остальные экраны поверх ── */
-/* шапка корзины (28.11): крупный заголовок и название заведения слева, «удалить всё» — чуть левее крестика, крестик — справа */
-html.desk #s-cart > .bar { display: flex; align-items: center; gap: 8px; padding: 24px 20px 14px 22px; }
-html.desk #s-cart > .bar > .bar__title { order: 1; flex: 1 1 auto; text-align: left; padding-right: 8px;
+/* шапка корзины (28.11): крупный заголовок и название заведения слева, «удалить всё» — чуть левее крестика,
+   крестик — справа на одинаковом расстоянии сверху и справа (20 px), без вращения: плавно темнеет и продавливается */
+html.desk #s-cart > .bar { display: flex; align-items: flex-start; gap: 8px; padding: 20px 20px 14px 20px; }
+html.desk #s-cart > .bar > .bar__title { order: 1; flex: 1 1 auto; text-align: left; padding: 3px 8px 0 0;
     font: var(--display-weight) 30px/1.1 var(--font-display); letter-spacing: var(--display-track); }
 html.desk #s-cart > .bar > .bar__title small { margin-top: 4px; font: 550 17px/1.25 var(--font); letter-spacing: -.01em; color: var(--muted); }
 html.desk #s-cart > .bar > [data-act="clear-cart"] { order: 2; flex: none; width: 40px; height: 40px; border-radius: 50%; color: var(--muted);
-    transition: background-color .2s var(--dease), color .2s var(--dease), transform .18s var(--dease); }
+    transition: background-color .3s var(--dease), color .25s ease, transform .22s var(--dease); }
 html.desk #s-cart > .bar > [data-act="clear-cart"] svg.i { width: 20px; height: 20px; }
 html.desk #s-cart > .bar > [data-act="clear-cart"]:hover { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand); }
-html.desk #s-cart > .bar > [data-act="clear-cart"]:active { transform: scale(.92); }
+html.desk #s-cart > .bar > [data-act="clear-cart"]:active { transform: scale(.91); transition: transform .14s ease-out, background-color .16s ease-out; }
 html.desk #s-cart > .bar > span:last-child { display: none; }
 html.desk #s-cart.dk-first > .bar > .ibtn:first-child { order: 3; flex: none; margin-left: 0; background: var(--surface);
-    transition: background-color .2s var(--dease), color .2s var(--dease), transform .25s var(--dease); }
+    transition: background-color .3s var(--dease), color .25s ease, transform .22s var(--dease); }
 html.desk #s-cart.dk-first > .bar > .ibtn:first-child::after { inset: -2px; }
-html.desk #s-cart.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 12%, var(--surface)); transform: rotate(90deg); }
-html.desk #s-cart.dk-first > .bar > .ibtn:first-child:active { transform: rotate(90deg) scale(.92); opacity: 1; }
-/* «Добавить к заказу?» в корзине (28.11): компактнее, без теней, всё по центру (все 5 карточек ровно по ширине окна);
-   при ховере — только мягкое затемнение без прыжка и теней */
+html.desk #s-cart.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transform: none; }
+html.desk #s-cart.dk-first > .bar > .ibtn:first-child:active { background: color-mix(in srgb, var(--ink) 16%, var(--surface)); transform: scale(.91); opacity: 1; transition: transform .14s ease-out, background-color .16s ease-out; }
+html.desk[data-theme="dark"] #s-cart.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+html.desk[data-theme="dark"] #s-cart.dk-first > .bar > .ibtn:first-child:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #s-cart.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+    html.desk:not([data-theme="light"]) #s-cart.dk-first > .bar > .ibtn:first-child:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+}
+/* «Добавить к заказу?» в корзине (28.11): заголовок слева, компактные карточки без теней (5 шт. ровно в ширину окна),
+   фото на всю ширину сверху со скруглением только по верхним углам карточки и ровной кромкой снизу (как на мобильном);
+   названия и цены по центру и чуть крупнее; при ховере — плавное затемнение без прыжка и теней */
 html.desk #s-cart .sec:has(> .hscroll) { gap: 12px; padding-top: 24px; }
-html.desk #s-cart .sec:has(> .hscroll) .sec__head { justify-content: center; text-align: center; }
+html.desk #s-cart .sec:has(> .hscroll) .sec__head { justify-content: flex-start; text-align: left; padding-left: 20px; padding-right: 20px; }
 html.desk #s-cart .hscroll { gap: 7px; padding: 2px 16px 14px; margin: 0; scroll-padding: 16px; justify-content: safe center; }
-html.desk #s-cart .ups { position: relative; width: 108px; padding: 6px 6px 10px; gap: 6px; border-radius: 16px;
+html.desk #s-cart .ups { position: relative; width: 108px; padding: 0 0 11px; gap: 7px; border-radius: 16px; overflow: hidden;
     align-items: center; text-align: center; background: var(--surface); box-shadow: none;
-    transition: background-color .22s var(--dease), transform .22s var(--dease); }
-html.desk #s-cart .ups__pic { width: 100%; height: 82px; border-radius: 10px; background: var(--tile); }
+    transition: background-color .36s var(--dease), transform .32s var(--dease); }
+html.desk #s-cart .ups__pic { width: 100%; height: 86px; border-radius: 0; background: var(--tile); overflow: hidden; }
 html.desk #s-cart .ups__pic.is-round { background: transparent; }
-html.desk #s-cart .ups__pic img.round { width: 70px; height: 70px; }
-html.desk #s-cart .ups b { width: 100%; font: 550 11.5px/1.24 var(--font); padding: 0 3px; margin: 0; min-height: 29px; text-align: center; }
-html.desk #s-cart .ups__price { width: 100%; margin-top: auto; padding: 0 3px; font: 700 13px/1.18 var(--font); text-align: center; }
+html.desk #s-cart .ups__pic img { transition: filter .36s var(--dease); }
+html.desk #s-cart .ups__pic img.round { width: 72px; height: 72px; }
+html.desk #s-cart .ups b { width: 100%; font: 550 12.5px/1.24 var(--font); padding: 0 6px; margin: 1px 0 0; min-height: 31px; text-align: center; }
+html.desk #s-cart .ups__price { width: 100%; margin-top: auto; padding: 0 5px; font: 700 14.5px/1.18 var(--font); text-align: center; }
 html.desk #s-cart .ups .is-sale { justify-items: center; }
 html.desk #s-cart .ups .is-sale .pr-old { justify-self: center; }
 html.desk #s-cart .ups:hover { transform: none; box-shadow: none; background: color-mix(in srgb, var(--ink) 7%, var(--surface)); }
-html.desk #s-cart .ups:active { transform: scale(.97); background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transition: transform .15s var(--dease), background-color .15s var(--dease); }
+html.desk #s-cart .ups:hover .ups__pic img { filter: brightness(.94); }
+html.desk #s-cart .ups:active { transform: scale(.97); background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transition: transform .18s ease-out, background-color .2s ease-out; }
 html.desk[data-theme="dark"] #s-cart .ups:hover { background: color-mix(in srgb, #000 22%, var(--surface)); }
+html.desk[data-theme="dark"] #s-cart .ups:hover .ups__pic img { filter: brightness(.9); }
 html.desk[data-theme="dark"] #s-cart .ups:active { background: color-mix(in srgb, #000 30%, var(--surface)); }
 @media (prefers-color-scheme: dark) {
     html.desk:not([data-theme="light"]) #s-cart .ups:hover { background: color-mix(in srgb, #000 22%, var(--surface)); }
+    html.desk:not([data-theme="light"]) #s-cart .ups:hover .ups__pic img { filter: brightness(.9); }
     html.desk:not([data-theme="light"]) #s-cart .ups:active { background: color-mix(in srgb, #000 30%, var(--surface)); }
 }
 html.desk #s-cart .citem:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
@@ -791,27 +805,31 @@ html.desk :is(#sheet, #sheetUnder).is-dish > .dpg {
     position: static; inset: auto; height: auto;
     border-radius: 0; overflow: visible; background: transparent; box-shadow: none;
 }
-/* крест: тёплая плашка без обводки, выровнена по правой линии сетки и по вертикальному центру шапки */
+/* крест: тёплая плашка без обводки, одинаковый отступ сверху и справа, без вращения — плавно темнеет и продавливается */
 html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close {
-    top: 34px; right: 30px; z-index: 8;
+    top: 26px; right: 26px; z-index: 8;
     width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
     background: var(--surface);
     color: var(--ink);
     box-shadow: none;
     -webkit-backdrop-filter: none; backdrop-filter: none;
-    transition: transform .26s var(--dease), background-color .2s;
+    transition: background-color .3s var(--dease), color .25s ease, transform .22s var(--dease);
 }
-html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) > .sheet__close { top: 32px; right: 26px; }
+html.desk :is(#sheet, #sheetUnder).is-dish:is(.is-dish-cfg, .is-dish-rich) > .sheet__close { top: 26px; right: 26px; }
 html.desk :is(#sheet, #sheetUnder).is-dish.is-dish-rich.is-dish-scr > .sheet__close {
     background: var(--card);
     box-shadow: 0 4px 14px -4px rgba(20, 12, 8, .16), 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
 }
 html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close:hover {
-    background: color-mix(in srgb, #d4c3aa 36%, var(--surface));
+    background: color-mix(in srgb, var(--ink) 11%, var(--surface));
     box-shadow: none;
-    transform: rotate(90deg) scale(1.05);
+    transform: none;
 }
-html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close:active { transform: rotate(90deg) scale(.94); }
+html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close:active {
+    background: color-mix(in srgb, var(--ink) 16%, var(--surface));
+    transform: scale(.91);
+    transition: transform .14s ease-out, background-color .16s ease-out;
+}
 html.desk :is(#sheet, #sheetUnder).is-dish > .sheet__close svg { width: 20px; height: 20px; stroke-width: 1.9; }
 html.desk :is(#sheet, #sheetUnder).is-dish .ddish-grid {
     position: relative;
@@ -1343,7 +1361,10 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish.is-dish-rich.is-di
     box-shadow: 0 6px 18px -4px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .10);
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish > .sheet__close:hover {
-    background: color-mix(in srgb, #e8d8c4 16%, var(--card));
+    background: color-mix(in srgb, #000 22%, var(--surface));
+}
+html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish > .sheet__close:active {
+    background: color-mix(in srgb, #000 32%, var(--surface));
 }
 html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
     background: rgba(255, 255, 255, .04);
@@ -1385,7 +1406,10 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-pnav:hover 
         box-shadow: 0 6px 18px -4px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .10);
     }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish > .sheet__close:hover {
-        background: color-mix(in srgb, #e8d8c4 16%, var(--card));
+        background: color-mix(in srgb, #000 22%, var(--surface));
+    }
+    html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish > .sheet__close:active {
+        background: color-mix(in srgb, #000 32%, var(--surface));
     }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .ddish-nutr {
         background: rgba(255, 255, 255, .04);
@@ -1419,8 +1443,15 @@ html.desk[data-theme="dark"] :is(#sheet, #sheetUnder).is-dish .ddish-pnav:hover 
     }
     html.desk:not([data-theme="light"]) :is(#sheet, #sheetUnder).is-dish .ddish-pnav:hover { background: rgba(34, 30, 27, .96); }
 }
-html.desk .sheet__close { transition: transform .25s var(--dease), background-color .2s; }
-html.desk .sheet__close:hover { transform: rotate(90deg) scale(1.06); }
+html.desk .sheet__close { top: 18px; right: 18px; transition: background-color .3s var(--dease), color .25s ease, transform .22s var(--dease); }
+html.desk .sheet__close:hover { background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transform: none; }
+html.desk .sheet__close:active { background: color-mix(in srgb, var(--ink) 16%, var(--surface)); transform: scale(.91); transition: transform .14s ease-out, background-color .16s ease-out; }
+html.desk[data-theme="dark"] .sheet__close:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+html.desk[data-theme="dark"] .sheet__close:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) .sheet__close:hover { background: color-mix(in srgb, #000 24%, var(--surface)); }
+    html.desk:not([data-theme="light"]) .sheet__close:active { background: color-mix(in srgb, #000 34%, var(--surface)); }
+}
 /* 24.11: всплывающее окно акции на десктопе — нижний поясняющий текст и карточка условий крупнее, чтобы легко читались на широком экране;
    круг акции и значок чуть крупнее (+14%), внешний и внутренний круги плавно перетекают, как плазма звонка в Telegram */
 html.desk #sheet.is-deal .dls:has(.dls__orb) { --dls-grab: 6px; --dls-g: 30px; }
