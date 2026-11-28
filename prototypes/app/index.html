@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 15:00';
+    var BUILD = '28.11 · 15:11';
 
     /* ── состояние ── */
     var S = {
@@ -22472,10 +22472,12 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         "Вариант": ["Варыянт","Option"],
         "Ваш город": ["Ваш горад","Your city"],
         "Ваш заказ": ["Ваша замова","Your order"],
+        "Ваш номер телефона": ["Ваш нумар тэлефона","Your phone number"],
         "Введите ваш номер телефона, чтобы получить код для авторизации": ["Увядзіце ваш нумар тэлефона, каб атрымаць код для аўтарызацыі","Enter your phone number to get a sign-in code"],
         "Введите код, который был отправлен вам на номер": ["Увядзіце код, які быў адпраўлены вам на нумар","Enter the code we sent to"],
         "Введите номер полностью: {0} цифр после +{1}": ["Увядзіце нумар цалкам: {0} лічбаў пасля +{1}","Enter the full number: {0} digits after +{1}"],
         "Введите номер полностью: {0}–{1} цифр после +{2}": ["Увядзіце нумар цалкам: {0}–{1} лічбаў пасля +{2}","Enter the full number: {0}–{1} digits after +{2}"],
+        "Введите номер телефона": ["Увядзіце нумар тэлефона","Enter your phone number"],
         "Введите промокод, например CLEVER{0}": ["Увядзіце промакод, напрыклад CLEVER{0}","Enter a promo code, e.g. CLEVER{0}"],
         "Вегги": ["Вегі","Veggie"],
         "Велокурьер": ["Велакур’ер","Bike courier"],
@@ -22528,6 +22530,18 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         "Выберите адрес в {c0}, и заказ можно будет оформить.": ["Выберыце адрас у {c0}, і замову можна будзе аформіць.","Choose an address in {c0} to place the order."],
         "выберите, затем укажите дом": ["выберыце, потым пакажыце дом","choose, then enter the house"],
         "выбрано {0}": ["абрана {0}","{0} selected"],
+        "Жду звонка": ["Чакаю званка","Request a callback"],
+        "Заказы на сайте — круглосуточно": ["Замовы на сайце — кругласутачна","Online orders are accepted 24/7"],
+        "Заявка принята": ["Заяўка прынята","Request received"],
+        "На связи": ["На сувязі","Online"],
+        "Оля · отвечаем за 2 мин": ["Оля · адказваем за 2 хв","Olya · replies in 2 min"],
+        "Перезвоним в течение 2 минут": ["Ператэлефануем на працягу 2 хвілін","We’ll call back within 2 minutes"],
+        "Перезвоним за 2 минуты": ["Ператэлефануем за 2 хвіліны","We’ll call back in 2 minutes"],
+        "Пн–Вс": ["Пн–Нд","Mon–Sun"],
+        "Поможем с заказом, доставкой или оплатой": ["Дапаможам з замовай, дастаўкай або аплатай","We’ll help with your order, delivery, or payment"],
+        "Скопировано": ["Скапіявана","Copied"],
+        "Скопировать номер": ["Скапіяваць нумар","Copy number"],
+        "Служба поддержки": ["Служба падтрымкі","Customer support"],
         "убрано {0}": ["прыбрана {0}","{0} removed"],
         "Убрать из состава": ["Прыбраць са складу","Remove ingredients"],
         "Дополнительно": ["Дадаткова","Extras"],
@@ -23310,6 +23324,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         "Укажите номер дома": ["Пакажыце нумар дома","Enter the house number"],
         "Укажите, кто придёт за заказом, — отдадим ему": ["Пакажыце, хто прыйдзе па замову, — аддадзім яму","Tell us who’ll come for the order — we’ll hand it to them"],
         "Указать адрес": ["Пазначыць адрас","Enter address"],
+        "Указать другой номер": ["Пазначыць іншы нумар","Use another number"],
         "Украина": ["Украіна","Ukraine"],
         "Улица и дом": ["Вуліца і дом","Street and house"],
         "Улица и дом в {c0}": ["Вуліца і дом у {c0}","Street and house in {c0}"],
@@ -23349,6 +23364,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         "Цыплёнок, запечённый целиком": ["Кураня, запечанае цалкам","Whole roast chicken"],
         "Часто заказывают": ["Часта замаўляюць","Popular picks"],
         "Частые": ["Частыя","Popular"],
+        "Чат с поддержкой": ["Чат з падтрымкай","Support chat"],
         "Чек": ["Чэк","Receipt"],
         "Чем больше заказ, тем дешевле": ["Чым большая замова, тым танней","The bigger the order, the cheaper"],
         "Чем больше заказ, тем дешевле доставка: она плавно уменьшается с каждым рублём — от {0} ⃅, а от {1} ⃅ бесплатна.": ["Чым большая замова, тым танней дастаўка: яна плаўна змяншаецца з кожным рублём — ад {0} ⃅, а ад {1} ⃅ бясплатна.","The bigger the order, the cheaper the delivery: it drops with every ruble — from {0} ⃅, and it’s free from {1} ⃅."],

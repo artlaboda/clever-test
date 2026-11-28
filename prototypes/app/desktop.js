@@ -14,7 +14,7 @@ window.cleverDesk = function (A) {
        «Укажите адрес»), справа значки поиска, поддержки и профиля и наша кнопка корзины; под шапкой на главной — категории
        текстом в строку («Все» на красной плашке). Профиль без входа — значок открывает вход (кнопки «Войти» в шапке больше нет) */
     var PIN = '<svg class="dh-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2s-6.8-5.9-6.8-11.4a6.8 6.8 0 0 1 13.6 0c0 5.5-6.8 11.4-6.8 11.4z"/><circle cx="12" cy="9.9" r="2.4"/></svg>';
-    var TEL = '<svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.2 3.6h3l1.6 4-2 1.3a10.6 10.6 0 0 0 5.3 5.3l1.3-2 4 1.6v3a1.6 1.6 0 0 1-1.7 1.6A15.6 15.6 0 0 1 3.6 5.3 1.6 1.6 0 0 1 5.2 3.6z"/></svg>';
+    var TEL = '<svg class="i dh-tel__ic" viewBox="0 0 24 24" aria-hidden="true"><path class="dh-tel__bub" d="M12 3.2c-4.97 0-9 3.74-9 8.35 0 1.79.61 3.44 1.65 4.8l-1.15 3.95 4.18-1.1c1.31.52 2.77.8 4.32.8 4.97 0 9-3.74 9-8.45 0-4.61-4.03-8.35-9-8.35z"/><path class="dh-tel__hand" d="M8.88 7.92H10.54L11.23 9.99L10.21 10.59a5.06 5.06 0 0 0 2.9 2.9L13.71 12.47L15.78 13.16V14.82a0.69 0.69 0 0 1 -0.74 0.69C11.41 15.28 8.42 12.29 8.19 8.66A0.69 0.69 0 0 1 8.88 7.92Z"/></svg>';
     /* 23.11: бегущая строка длинного адреса в десктопной шапке — по образцу мобильной headRun/headEdge:
        края мягко тают маской (mask-image), работает одинаково чисто и в светлой, и в тёмной теме */
     function deskAddrEdge(t, l, r, now) {
@@ -1549,6 +1549,218 @@ window.cleverDesk = function (A) {
         }
         return document.getElementById('cartBag');
     }
+    /* 28.11: десктопная поддержка (#s-chat) — двухколоночное окно: слева телефоны МТС/А1 (как на clever.by),
+       форма обратного звонка и время работы; справа живой чат с поддержкой; крестик закрытия — справа сверху */
+    function byPhoneDigits(raw) {
+        var d = String(raw || '').replace(/\D/g, '');
+        if (d.indexOf('375') === 0) d = d.slice(3);
+        else if (d.indexOf('80') === 0 && d.length > 2) d = d.slice(2);
+        return d.slice(0, 9);
+    }
+    function fmtByPhone(raw, prev) {
+        var digits = String(raw || '').replace(/\D/g, '');
+        if (!digits) return '';
+        if (prev && raw.length < prev.length && digits.length <= 3 && ('375'.indexOf(digits) === 0)) return '';
+        var d = byPhoneDigits(raw);
+        if (!d) return '+375 ';
+        var out = '+375 (' + d.slice(0, 2);
+        if (d.length > 2) out += ') ' + d.slice(2, 5);
+        if (d.length > 5) out += '-' + d.slice(5, 7);
+        if (d.length > 7) out += '-' + d.slice(7, 9);
+        return out;
+    }
+    function deskSupportMount() {
+        var scr = document.getElementById('s-chat');
+        if (!scr || !deskOn() || S.stack.indexOf('chat') < 0) return;
+        if (scr.querySelector('.dsup')) return;
+        var bar = scr.querySelector(':scope > .bar');
+        var chatScroll = document.getElementById('chatScroll');
+        var chatForm = document.getElementById('chatForm');
+        if (!chatScroll || !chatForm) return;
+        var avaSvg = bar ? bar.querySelector('.ophead svg') : null;
+        if (bar) bar.remove();
+
+        var COPY_IC = '<svg class="dsup__copy-ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg>';
+        var OK_IC = '<svg class="dsup__ok-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+        var prePhone = (S.auth && S.me && S.me.phone) ? fmtByPhone(S.me.phone) : '';
+
+        var wrap = document.createElement('div');
+        wrap.className = 'dsup';
+
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'dsup__close';
+        closeBtn.dataset.act = 'back';
+        closeBtn.setAttribute('aria-label', 'Закрыть');
+        closeBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>';
+        wrap.appendChild(closeBtn);
+
+        var side = document.createElement('aside');
+        side.className = 'dsup__side scroll';
+        side.innerHTML =
+            '<div class="dsup__head">' +
+                '<h2 class="dsup__title">Служба поддержки</h2>' +
+                '<p class="dsup__sub">Поможем с заказом, доставкой или оплатой</p>' +
+            '</div>' +
+            '<div class="dsup__phones">' +
+                '<div class="dsup__prow">' +
+                    '<a class="dsup__phone" href="tel:+375295550505">' +
+                        '<span class="dsup__op dsup__op--mts" aria-hidden="true"></span>' +
+                        '<span class="dsup__num" translate="no">+375 (29) 555-05-05</span>' +
+                    '</a>' +
+                    '<button type="button" class="dsup__copy" data-copy="+375 (29) 555-05-05" aria-label="Скопировать номер">' + COPY_IC + OK_IC + '</button>' +
+                    '<span class="dsup__copied" aria-live="polite">Скопировано</span>' +
+                '</div>' +
+                '<div class="dsup__prow">' +
+                    '<a class="dsup__phone" href="tel:+375445550505">' +
+                        '<span class="dsup__op dsup__op--a1" aria-hidden="true"></span>' +
+                        '<span class="dsup__num" translate="no">+375 (44) 555-05-05</span>' +
+                    '</a>' +
+                    '<button type="button" class="dsup__copy" data-copy="+375 (44) 555-05-05" aria-label="Скопировать номер">' + COPY_IC + OK_IC + '</button>' +
+                    '<span class="dsup__copied" aria-live="polite">Скопировано</span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="dsup__cb" id="dsupCb">' +
+                '<p class="dsup__cb-h" id="dsupCbTitle">Перезвоним за 2 минуты</p>' +
+                '<form class="dsup__cb-form" id="dsupCbForm" novalidate>' +
+                    '<input class="dsup__cb-in" id="dsupCbPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+375 (29) 123-45-67" aria-label="Ваш номер телефона" value="' + esc(prePhone) + '">' +
+                    '<button type="submit" class="dsup__cb-btn">Жду звонка</button>' +
+                '</form>' +
+                '<div class="dsup__cb-ok" id="dsupCbOk" hidden>' +
+                    '<div class="dsup__cb-okrow">' +
+                        '<span class="dsup__cb-badge" aria-hidden="true">' + OK_IC + '</span>' +
+                        '<div class="dsup__cb-okt">' +
+                            '<b>Заявка принята</b>' +
+                            '<span class="dsup__cb-okp">Перезвоним в течение 2 минут</span>' +
+                            '<span class="dsup__cb-okn" id="dsupCbSent" translate="no"></span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<button type="button" class="dsup__cb-again" id="dsupCbAgain">Указать другой номер</button>' +
+                '</div>' +
+            '</div>' +
+            '<div class="dsup__sched">' +
+                '<div class="dsup__sched-top">' +
+                    '<span class="dsup__sched-h">Время работы</span>' +
+                    '<span class="dsup__online"><i aria-hidden="true"></i><span>На связи</span></span>' +
+                '</div>' +
+                '<div class="dsup__sched-row">' +
+                    '<span class="dsup__sched-days">Пн–Вс</span>' +
+                    '<span class="dsup__sched-time" translate="no">09:00 – 01:00</span>' +
+                '</div>' +
+                '<p class="dsup__sched-note">Заказы на сайте — круглосуточно</p>' +
+            '</div>';
+
+        var chatCol = document.createElement('div');
+        chatCol.className = 'dsup__chat';
+        var chead = document.createElement('div');
+        chead.className = 'dsup__chead';
+        chead.innerHTML =
+            '<span class="dsup__ava" aria-hidden="true"><i class="dsup__dot"></i></span>' +
+            '<div class="dsup__ctxt">' +
+                '<b class="dsup__cname">Чат с поддержкой</b>' +
+                '<small class="dsup__csub">Оля · отвечаем за 2 мин</small>' +
+            '</div>';
+        if (avaSvg) chead.querySelector('.dsup__ava').insertBefore(avaSvg, chead.querySelector('.dsup__dot'));
+        chatCol.appendChild(chead);
+        chatCol.appendChild(chatScroll);
+        chatCol.appendChild(chatForm);
+
+        wrap.appendChild(side);
+        wrap.appendChild(chatCol);
+        scr.appendChild(wrap);
+
+        // Копирование телефона
+        side.addEventListener('click', function (e) {
+            var btn = e.target.closest('.dsup__copy');
+            if (!btn) return;
+            var row = btn.closest('.dsup__prow');
+            var val = btn.dataset.copy || '';
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(val).catch(function () {});
+            }
+            if (row) {
+                row.classList.add('is-copied');
+                clearTimeout(row._ct);
+                row._ct = setTimeout(function () { row.classList.remove('is-copied'); }, 1800);
+            }
+        });
+
+        // Форма обратного звонка
+        var cbBox = side.querySelector('#dsupCb');
+        var cbTitle = side.querySelector('#dsupCbTitle');
+        var cbForm = side.querySelector('#dsupCbForm');
+        var cbPhone = side.querySelector('#dsupCbPhone');
+        var cbOk = side.querySelector('#dsupCbOk');
+        var cbSent = side.querySelector('#dsupCbSent');
+        var cbAgain = side.querySelector('#dsupCbAgain');
+        var prevVal = cbPhone.value;
+
+        function cbClearErr() {
+            if (!cbBox.classList.contains('is-err')) return;
+            cbBox.classList.remove('is-err');
+            cbTitle.textContent = 'Перезвоним за 2 минуты';
+        }
+        cbPhone.addEventListener('focus', function () {
+            if (!cbPhone.value) { cbPhone.value = '+375 '; prevVal = cbPhone.value; }
+        });
+        cbPhone.addEventListener('blur', function () {
+            if (cbPhone.value.trim() === '+375') { cbPhone.value = ''; prevVal = ''; }
+        });
+        cbPhone.addEventListener('input', function () {
+            var next = fmtByPhone(cbPhone.value, prevVal);
+            cbPhone.value = next;
+            prevVal = next;
+            cbClearErr();
+        });
+        cbForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var d = byPhoneDigits(cbPhone.value);
+            if (d.length < 9) {
+                cbBox.classList.add('is-err');
+                cbTitle.textContent = 'Введите номер телефона';
+                if (!fxOff() && cbPhone.animate) {
+                    cbPhone.animate([
+                        { transform: 'translateX(0)' }, { transform: 'translateX(-6px)' },
+                        { transform: 'translateX(5px)' }, { transform: 'translateX(-3px)' },
+                        { transform: 'translateX(0)' }
+                    ], { duration: 320, easing: 'ease-out' });
+                }
+                cbPhone.focus();
+                return;
+            }
+            var formatted = fmtByPhone(d);
+            cbPhone.value = formatted; prevVal = formatted;
+            cbClearErr();
+            cbSent.textContent = formatted;
+            cbForm.hidden = true;
+            cbTitle.hidden = true;
+            cbOk.hidden = false;
+            if (!fxOff() && cbOk.animate) {
+                cbOk.animate([
+                    { opacity: 0, transform: 'translateY(8px) scale(.97)' },
+                    { opacity: 1, transform: 'none' }
+                ], { duration: 320, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+            }
+        });
+        cbAgain.addEventListener('click', function () {
+            cbOk.hidden = true;
+            cbTitle.hidden = false;
+            cbForm.hidden = false;
+            if (!fxOff() && cbForm.animate) {
+                cbForm.animate([
+                    { opacity: 0, transform: 'translateY(6px)' },
+                    { opacity: 1, transform: 'none' }
+                ], { duration: 240, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+            }
+            cbPhone.focus();
+            try { cbPhone.select(); } catch (er) {}
+        });
+
+        requestAnimationFrame(function () {
+            if (chatScroll) chatScroll.scrollTop = chatScroll.scrollHeight;
+        });
+    }
+
     function deskChrome() {
         if (!deskOn()) { homeFloatHide(true); deskAddrStop(); deskPlaceHead(); var tb = document.getElementById('tabbar'); if (tb) tb._dk = ''; if (askEl) hideAskAddr(true); if (app.dataset.dtop != null) { delete app.dataset.dtop; delete app.dataset.dpage; } return; }
         if (askEl && (S.tab !== 'home' || S.stack.length || A.sheetKind())) hideAskAddr();
@@ -1560,7 +1772,7 @@ window.cleverDesk = function (A) {
         document.getElementById('dscrim').style.zIndex = String(10 + k);
         $$('.screen.dk-first').forEach(function (s) { if (s.id !== 's-' + S.stack[k]) s.classList.remove('dk-first'); });
         if (S.stack[k]) document.getElementById('s-' + S.stack[k]).classList.add('dk-first');
-        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskRestScroll(); deskPop(); deskNavSync();
+        deskPlaceHead(); deskHead(); deskCats(); deskRestMount(); deskRestScroll(); deskPop(); deskNavSync(); deskSupportMount();
         homeCartRingSync(document.getElementById('cartTab'));
         homeFloatScroll();
     }
