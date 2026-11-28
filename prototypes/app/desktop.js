@@ -241,7 +241,8 @@ window.cleverDesk = function (A) {
         });
         mappStopCycle();
         if (!fxOff() && !mappPaused) {
-            mappTimer = setTimeout(function () { mappSetScene(mappScene + 1, false); }, fromUser ? 6200 : 4800);
+            var dur = mappScene === 1 ? (fromUser ? 7200 : 5800) : (fromUser ? 6200 : 4800);
+            mappTimer = setTimeout(function () { mappSetScene(mappScene + 1, false); }, dur);
         }
     }
     function closeAppModal(instant) {
@@ -312,7 +313,7 @@ window.cleverDesk = function (A) {
                                     '</span>' +
                                 '</div>' +
                                 '<div class="dmapp__scenes">' +
-                                    /* Экран 1: реальная Главная мобильной версии */
+                                    /* Экран 1: реальная Главная мобильной версии (светлая акция «Блюдо в подарок» и воздух между блоками) */
                                     '<div class="dmapp__sc dmapp__sc--home is-active" aria-hidden="false">' +
                                         '<div class="dmapp__mh-top">' +
                                             '<div class="dmapp__mh-addr">' +
@@ -330,27 +331,29 @@ window.cleverDesk = function (A) {
                                             '<span><img src="img/u/c-home.webp" alt=""><b>Домашняя</b></span>' +
                                         '</div>' +
                                         '<div class="dmapp__mh-promos">' +
-                                            '<div class="dmapp__mh-promo is-dark">' +
-                                                '<div class="dmapp__mh-pban">' +
-                                                    '<img class="dmapp__mh-pimg" src="img/u/pr-1-s.webp" alt="">' +
-                                                    '<div class="dmapp__mh-ptx">' +
-                                                        '<span class="dmapp__mh-ptag">СКИДКА</span>' +
-                                                        '<b>−30%\nна комбо</b>' +
-                                                        '<small>Две пиццы и напиток до 5 декабря</small>' +
-                                                    '</div>' +
-                                                '</div>' +
-                                                '<div class="dmapp__mh-pfoot"><b>Доминос пицца</b><span class="num"><i>★</i>4,7 · 115</span></div>' +
-                                            '</div>' +
-                                            '<div class="dmapp__mh-promo is-peek" aria-hidden="true">' +
+                                            '<div class="dmapp__mh-promo is-light">' +
                                                 '<div class="dmapp__mh-pban is-warm">' +
+                                                    '<img class="dmapp__mh-pimg" src="img/u/pr-2-s.webp" alt="">' +
                                                     '<div class="dmapp__mh-ptx">' +
                                                         '<span class="dmapp__mh-ptag is-l">ПОДАРОК</span>' +
                                                         '<b>Блюдо\nв подарок</b>' +
+                                                        '<small>К первому заказу от 40\u00a0' + byn + '</small>' +
                                                     '</div>' +
                                                 '</div>' +
-                                                '<div class="dmapp__mh-pfoot"><b>Пицца</b></div>' +
+                                                '<div class="dmapp__mh-pfoot"><b>Пицца Темпо</b><span class="num"><i>★</i>4,8 · 288</span></div>' +
+                                            '</div>' +
+                                            '<div class="dmapp__mh-promo is-peek is-red" aria-hidden="true">' +
+                                                '<div class="dmapp__mh-pban is-crimson">' +
+                                                    '<img class="dmapp__mh-pimg" src="img/u/pr-3-s.webp" alt="">' +
+                                                    '<div class="dmapp__mh-ptx">' +
+                                                        '<span class="dmapp__mh-ptag">ДОСТАВКА</span>' +
+                                                        '<b>Доставка\n0\u00a0' + byn + '</b>' +
+                                                    '</div>' +
+                                                '</div>' +
+                                                '<div class="dmapp__mh-pfoot"><b>Terra</b></div>' +
                                             '</div>' +
                                         '</div>' +
+                                        '<div class="dmapp__mh-pdots" aria-hidden="true"><i class="is-on"></i><i></i><i></i><i></i><i></i></div>' +
                                         '<div class="dmapp__mh-sech"><b>Снова хочется</b><span>Все заказы</span></div>' +
                                         '<div class="dmapp__mh-again">' +
                                             '<div class="dmapp__mh-acard is-warm">' +
@@ -364,7 +367,7 @@ window.cleverDesk = function (A) {
                                         '</div>' +
                                         miniTabbar(0, false) +
                                     '</div>' +
-                                    /* Экран 2: реальная витрина заведения Terra */
+                                    /* Экран 2: реальная витрина Terra — листающаяся галерея и перелёт блюда в корзину */
                                     '<div class="dmapp__sc dmapp__sc--rest" aria-hidden="true">' +
                                         '<div class="dmapp__mr-hero">' +
                                             '<img src="img/r-terra.jpg" alt="">' +
@@ -388,24 +391,45 @@ window.cleverDesk = function (A) {
                                                 '<span class="is-on">Популярное</span><span>Горячее</span><span>Салаты и боулы</span>' +
                                             '</div>' +
                                             '<div class="dmapp__mr-h">Популярное</div>' +
-                                            '<div class="dmapp__mr-grid">' +
-                                                '<div class="dmapp__mr-card">' +
-                                                    '<div class="dmapp__mr-pic"><img src="img/u/dish-steak-s.webp" alt=""></div>' +
-                                                    '<div class="dmapp__mr-info">' +
-                                                        '<b>Стейк рибай</b>' +
-                                                        '<small class="num"><i>★</i>4,9 · 350 г</small>' +
-                                                        '<div class="dmapp__mr-foot"><span class="num">24,90\u00a0' + byn + '</span><i class="dmapp__mr-plus is-pulse">' + ic('i-plus') + '</i></div>' +
+                                            '<div class="dmapp__mr-gal">' +
+                                                '<div class="dmapp__mr-track">' +
+                                                    '<div class="dmapp__mr-card is-target">' +
+                                                        '<div class="dmapp__mr-pic"><img src="img/u/dish-steak-s.webp" alt=""></div>' +
+                                                        '<div class="dmapp__mr-info">' +
+                                                            '<b>Стейк рибай</b>' +
+                                                            '<small class="num"><i>★</i>4,9 · 350 г</small>' +
+                                                            '<div class="dmapp__mr-foot">' +
+                                                                '<span class="num">24,90\u00a0' + byn + '</span>' +
+                                                                '<span class="dmapp__mr-add">' +
+                                                                    '<i class="dmapp__mr-plus is-anim">' + ic('i-plus') + '</i>' +
+                                                                    '<em class="dmapp__mr-qty num">1</em>' +
+                                                                '</span>' +
+                                                            '</div>' +
+                                                        '</div>' +
                                                     '</div>' +
-                                                '</div>' +
-                                                '<div class="dmapp__mr-card">' +
-                                                    '<div class="dmapp__mr-pic"><img src="img/u/dish-salmon_grill-s.webp" alt=""></div>' +
-                                                    '<div class="dmapp__mr-info">' +
-                                                        '<b>Лосось на гриле</b>' +
-                                                        '<small class="num"><i>★</i>4,9 · 310 г</small>' +
-                                                        '<div class="dmapp__mr-foot"><span class="num">29,90\u00a0' + byn + '</span><i class="dmapp__mr-plus">' + ic('i-plus') + '</i></div>' +
+                                                    '<div class="dmapp__mr-card">' +
+                                                        '<div class="dmapp__mr-pic"><img src="img/u/dish-salmon_grill-s.webp" alt=""></div>' +
+                                                        '<div class="dmapp__mr-info">' +
+                                                            '<b>Лосось на гриле</b>' +
+                                                            '<small class="num"><i>★</i>4,9 · 310 г</small>' +
+                                                            '<div class="dmapp__mr-foot"><span class="num">29,90\u00a0' + byn + '</span><i class="dmapp__mr-plus">' + ic('i-plus') + '</i></div>' +
+                                                        '</div>' +
+                                                    '</div>' +
+                                                    '<div class="dmapp__mr-card">' +
+                                                        '<div class="dmapp__mr-pic"><img src="img/u/dish-caesar-s.webp" alt=""></div>' +
+                                                        '<div class="dmapp__mr-info">' +
+                                                            '<b>Цезарь с курицей</b>' +
+                                                            '<small class="num"><i>★</i>4,8 · 260 г</small>' +
+                                                            '<div class="dmapp__mr-foot"><span class="num">13,90\u00a0' + byn + '</span><i class="dmapp__mr-plus">' + ic('i-plus') + '</i></div>' +
+                                                        '</div>' +
                                                     '</div>' +
                                                 '</div>' +
                                             '</div>' +
+                                        '</div>' +
+                                        '<div class="dmapp__mr-fly" aria-hidden="true"><img src="img/u/dish-steak-s.webp" alt=""></div>' +
+                                        '<div class="dmapp__mr-cart" aria-hidden="true">' +
+                                            '<span class="dmapp__mr-cart-l"><em class="num">1</em><b>Мой заказ</b></span>' +
+                                            '<span class="dmapp__mr-cart-r num">24,90\u00a0' + byn + '</span>' +
                                         '</div>' +
                                     '</div>' +
                                     /* Экран 3: реальный Профиль и карточка clever-баллы ×2 */
