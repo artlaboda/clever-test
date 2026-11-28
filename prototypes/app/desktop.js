@@ -1982,27 +1982,31 @@ window.cleverDesk = function (A) {
                 '<p class="dsup__sub">Поможем с заказом, доставкой или оплатой</p>' +
             '</div>' +
             '<div class="dsup__phones">' +
-                '<div class="dsup__prow">' +
-                    '<a class="dsup__phone" href="tel:+375295550505">' +
-                        '<span class="dsup__op dsup__op--mts" aria-hidden="true"></span>' +
-                        '<span class="dsup__num" translate="no">+375 (29) 555-05-05</span>' +
-                    '</a>' +
-                    '<button type="button" class="dsup__copy" data-copy="+375 (29) 555-05-05" aria-label="Скопировать номер">' + COPY_IC + OK_IC + '</button>' +
+                '<div class="dsup__pwrap">' +
+                    '<div class="dsup__prow">' +
+                        '<a class="dsup__phone" href="tel:+375295550505">' +
+                            '<span class="dsup__op dsup__op--mts" aria-hidden="true"></span>' +
+                            '<span class="dsup__num" translate="no">+375 (29) 555-05-05</span>' +
+                        '</a>' +
+                        '<button type="button" class="dsup__copy" data-copy="+375 (29) 555-05-05" aria-label="Скопировать номер">' + COPY_IC + OK_IC + '</button>' +
+                    '</div>' +
                     '<span class="dsup__copied" aria-live="polite">Скопировано</span>' +
                 '</div>' +
-                '<div class="dsup__prow">' +
-                    '<a class="dsup__phone" href="tel:+375445550505">' +
-                        '<span class="dsup__op dsup__op--a1" aria-hidden="true"></span>' +
-                        '<span class="dsup__num" translate="no">+375 (44) 555-05-05</span>' +
-                    '</a>' +
-                    '<button type="button" class="dsup__copy" data-copy="+375 (44) 555-05-05" aria-label="Скопировать номер">' + COPY_IC + OK_IC + '</button>' +
+                '<div class="dsup__pwrap">' +
+                    '<div class="dsup__prow">' +
+                        '<a class="dsup__phone" href="tel:+375445550505">' +
+                            '<span class="dsup__op dsup__op--a1" aria-hidden="true"></span>' +
+                            '<span class="dsup__num" translate="no">+375 (44) 555-05-05</span>' +
+                        '</a>' +
+                        '<button type="button" class="dsup__copy" data-copy="+375 (44) 555-05-05" aria-label="Скопировать номер">' + COPY_IC + OK_IC + '</button>' +
+                    '</div>' +
                     '<span class="dsup__copied" aria-live="polite">Скопировано</span>' +
                 '</div>' +
             '</div>' +
             '<div class="dsup__cb" id="dsupCb">' +
                 '<p class="dsup__cb-h" id="dsupCbTitle">Перезвоним за 2 минуты</p>' +
                 '<form class="dsup__cb-form" id="dsupCbForm" novalidate>' +
-                    '<input class="dsup__cb-in" id="dsupCbPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+375 (29) 123-45-67" aria-label="Ваш номер телефона" value="' + esc(prePhone) + '">' +
+                    '<div class="dsup__cb-field"><input class="dsup__cb-in" id="dsupCbPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+375 (29) 123-45-67" aria-label="Ваш номер телефона" value="' + esc(prePhone) + '"></div>' +
                     '<button type="submit" class="dsup__cb-btn">Жду звонка</button>' +
                 '</form>' +
                 '<div class="dsup__cb-ok" id="dsupCbOk" hidden>' +
@@ -2040,6 +2044,13 @@ window.cleverDesk = function (A) {
                 '<small class="dsup__csub">Оля · отвечаем за 2 мин</small>' +
             '</div>';
         if (avaSvg) chead.querySelector('.dsup__ava').insertBefore(avaSvg, chead.querySelector('.dsup__dot'));
+        var chatIn = chatForm.querySelector('#chatInput');
+        if (chatIn && !chatIn.closest('.dsup__inwrap')) {
+            var inWrap = document.createElement('div');
+            inWrap.className = 'dsup__inwrap';
+            chatIn.parentNode.insertBefore(inWrap, chatIn);
+            inWrap.appendChild(chatIn);
+        }
         chatCol.appendChild(chead);
         chatCol.appendChild(chatScroll);
         chatCol.appendChild(chatForm);
@@ -2052,7 +2063,7 @@ window.cleverDesk = function (A) {
         side.addEventListener('click', function (e) {
             var btn = e.target.closest('.dsup__copy');
             if (!btn) return;
-            var row = btn.closest('.dsup__prow');
+            var row = btn.closest('.dsup__pwrap');
             var val = btn.dataset.copy || '';
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(val).catch(function () {});
@@ -2097,8 +2108,9 @@ window.cleverDesk = function (A) {
             if (d.length < 9) {
                 cbBox.classList.add('is-err');
                 cbTitle.textContent = 'Введите номер телефона';
-                if (!fxOff() && cbPhone.animate) {
-                    cbPhone.animate([
+                var cbField = cbPhone.closest('.dsup__cb-field') || cbPhone;
+                if (!fxOff() && cbField.animate) {
+                    cbField.animate([
                         { transform: 'translateX(0)' }, { transform: 'translateX(-6px)' },
                         { transform: 'translateX(5px)' }, { transform: 'translateX(-3px)' },
                         { transform: 'translateX(0)' }

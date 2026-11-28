@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 15:32';
+    var BUILD = '28.11 · 15:40';
 
     /* ── состояние ── */
     var S = {
@@ -23720,8 +23720,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        • обводка без фона (пунктир «Получатель — другой человек») — «line»: свою обводку прячем, слой рисует её по контуру.
        Мягкую тень (с размытием) так не повторить — у таких элементов она у обёртки: filter: drop-shadow идёт по контуру
        (.rcpt-w, .pticket). Что не подходит ни под один способ — по-старому («paint» или обычный радиус) */
-    var SQ_X = '.auth__ph, .cat__pic, .dcard, .item, .bcard, .list, .citem__pic, .dlv, .rcpt, .pticket__in, .cwho__card, .fgrp__cv, .tilecat img, .resrow__pic, .rev, .ostat, .oc, .oc__cover, .ocard__pics span, .nt, .nt__ic, .nt__pic, .cother, .bt__map, .auth__bot, .ccp--menu > .ccp__in, .ccp--unfold, .ccp--wheel, .dls__ph, .agn__list, .ddish-grid, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl',   // .dls__ph — шторка акции (17.11): фото подарка;   // .agn__list — заказы блюда в шторке «Вы заказывали N раз» (17.11, «clip»); .auth__bot — макет капчи входа (17.11): обводка 1 px — «halo»; выбор страны: меню (стекло — «clip»), раскрытие и барабан («halo»); .ddish-grid / .ddish-nutr / .ddish-crust .opt / .ddish-addon / .ddish-excl (26.11): гладкие углы карточки блюда и элементов внутри без мерцания при наведении
-        SQ_RING = '.cat__pic, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl';   // тонкая обводка по контуру изнутри у ::after (--sq-ring 1 px, --sq-ring2 1.5 px)
+    var SQ_X = '.auth__ph, .cat__pic, .dcard, .item, .bcard, .list, .citem__pic, .dlv, .rcpt, .pticket__in, .cwho__card, .fgrp__cv, .tilecat img, .resrow__pic, .rev, .ostat, .oc, .oc__cover, .ocard__pics span, .nt, .nt__ic, .nt__pic, .cother, .bt__map, .auth__bot, .ccp--menu > .ccp__in, .ccp--unfold, .ccp--wheel, .dls__ph, .agn__list, .ddish-grid, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl, .dsup, .dsup__prow, .dsup__op, .dsup__copied, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .msg, .dsup__chat .quick .chip',   // .dls__ph — шторка акции (17.11): фото подарка;   // .agn__list — заказы блюда в шторке «Вы заказывали N раз» (17.11, «clip»); .auth__bot — макет капчи входа (17.11): обводка 1 px — «halo»; выбор страны: меню (стекло — «clip»), раскрытие и барабан («halo»); .ddish-grid / .ddish-nutr / .ddish-crust .opt / .ddish-addon / .ddish-excl (26.11): гладкие углы карточки блюда и элементов внутри без мерцания при наведении; .dsup* / .dsup__chat .msg (28.11): гладкие углы всей десктопной формы поддержки и баллонов чата
+        SQ_RING = '.cat__pic, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl, .dsup__prow, .dsup__op--a1, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .quick .chip';   // тонкая обводка по контуру изнутри у ::after (--sq-ring 1 px, --sq-ring2 1.5 px)
     var SQ_SMOOTH = .6, SQ_SEL = 'button, .rest__pic, .sfield, .acard, .appseg, .slot, .field, .pay, .cchip, .ctile, .stepper, .qty, .btn2, .cta, .promo__banner, .tilecat, .rfact, .cartbar, .search, .adder__clip, .adder__slab, .cgrp, .bt, ' + SQ_X, sqN = 0;
     function sqCorner(r, budget) {
         if (r <= 0) return null;

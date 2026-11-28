@@ -758,20 +758,38 @@ html.desk .screen:not(.is-tab):not(#s-rest) {
 }
 html.desk .screen:not(.is-tab):not(#s-rest):is(.is-on, .is-under) { transform: none; opacity: 1; transition: transform .4s var(--dease), opacity .25s, visibility 0s; }
 html.desk .screen:not(.is-tab):not(#s-rest) > .scroll { overscroll-behavior: none; }
-/* ── поддержка на десктопе (#s-chat, 28.11): двухколоночное окно (телефоны МТС/А1, обратный звонок, график + живой чат) ── */
+/* ── поддержка на десктопе (#s-chat, 28.11): двухколоночное окно (телефоны МТС/А1, обратный звонок, график + живой чат);
+   везде в форме, включая саму рамку окна и баллоны переписки — гладкие углы (Apple smooth corners: SQ_X / SQ_RING) ── */
 html.desk #s-chat.screen:not(.is-tab) {
     width: min(860px, calc(100% - 40px)); height: min(640px, calc(100% - 48px));
-    background: var(--card);
+    border-radius: 0; overflow: visible; background: transparent; box-shadow: none;
+}
+html.desk #s-chat.screen:not(.is-tab)::before {
+    content: ""; position: absolute; inset: 0; border-radius: 28px; pointer-events: none; z-index: -1;
+    box-shadow: 0 50px 120px -30px rgba(20, 12, 8, .6);
 }
 html.desk #s-chat .dsup {
     position: relative; display: grid; grid-template-columns: 356px minmax(0, 1fr);
     width: 100%; height: 100%; min-height: 0;
+    border-radius: 30px; overflow: hidden; background: var(--card);
 }
 @media (max-width: 960px) {
     html.desk #s-chat .dsup { grid-template-columns: 320px minmax(0, 1fr); }
 }
+/* общие гладкие обводки (SQ_RING: 1 px / 1.5 px по суперэллипсу без мерцания) */
+html.desk #s-chat :is(.dsup__prow, .dsup__op--a1, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .quick .chip)::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 4;
+    border-radius: inherit;
+    transition: background-color .22s ease;
+}
+html.desk #s-chat :is(.dsup__prow, .dsup__op--a1, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .quick .chip)[data-sq="clip"]::after {
+    border-radius: 0;
+    background-color: var(--ring-c, var(--line));
+    -webkit-clip-path: var(--sq-ring, inset(50%));
+    clip-path: var(--sq-ring, inset(50%));
+}
 html.desk #s-chat .dsup__close {
-    position: absolute; top: 20px; right: 20px; z-index: 4;
+    position: absolute; top: 20px; right: 20px; z-index: 5;
     width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%;
     display: grid; place-items: center; cursor: pointer;
     background: var(--surface); color: var(--ink);
@@ -803,22 +821,23 @@ html.desk #s-chat .dsup__sub {
     margin: 7px 0 0; font: 450 14px/1.4 var(--font); color: var(--muted);
 }
 html.desk #s-chat .dsup__phones { display: flex; flex-direction: column; gap: 8px; margin-top: 22px; }
+html.desk #s-chat .dsup__pwrap { position: relative; }
 html.desk #s-chat .dsup__prow {
-    position: relative; display: flex; align-items: center; gap: 6px; padding: 5px 6px 5px 12px;
-    border-radius: 14px; background: var(--card); border: 1px solid var(--line);
-    transition: border-color .22s ease, background-color .22s ease;
+    position: relative; display: flex; align-items: center; gap: 6px; padding: 6px 7px 6px 13px;
+    border-radius: 14px; background: var(--card); border: 0; --ring-c: var(--line);
+    transition: background-color .22s ease;
 }
-html.desk #s-chat .dsup__prow:hover { border-color: color-mix(in srgb, var(--ink) 18%, var(--line)); }
+html.desk #s-chat .dsup__prow:hover { --ring-c: color-mix(in srgb, var(--ink) 18%, var(--line)); }
 html.desk #s-chat .dsup__phone {
     flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 11px;
     padding: 6px 0; text-decoration: none; color: var(--ink);
 }
 html.desk #s-chat .dsup__op {
-    flex: none; width: 24px; height: 24px; border-radius: 6px;
+    position: relative; flex: none; width: 24px; height: 24px; border-radius: 6px;
     background-position: center; background-size: cover; background-repeat: no-repeat;
 }
 html.desk #s-chat .dsup__op--mts { background-image:url(data:image/svg+xml,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Cmask%20id%3D%22mask0_1320_133%22%20style%3D%22mask-type%3Aluminance%22%20maskUnits%3D%22userSpaceOnUse%22%20x%3D%220%22%20y%3D%220%22%20width%3D%2220%22%20height%3D%2220%22%3E%0A%3Cpath%20d%3D%22M20%200H0V20H20V0Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fmask%3E%0A%3Cg%20mask%3D%22url%28%23mask0_1320_133%29%22%3E%0A%3Cpath%20d%3D%22M15%200H5C2.23858%200%200%202.23858%200%205V15C0%2017.7614%202.23858%2020%205%2020H15C17.7614%2020%2020%2017.7614%2020%2015V5C20%202.23858%2017.7614%200%2015%200Z%22%20fill%3D%22%23EA1D25%22%2F%3E%0A%3C%2Fg%3E%0A%3Cpath%20d%3D%22M9.70462%203.00021C14.5146%202.94021%2017.6646%2016.0702%209.86462%2016.1702C2.05462%2016.2602%204.89462%203.06021%209.70462%203.00021Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E%0A); }
-html.desk #s-chat .dsup__op--a1 { background-image:url(data:image/svg+xml,%3Csvg%20width%3D%2221%22%20height%3D%2220%22%20viewBox%3D%220%200%2021%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%3E%0A%3Cg%20clip-path%3D%22url%28%23clip0_1320_227%29%22%3E%0A%3Cmask%20id%3D%22mask0_1320_227%22%20style%3D%22mask-type%3Aluminance%22%20maskUnits%3D%22userSpaceOnUse%22%20x%3D%220%22%20y%3D%220%22%20width%3D%2221%22%20height%3D%2220%22%3E%0A%3Cpath%20d%3D%22M15.75%200H5.25C2.3505%200%200%202.23858%200%205V15C0%2017.7614%202.3505%2020%205.25%2020H15.75C18.6495%2020%2021%2017.7614%2021%2015V5C21%202.23858%2018.6495%200%2015.75%200Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fmask%3E%0A%3Cg%20mask%3D%22url%28%23mask0_1320_227%29%22%3E%0A%3Cpath%20d%3D%22M15.75%200H5.25C2.3505%200%200%202.23858%200%205V15C0%2017.7614%202.3505%2020%205.25%2020H15.75C18.6495%2020%2021%2017.7614%2021%2015V5C21%202.23858%2018.6495%200%2015.75%200Z%22%20fill%3D%22%23F1F1F1%22%2F%3E%0A%3Cpath%20d%3D%22M21%200H0V20H21V0Z%22%20fill%3D%22url%28%23pattern0_1320_227%29%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fg%3E%0A%3Cdefs%3E%0A%3Cpattern%20id%3D%22pattern0_1320_227%22%20patternContentUnits%3D%22objectBoundingBox%22%20width%3D%221%22%20height%3D%221%22%3E%0A%3Cuse%20xlink%3Ahref%3D%22%23image0_1320_227%22%20transform%3D%22scale%280.0166667%29%22%2F%3E%0A%3C%2Fpattern%3E%0A%3CclipPath%20id%3D%22clip0_1320_227%22%3E%0A%3Crect%20width%3D%2221%22%20height%3D%2220%22%20fill%3D%22white%22%2F%3E%0A%3C%2FclipPath%3E%0A%3Cimage%20id%3D%22image0_1320_227%22%20width%3D%2260%22%20height%3D%2260%22%20preserveAspectRatio%3D%22none%22%20xlink%3Ahref%3D%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6%2FNlyAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAPKADAAQAAAABAAAAPAAAAACL3%2BlcAAAK7UlEQVRoBe1ZW2xcVxXd5947rzvjmbEd27GTQtQUCGmbkrollZJWCSQtDjQUtXH%2F%2BIugEj988MMHygdCPP6Q%2BsEHokJCQqlEiiKVIkRTolYpSipa2kSBPJtH%2FYzjGc%2Fc19xzDmsf%2B7p23MaeZNIEaY617%2BP43Jm99mPtfe4QtUfbAm0LtC3QtkDbAm0LtC3QtsCKLWCteCUWimYW3w1rd%2B%2Fe%2FUg%2Bn38ilUrdC33ulVL2HT16dP%2FFixcPrUQ%2FZyWL7pY127dvd8rl8m8hmyzLojiOKQxDlp9Dx79CouV0%2Fb8CXCwWn8pkMg8wUK21AcxniA2gK4rWpuJ%2FOevdzv8%2F%2BeSTvblc7pfwrMWAG42GESEEYUqv9Ls%2FEw%2B%2Fncs9tqFY3JMtFC4oohP1dPrci88%2FP7Z%2F%2F37cLj%2B2bNnSB7AH0un0xiiajdrEw%2FD48h%2BwYMWKwmDB%2BqYuD2az67oE%2FXSN1nvXZzJpyuVIczg69lVF4oJS6oSWjePnav5rG8Pw9Cd9ODy7xXGc37g59yHbsYk9yoMBg7Coq6uLDh06dGpkZOQrmA7NP29wuK0ezgnxiy6hh7tYgUKeyHZIWIKEbXUjDLuh9SBF4ru5onOYJsKvY9V8aA4ODq4qlUo%2FxrrvAaQbNSJyNJ4HYAbLQ8bS3CdGMJPLHG5bDv%2FZdQfSgnZZ4BIXQKmjg5BsRKkUEYdhNkuUcynC%2F2zbHjwxOHjPQl0RvtsgP4QXXQ5jFmbk5JpzmI3Q7LhtHs6Q2p0n0VmARmnXJQ2AIorBpQCdTpO2YQpcN%2Bp1ykZRsSHl41j6hwQAvKYZHMLeTPE1DMMEZYQnGTR7%2B67wMFTbCw9TB0SUS7NFA%2BFMDmzMuchet2xSyEMbnnPC8BsJWD7HYSiMF%2BdAZ2Ewz%2FOM%2BL4%2F7%2BkkvBc%2Be6Pr2xLSr5Yy6x1SWzMAlAdAXSwi4RRpBgwvMVCTrUw8jZhiiNUIt57Yvp0DwowwjgWTEmovobOis2fPqtHR0RGeS0KbDZJEQPLccufbAtiJnW8VhJUvAGAKynIIQzMmK%2BNdBquVJAXGlhGUBnDHCz6fD8NNicK9vb11yPjk5GTt2LFjR86cOfM0gP86qcFBEBgv830zo%2BWA989S07MOwBaRb6KzE96VjNDkrYltgNXwThz4pOBdJrOM71tW6O9IlN%2B3b9%2FfT548ef%2Fx48cfBGiefxXgTF4nxJWcmwnrlpPWw4XCl20lH007GXJT%2BPgS8hc5B3YBuXAHqKnuB0hSAMWZc5hJRyGPhR%2FshPI%2FY8IaHh6GlWhyTnBCkUVeLwTH4cz53MxoOeCMEHtyKDodKD0plCLN4VytklBcO4FBanpr8iqVwNBfjBtwOPIaw4Sm7z88smvXPbi9aCavO1wfvgnghUa47pElty0N6f3IULjsGRukVOI627ca%2B5cIYBHCXF4QvtIP6Yjn0wXgV8zU8PgsZJRl3y%2FKSuWJJVrOTTBAJi0GzmcWzuU7BnhzufygpdTmjJsjF52V7iyRQClhrwrO1SCkcc9rvB9F8hI3IN3dJtQZD9dkAUPowBv6NMBgZZGA5TMLA25mtNTDtlLPZJVOlUBUdicaSnhEoxvi%2Fpm4K4pCsmJ5EB79zxVc%2Bz29Jn%2F1nItjMDby%2BPHTQ0OoY0sHezgBmgBn4rojHj5w%2F%2F1pxNi37ZRNneUyoaufzV14F1rOS1nrl%2FqI3vRmZmgMeW5hQ5EMBSZPef5aa3Ly0WRu4RkgTW1OwplBN1uLW%2Bbh9KVLmx0ZP1CAd10mK24lZ6rwMlhYAjDyLZLyKkjtrc%2FZ9hsuvHV%2BaoosNg4YnL3MbJ32PIGu66mFQBdeszfZ04kw4GZGywBbWn8njzcPq0BUlosuGjWWCYuwozECJQMl%2FymmpqolmXobMVu7dOUyRR3FedLSAIyWEuXK23kYr3OuB5KAZA8n1%2Bzlzzykf7duXRa19%2BkMSlAZuatBWgTvaYDVICsNBbm19BrqLwziBxR8CJjv%2B5UKTaP1FCAwLlo8GIzl%2BxvvqdU2zM4sPibg%2BMzC63FOiH7x4k%2B4a4mHOyuVR1NSbSj2rCJmaLMNnK4glFGKEM4C3g0bjeBDKV9nHaCdylvicAbKjmK3JPJooaG8GfCy6%2FkZEdR5f7xkJECTM3u6mdESwLaUzyJrra6BtSQyqL%2B1GkJ6rpsyoCXVpPrgsSg6mSgXW9bfELN6dHyMQjbSAsAaz1pBtGj3xM8BJGrZx4NznoFjLAn%2Fj1ctvlrxwsWPfXz3%2B76%2BvFOvfzOTy1KxG%2BEM5hWXLxpW5nAGrUJTomtaVk8XCqByBIDW1hWt3TNKBZlaLVcDsRWhfBKXnJeWH3z15OBg%2F8Z33hlJvg3gXoHUcI8CTr247kVIF7BPfhH3K3obcMuAOxqNrRkZry%2BuHaA0vKtRWpL8RZdgOiwFJCU7tcOLo3%2FNwtJiAABXObxPhHvgUcFvQ0wmw2u4yvp%2BV%2BTXtuHyZYgZ9Xr9PVywzA%2FeIzczbjmk01LuddFIda1ZC81BQNPXzKaAay9vAXnYxnVK4GVqKgVxtHBSipy8ZYsCMGf5LUYS0ljPgG0Oay8c4udbOW4J8MF15TJq7FC24FIBuyLF%2B92REYQxLMBgsWFgf0XIY75Fm4E%2FhLQRbUBi%2B0Mshso4qPkSEqO%2BCt%2Ff%2Ft6mTdhQt27cEmBnxt6Rk3JNaXU%2FnAvvMlFNXTOeNZsF1h3Ke%2Fx20eiMUoIzb5wUKkkiXFV4TuOQPMf3qTBYlw1mHm4d3Flj3%2FTn2XE8nEcudg30GyBifJxECO6AO43n8Ml1fg0DDzNZgc4oAyDgZMrBEllIBmLPibHOAm3cMBIpfylbL1jS9OVNk9aBnp7Vluft4jYyj86KvSNGPjIu5b2vRH2sAXwE70Zan4u1GgGrYmMsquC1qhKiAstUz2jR%2F67QL%2BBlPe3Ejom7LTNw5vdddhDuOrB370%2BGX355lhCahrj4gZsGnA6CobyU3Z0DA2RxKNZRe2fqpuXz0R4GvPPhhkPG707G8Y7NRNOLv3r%2BrvR9234uEKLncaQFGB%2FRwrmMH8vwvAjDBx86duwLWH1q%2FolbuLjpHHaUGnZBv%2BWeHrSO2ByMjZGHHJ5G51RDDy2hMPbGVFfqTzcAy6pXOm3nHRtM7XWWQWQ8ZQ7mmImirBV4X%2BPZVoybAvzHUmk9uqttvDPK8iscAA1Hx6iOEG4AJKsrEbcVFctAKf7d9obDFfQ6QoOmkR4WvGzICwYzn4OwDjy%2FZeXppgA7cbSnoFWh3N9PFrypsAmoVSsEekK7oykA2FBLmtL67H%2BJ3r8hWvwTTcc%2FssjZKeyRdRbUZkoaGhiAxg6LaoG%2F9VBHx6rlPmcl%2F28a8AH%2BSUzK57L49aAD4dyYmKDpSxfJZ5D4Rh9KehAfeQ2GemMYU8spcsb3%2Fx1Z1isT09fCAG9CNMgrSKfimbRTmbLsD2uxeo1mZpprqT7lS5smLem6m6y48Vihp5vS%2BBVh%2BqMRqtbqCGWQDIAy0cSGpTXNCGG2g5%2Fy3fPTLyEp8A722V%2Fh999LUn6pVMjXaPXq0atSTo1Vq9eGJya4f27JaBpwI44DtJPn1%2Fb3r7fHJ7BXr8GrgiK0iCGIB281fJSkSq3RODUu5ZEmtFQ%2FiqIPsP4Dfq1rpImHV7p0ruitdPnsusNEqx%2B5774XqmOjA%2BeVngxcd1QXCiO2616p%2B%2F64H0VXhy9f5jLU3Ga1OTXaq9sWaFugbYG2BdoWaFugbYG2BdoWuJMW%2BB92p%2BmVGNxu7AAAAABJRU5ErkJggg%3D%3D%22%2F%3E%0A%3C%2Fdefs%3E%0A%3C%2Fsvg%3E%0A); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .06); }
+html.desk #s-chat .dsup__op--a1 { background-image:url(data:image/svg+xml,%3Csvg%20width%3D%2221%22%20height%3D%2220%22%20viewBox%3D%220%200%2021%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%3E%0A%3Cg%20clip-path%3D%22url%28%23clip0_1320_227%29%22%3E%0A%3Cmask%20id%3D%22mask0_1320_227%22%20style%3D%22mask-type%3Aluminance%22%20maskUnits%3D%22userSpaceOnUse%22%20x%3D%220%22%20y%3D%220%22%20width%3D%2221%22%20height%3D%2220%22%3E%0A%3Cpath%20d%3D%22M15.75%200H5.25C2.3505%200%200%202.23858%200%205V15C0%2017.7614%202.3505%2020%205.25%2020H15.75C18.6495%2020%2021%2017.7614%2021%2015V5C21%202.23858%2018.6495%200%2015.75%200Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fmask%3E%0A%3Cg%20mask%3D%22url%28%23mask0_1320_227%29%22%3E%0A%3Cpath%20d%3D%22M15.75%200H5.25C2.3505%200%200%202.23858%200%205V15C0%2017.7614%202.3505%2020%205.25%2020H15.75C18.6495%2020%2021%2017.7614%2021%2015V5C21%202.23858%2018.6495%200%2015.75%200Z%22%20fill%3D%22%23F1F1F1%22%2F%3E%0A%3Cpath%20d%3D%22M21%200H0V20H21V0Z%22%20fill%3D%22url%28%23pattern0_1320_227%29%22%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fg%3E%0A%3Cdefs%3E%0A%3Cpattern%20id%3D%22pattern0_1320_227%22%20patternContentUnits%3D%22objectBoundingBox%22%20width%3D%221%22%20height%3D%221%22%3E%0A%3Cuse%20xlink%3Ahref%3D%22%23image0_1320_227%22%20transform%3D%22scale%280.0166667%29%22%2F%3E%0A%3C%2Fpattern%3E%0A%3CclipPath%20id%3D%22clip0_1320_227%22%3E%0A%3Crect%20width%3D%2221%22%20height%3D%2220%22%20fill%3D%22white%22%2F%3E%0A%3C%2FclipPath%3E%0A%3Cimage%20id%3D%22image0_1320_227%22%20width%3D%2260%22%20height%3D%2260%22%20preserveAspectRatio%3D%22none%22%20xlink%3Ahref%3D%22data%3Aimage%2Fpng%3Bbase64%2CiVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6%2FNlyAAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAPKADAAQAAAABAAAAPAAAAACL3%2BlcAAAK7UlEQVRoBe1ZW2xcVxXd5947rzvjmbEd27GTQtQUCGmbkrollZJWCSQtDjQUtXH%2F%2BIugEj988MMHygdCPP6Q%2BsEHokJCQqlEiiKVIkRTolYpSipa2kSBPJtH%2FYzjGc%2Fc19xzDmsf%2B7p23MaeZNIEaY617%2BP43Jm99mPtfe4QtUfbAm0LtC3QtkDbAm0LtC3QtsCKLWCteCUWimYW3w1rd%2B%2Fe%2FUg%2Bn38ilUrdC33ulVL2HT16dP%2FFixcPrUQ%2FZyWL7pY127dvd8rl8m8hmyzLojiOKQxDlp9Dx79CouV0%2Fb8CXCwWn8pkMg8wUK21AcxniA2gK4rWpuJ%2FOevdzv8%2F%2BeSTvblc7pfwrMWAG42GESEEYUqv9Ls%2FEw%2B%2Fncs9tqFY3JMtFC4oohP1dPrci88%2FP7Z%2F%2F37cLj%2B2bNnSB7AH0un0xiiajdrEw%2FD48h%2BwYMWKwmDB%2BqYuD2az67oE%2FXSN1nvXZzJpyuVIczg69lVF4oJS6oSWjePnav5rG8Pw9Cd9ODy7xXGc37g59yHbsYk9yoMBg7Coq6uLDh06dGpkZOQrmA7NP29wuK0ezgnxiy6hh7tYgUKeyHZIWIKEbXUjDLuh9SBF4ru5onOYJsKvY9V8aA4ODq4qlUo%2FxrrvAaQbNSJyNJ4HYAbLQ8bS3CdGMJPLHG5bDv%2FZdQfSgnZZ4BIXQKmjg5BsRKkUEYdhNkuUcynC%2F2zbHjwxOHjPQl0RvtsgP4QXXQ5jFmbk5JpzmI3Q7LhtHs6Q2p0n0VmARmnXJQ2AIorBpQCdTpO2YQpcN%2Bp1ykZRsSHl41j6hwQAvKYZHMLeTPE1DMMEZYQnGTR7%2B67wMFTbCw9TB0SUS7NFA%2BFMDmzMuchet2xSyEMbnnPC8BsJWD7HYSiMF%2BdAZ2Ewz%2FOM%2BL4%2F7%2BkkvBc%2Be6Pr2xLSr5Yy6x1SWzMAlAdAXSwi4RRpBgwvMVCTrUw8jZhiiNUIt57Yvp0DwowwjgWTEmovobOis2fPqtHR0RGeS0KbDZJEQPLccufbAtiJnW8VhJUvAGAKynIIQzMmK%2BNdBquVJAXGlhGUBnDHCz6fD8NNicK9vb11yPjk5GTt2LFjR86cOfM0gP86qcFBEBgv830zo%2BWA989S07MOwBaRb6KzE96VjNDkrYltgNXwThz4pOBdJrOM71tW6O9IlN%2B3b9%2FfT548ef%2Fx48cfBGiefxXgTF4nxJWcmwnrlpPWw4XCl20lH007GXJT%2BPgS8hc5B3YBuXAHqKnuB0hSAMWZc5hJRyGPhR%2FshPI%2FY8IaHh6GlWhyTnBCkUVeLwTH4cz53MxoOeCMEHtyKDodKD0plCLN4VytklBcO4FBanpr8iqVwNBfjBtwOPIaw4Sm7z88smvXPbi9aCavO1wfvgnghUa47pElty0N6f3IULjsGRukVOI627ca%2B5cIYBHCXF4QvtIP6Yjn0wXgV8zU8PgsZJRl3y%2FKSuWJJVrOTTBAJi0GzmcWzuU7BnhzufygpdTmjJsjF52V7iyRQClhrwrO1SCkcc9rvB9F8hI3IN3dJtQZD9dkAUPowBv6NMBgZZGA5TMLA25mtNTDtlLPZJVOlUBUdicaSnhEoxvi%2Fpm4K4pCsmJ5EB79zxVc%2Bz29Jn%2F1nItjMDby%2BPHTQ0OoY0sHezgBmgBn4rojHj5w%2F%2F1pxNi37ZRNneUyoaufzV14F1rOS1nrl%2FqI3vRmZmgMeW5hQ5EMBSZPef5aa3Ly0WRu4RkgTW1OwplBN1uLW%2Bbh9KVLmx0ZP1CAd10mK24lZ6rwMlhYAjDyLZLyKkjtrc%2FZ9hsuvHV%2BaoosNg4YnL3MbJ32PIGu66mFQBdeszfZ04kw4GZGywBbWn8njzcPq0BUlosuGjWWCYuwozECJQMl%2FymmpqolmXobMVu7dOUyRR3FedLSAIyWEuXK23kYr3OuB5KAZA8n1%2Bzlzzykf7duXRa19%2BkMSlAZuatBWgTvaYDVICsNBbm19BrqLwziBxR8CJjv%2B5UKTaP1FCAwLlo8GIzl%2BxvvqdU2zM4sPibg%2BMzC63FOiH7x4k%2B4a4mHOyuVR1NSbSj2rCJmaLMNnK4glFGKEM4C3g0bjeBDKV9nHaCdylvicAbKjmK3JPJooaG8GfCy6%2FkZEdR5f7xkJECTM3u6mdESwLaUzyJrra6BtSQyqL%2B1GkJ6rpsyoCXVpPrgsSg6mSgXW9bfELN6dHyMQjbSAsAaz1pBtGj3xM8BJGrZx4NznoFjLAn%2Fj1ctvlrxwsWPfXz3%2B76%2BvFOvfzOTy1KxG%2BEM5hWXLxpW5nAGrUJTomtaVk8XCqByBIDW1hWt3TNKBZlaLVcDsRWhfBKXnJeWH3z15OBg%2F8Z33hlJvg3gXoHUcI8CTr247kVIF7BPfhH3K3obcMuAOxqNrRkZry%2BuHaA0vKtRWpL8RZdgOiwFJCU7tcOLo3%2FNwtJiAABXObxPhHvgUcFvQ0wmw2u4yvp%2BV%2BTXtuHyZYgZ9Xr9PVywzA%2FeIzczbjmk01LuddFIda1ZC81BQNPXzKaAay9vAXnYxnVK4GVqKgVxtHBSipy8ZYsCMGf5LUYS0ljPgG0Oay8c4udbOW4J8MF15TJq7FC24FIBuyLF%2B92REYQxLMBgsWFgf0XIY75Fm4E%2FhLQRbUBi%2B0Mshso4qPkSEqO%2BCt%2Ff%2Ft6mTdhQt27cEmBnxt6Rk3JNaXU%2FnAvvMlFNXTOeNZsF1h3Ke%2Fx20eiMUoIzb5wUKkkiXFV4TuOQPMf3qTBYlw1mHm4d3Flj3%2FTn2XE8nEcudg30GyBifJxECO6AO43n8Ml1fg0DDzNZgc4oAyDgZMrBEllIBmLPibHOAm3cMBIpfylbL1jS9OVNk9aBnp7Vluft4jYyj86KvSNGPjIu5b2vRH2sAXwE70Zan4u1GgGrYmMsquC1qhKiAstUz2jR%2F67QL%2BBlPe3Ejom7LTNw5vdddhDuOrB370%2BGX355lhCahrj4gZsGnA6CobyU3Z0DA2RxKNZRe2fqpuXz0R4GvPPhhkPG707G8Y7NRNOLv3r%2BrvR9234uEKLncaQFGB%2FRwrmMH8vwvAjDBx86duwLWH1q%2FolbuLjpHHaUGnZBv%2BWeHrSO2ByMjZGHHJ5G51RDDy2hMPbGVFfqTzcAy6pXOm3nHRtM7XWWQWQ8ZQ7mmImirBV4X%2BPZVoybAvzHUmk9uqttvDPK8iscAA1Hx6iOEG4AJKsrEbcVFctAKf7d9obDFfQ6QoOmkR4WvGzICwYzn4OwDjy%2FZeXppgA7cbSnoFWh3N9PFrypsAmoVSsEekK7oykA2FBLmtL67H%2BJ3r8hWvwTTcc%2FssjZKeyRdRbUZkoaGhiAxg6LaoG%2F9VBHx6rlPmcl%2F28a8AH%2BSUzK57L49aAD4dyYmKDpSxfJZ5D4Rh9KehAfeQ2GemMYU8spcsb3%2Fx1Z1isT09fCAG9CNMgrSKfimbRTmbLsD2uxeo1mZpprqT7lS5smLem6m6y48Vihp5vS%2BBVh%2BqMRqtbqCGWQDIAy0cSGpTXNCGG2g5%2Fy3fPTLyEp8A722V%2Fh999LUn6pVMjXaPXq0atSTo1Vq9eGJya4f27JaBpwI44DtJPn1%2Fb3r7fHJ7BXr8GrgiK0iCGIB281fJSkSq3RODUu5ZEmtFQ%2FiqIPsP4Dfq1rpImHV7p0ruitdPnsusNEqx%2B5774XqmOjA%2BeVngxcd1QXCiO2616p%2B%2F64H0VXhy9f5jLU3Ga1OTXaq9sWaFugbYG2BdoWaFugbYG2BdoWuJMW%2BB92p%2BmVGNxu7AAAAABJRU5ErkJggg%3D%3D%22%2F%3E%0A%3C%2Fdefs%3E%0A%3C%2Fsvg%3E%0A); --ring-c: rgba(0, 0, 0, .06); }
 html.desk #s-chat .dsup__num {
     font: 600 16.5px/1.2 var(--font); font-variant-numeric: tabular-nums;
     letter-spacing: -.01em; color: var(--ink); transition: color .2s ease;
@@ -837,17 +856,16 @@ html.desk #s-chat .dsup__copy svg {
     transition: opacity .2s ease, transform .22s var(--dease);
 }
 html.desk #s-chat .dsup__copy .dsup__ok-ic { opacity: 0; transform: scale(.6); }
-html.desk #s-chat .dsup__prow.is-copied .dsup__copy { background: var(--ok-soft); color: var(--ok); }
-html.desk #s-chat .dsup__prow.is-copied .dsup__copy-ic { opacity: 0; transform: scale(.6); }
-html.desk #s-chat .dsup__prow.is-copied .dsup__ok-ic { opacity: 1; transform: scale(1); }
+html.desk #s-chat .dsup__pwrap.is-copied .dsup__copy { background: var(--ok-soft); color: var(--ok); }
+html.desk #s-chat .dsup__pwrap.is-copied .dsup__copy-ic { opacity: 0; transform: scale(.6); }
+html.desk #s-chat .dsup__pwrap.is-copied .dsup__ok-ic { opacity: 1; transform: scale(1); }
 html.desk #s-chat .dsup__copied {
-    position: absolute; bottom: calc(100% + 6px); right: 6px; z-index: 6; padding: 4px 10px; border-radius: 8px;
+    position: absolute; bottom: calc(100% + 6px); right: 6px; z-index: 6; padding: 5px 10px; border-radius: 8px;
     background: var(--ink); color: var(--app-bg); font: 600 11.5px/1.2 var(--font); white-space: nowrap;
-    box-shadow: 0 6px 16px -4px rgba(20, 12, 8, .28);
     opacity: 0; transform: translateY(4px); pointer-events: none;
     transition: opacity .2s ease, transform .22s var(--dease);
 }
-html.desk #s-chat .dsup__prow.is-copied .dsup__copied { opacity: 1; transform: translateY(0); }
+html.desk #s-chat .dsup__pwrap.is-copied .dsup__copied { opacity: 1; transform: translateY(0); }
 /* обратный звонок */
 html.desk #s-chat .kbpad { display: none !important; }
 html.desk #s-chat .dsup__cb { margin: 22px 0 20px; padding-top: 20px; border-top: 1px solid var(--line); }
@@ -858,32 +876,41 @@ html.desk #s-chat .dsup__cb-h {
 html.desk #s-chat .dsup__cb.is-err .dsup__cb-h { color: var(--brand); }
 html.desk #s-chat .dsup__cb-form { display: flex; flex-direction: column; gap: 9px; }
 html.desk #s-chat .dsup__cb-form[hidden], html.desk #s-chat .dsup__cb-h[hidden] { display: none; }
+html.desk #s-chat .dsup__cb-field {
+    position: relative; width: 100%; height: 48px; border-radius: 14px; border: 0;
+    background: var(--card); --ring-c: var(--line);
+}
+html.desk #s-chat .dsup__cb-field:focus-within { --ring-c: color-mix(in srgb, var(--ink) 44%, transparent); }
+html.desk #s-chat .dsup__cb-field[data-sq="clip"]:focus-within::after {
+    -webkit-clip-path: var(--sq-ring2, inset(50%));
+    clip-path: var(--sq-ring2, inset(50%));
+}
+html.desk #s-chat .dsup__cb.is-err .dsup__cb-field { --ring-c: var(--brand); }
+html.desk #s-chat .dsup__cb.is-err .dsup__cb-field[data-sq="clip"]::after {
+    -webkit-clip-path: var(--sq-ring2, inset(50%));
+    clip-path: var(--sq-ring2, inset(50%));
+}
 html.desk #s-chat .dsup__cb-in {
-    width: 100%; height: 48px; padding: 0 15px; box-sizing: border-box;
-    border-radius: 14px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
-    font: 500 16px/1.2 var(--font); font-variant-numeric: tabular-nums; outline: none;
-    transition: border-color .2s ease, box-shadow .2s ease;
+    width: 100%; height: 100%; padding: 0 15px; box-sizing: border-box;
+    border: 0; border-radius: 0; background: transparent; color: var(--ink);
+    font: 500 16px/1.2 var(--font); font-variant-numeric: tabular-nums; outline: none; box-shadow: none;
 }
 html.desk #s-chat .dsup__cb-in::placeholder { color: var(--faint); font-weight: 450; }
-html.desk #s-chat .dsup__cb-in:focus {
-    border-color: color-mix(in srgb, var(--ink) 42%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 7%, transparent);
-}
-html.desk #s-chat .dsup__cb.is-err .dsup__cb-in {
-    border-color: var(--brand);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 12%, transparent);
-}
 html.desk #s-chat .dsup__cb-btn {
-    width: 100%; height: 48px; padding: 0 18px; border: 0; border-radius: 14px;
-    background: var(--cta); color: var(--on-cta); box-shadow: var(--cta-ring, none);
+    position: relative; width: 100%; height: 48px; padding: 0 18px; border: 0; border-radius: 14px;
+    background: var(--cta); color: var(--on-cta); box-shadow: none; --ring-c: transparent;
     font: 600 15.5px/1 var(--font); cursor: pointer;
     transition: transform .2s var(--dease), opacity .2s ease, background-color .2s ease;
+}
+html.desk[data-theme="dark"] #s-chat .dsup__cb-btn { --ring-c: rgba(255, 255, 255, .18); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #s-chat .dsup__cb-btn { --ring-c: rgba(255, 255, 255, .18); }
 }
 html.desk #s-chat .dsup__cb-btn:hover { opacity: .9; }
 html.desk #s-chat .dsup__cb-btn:active { transform: scale(.98); }
 html.desk #s-chat .dsup__cb-ok {
-    display: flex; flex-direction: column; gap: 11px; padding: 14px 16px;
-    border-radius: 16px; background: var(--card); border: 1px solid var(--line);
+    position: relative; display: flex; flex-direction: column; gap: 11px; padding: 15px 17px;
+    border-radius: 16px; background: var(--card); border: 0; --ring-c: var(--line);
 }
 html.desk #s-chat .dsup__cb-ok[hidden] { display: none; }
 html.desk #s-chat .dsup__cb-okrow { display: flex; align-items: flex-start; gap: 12px; }
@@ -947,31 +974,47 @@ html.desk #s-chat #chatScroll {
     overflow-y: auto; overscroll-behavior: none;
 }
 html.desk #s-chat .chat { padding: 20px 24px 12px; gap: 10px; }
-html.desk #s-chat .msg { max-width: 82%; padding: 11px 15px; border-radius: 20px; font-size: 14.5px; line-height: 1.4; overflow-wrap: break-word; }
-html.desk #s-chat .quick { margin-top: auto; padding: 8px 24px 16px; gap: 7px; }
-html.desk #s-chat .quick .chip {
-    height: 34px; padding: 0 13px; font-size: 13.5px; border-radius: 999px; box-shadow: none;
-    transition: background-color .2s ease, border-color .2s ease, transform .18s var(--dease);
+html.desk #s-chat .dsup__chat .msg {
+    max-width: 82%; padding: 11px 15px; border-radius: 18px;
+    font-size: 14.5px; line-height: 1.4; overflow-wrap: break-word;
 }
-html.desk #s-chat .quick .chip:hover {
+html.desk #s-chat .dsup__chat .msg--them { border-bottom-left-radius: 6px; }
+html.desk #s-chat .dsup__chat .msg--me { border-bottom-right-radius: 6px; }
+html.desk #s-chat .dsup__chat .msg--typing { min-height: 36px; border-radius: 15px; border-bottom-left-radius: 6px; align-items: center; }
+html.desk #s-chat .quick { margin-top: auto; padding: 8px 24px 16px; gap: 7px; }
+html.desk #s-chat .dsup__chat .quick .chip {
+    position: relative; height: 34px; padding: 0 13px; font-size: 13.5px;
+    border: 0; border-radius: 12px; box-shadow: none; --ring-c: var(--line);
+    transition: background-color .2s ease, transform .18s var(--dease);
+}
+html.desk #s-chat .dsup__chat .quick .chip:hover {
     transform: none; box-shadow: none;
     background: color-mix(in srgb, var(--ink) 7%, var(--surface));
+    --ring-c: color-mix(in srgb, var(--ink) 18%, var(--line));
 }
-html.desk #s-chat .quick .chip:active { transform: scale(.96); }
+html.desk #s-chat .dsup__chat .quick .chip:active { transform: scale(.96); }
 html.desk #s-chat .chatin {
     padding: 14px 20px 18px; gap: 10px; border-top: 1px solid var(--line);
-    background: var(--card);
+    background: var(--card); align-items: center;
+}
+html.desk #s-chat .dsup__inwrap {
+    position: relative; flex: 1 1 auto; min-width: 0; height: 46px;
+    border-radius: 15px; border: 0; background: var(--surface); --ring-c: transparent;
+    transition: background-color .2s ease;
+}
+html.desk #s-chat .dsup__inwrap:focus-within {
+    background: var(--card); --ring-c: color-mix(in srgb, var(--ink) 32%, transparent);
+}
+html.desk #s-chat .dsup__inwrap[data-sq="clip"]:focus-within::after {
+    -webkit-clip-path: var(--sq-ring2, inset(50%));
+    clip-path: var(--sq-ring2, inset(50%));
 }
 html.desk #s-chat .chatin .field {
-    height: 46px; padding: 0 18px; border-radius: 23px; font-size: 14.5px;
-    background: var(--surface); border: 1.5px solid transparent;
-    transition: border-color .2s ease, background-color .2s ease;
-}
-html.desk #s-chat .chatin .field:focus {
-    background: var(--card); border-color: color-mix(in srgb, var(--ink) 32%, transparent);
+    width: 100%; height: 100%; padding: 0 16px; border: 0; border-radius: 0;
+    background: transparent; box-shadow: none; font-size: 14.5px;
 }
 html.desk #s-chat .chatin .plus {
-    width: 46px; height: 46px; flex: none;
+    width: 46px; height: 46px; flex: none; border-radius: 15px;
     transition: transform .18s var(--dease), opacity .2s ease;
 }
 html.desk #s-chat .chatin .plus:hover { opacity: .92; }
