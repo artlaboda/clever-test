@@ -394,7 +394,14 @@ html.desk .item .plus:active { transform: scale(.88); }
 html.desk .item .plus svg.i, html.desk .qty button svg.i { transition: transform .2s var(--dease); }
 html.desk .item .plus:hover svg.i, html.desk .qty button:hover svg.i, html.desk .adder__plus:hover, html.desk .adder__minus:hover { transform: scale(1.12); }
 html.desk .item .plus:active svg.i, html.desk .qty button:active svg.i { transform: scale(.78); }
-html.desk .stepper button:hover { background: color-mix(in srgb, var(--ink) 9%, transparent); border-radius: 50%; }
+html.desk .stepper button:hover { background: color-mix(in srgb, #8c5f34 9%, var(--card)); }
+html.desk .stepper button:active { background: color-mix(in srgb, #8c5f34 15%, var(--card)); }
+html.desk[data-theme="dark"] .stepper button:hover { background: color-mix(in srgb, var(--ink) 10%, var(--card)); }
+html.desk[data-theme="dark"] .stepper button:active { background: color-mix(in srgb, var(--ink) 16%, var(--card)); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) .stepper button:hover { background: color-mix(in srgb, var(--ink) 10%, var(--card)); }
+    html.desk:not([data-theme="light"]) .stepper button:active { background: color-mix(in srgb, var(--ink) 16%, var(--card)); }
+}
 /* окно блюда на десктопе (12.11): корзины в окне нет — она в шапке; «Добавлено» не зеленеет; у степпера при наведении и нажатии
    — без кружка, остаётся только градиент нажатия */
 html.desk .dcar__cart { display: none !important; }
