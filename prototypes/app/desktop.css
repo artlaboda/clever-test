@@ -352,11 +352,10 @@ html.desk .rest__txt b, html.desk .rest__txt > :first-child { transition: color 
 html.desk .dcard, html.desk .item { cursor: pointer; }
 html.desk .item { box-shadow: 0 1px 0 var(--line); }
 html.desk .app[data-skin="juicy"] .item { box-shadow: none; }
-html.desk .dcard, html.desk .item, html.desk .ups { transition: transform .3s var(--dease), box-shadow .3s; }
+html.desk .dcard, html.desk .item { transition: transform .3s var(--dease), box-shadow .3s; }
 html.desk .dcard:hover, html.desk .item:hover { transform: translateY(-4px); box-shadow: 0 20px 34px -22px rgba(40, 24, 12, .5), 0 0 0 1px var(--line); }
 html.desk .dcard:hover img, html.desk .item:hover .item__pic img { transform: scale(1.05); }
 html.desk .dcard img, html.desk .item__pic img { transition: transform .45s var(--dease); }
-html.desk .ups:hover { transform: translateY(-3px); }
 /* кнопки, плашки, строки */
 html.desk .cta { transition: translate .2s var(--dease), scale .16s var(--dease), box-shadow .2s, filter .2s; }
 html.desk .cta:hover:not(:disabled):not(.is-off) { z-index: 2; translate: 0 -1px; box-shadow: var(--cta-ring, 0 0 #0000), 0 12px 24px -12px rgba(20, 12, 8, .6); }
@@ -691,37 +690,52 @@ html.desk .app .rbadge svg { width: 10.5px; height: 10.5px; }
 html.desk .app .rbadge b { display: inline; font: inherit; letter-spacing: inherit; font-variant-numeric: proportional-nums; }
 html.desk .app[data-drate="photo"] .item__rate { margin-top: calc(100% - 37px); }
 
-/* ── корзина и оформление — модальные окна по центру (28.11), как остальные экраны поверх ── */
-/* «Добавить к заказу?» в корзине (20.11: «промокод прилип к кросс-селлу; кросс-селл в корзине выглядит не очень — надо красиво»).
-   Прилипал из-за общего запаса лент (снизу 40 px, забранных полем −40 px): в корзине карточки ниже, и блок промокода наезжал на
-   ленту. Здесь у ленты свой запас без отрицательных полей. Карточка — белая, с мягкой тенью: фото со скруглением внутри,
-   название и цена слева, круглый «+» в углу; под курсором карточка приподнимается, фото приближается, «+» краснеет */
-html.desk #s-cart .hscroll { gap: 14px; padding: 6px 16px 22px; margin: 0; scroll-padding: 16px; }
-html.desk #s-cart .sec:has(> .hscroll) { gap: 12px; padding-top: 30px; }
-html.desk #s-cart .ups { position: relative; width: 156px; padding: 8px 8px 12px; gap: 8px; border-radius: 20px; text-align: left; background: var(--card);
-    box-shadow: 0 0 0 1px var(--line), 0 12px 26px -20px rgba(40, 24, 12, .5); transition: transform .3s var(--dease), box-shadow .3s; }
-html.desk #s-cart .ups__pic { height: 116px; border-radius: 14px; background: var(--tile); }
-html.desk #s-cart .ups__pic img { transition: transform .45s var(--dease); }
-html.desk #s-cart .ups__pic img.round { width: 92px; height: 92px; }
-html.desk #s-cart .ups b { font: 600 13.5px/1.28 var(--font); padding: 0 40px 0 4px; margin: 0; min-height: 35px; text-align: left; }
-html.desk #s-cart .ups__price { margin-top: 0; padding: 0 4px; font: 700 15px/1.2 var(--font); text-align: left; }
-html.desk #s-cart .ups .is-sale { justify-items: start; }
-html.desk #s-cart .ups .is-sale .pr-old { justify-self: start; }
-html.desk #s-cart .ups::after { content: ''; position: absolute; right: 10px; bottom: 12px; width: 30px; height: 30px; border-radius: 50%;
-    background: var(--ink); -webkit-mask: none; transition: background .2s, transform .25s var(--dease); }
-html.desk #s-cart .ups::before { content: ''; position: absolute; z-index: 1; right: 10px; bottom: 12px; width: 30px; height: 30px; background: var(--app-bg);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E") center / 14px no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M12 6v12M6 12h12'/%3E%3C/svg%3E") center / 14px no-repeat; transition: transform .25s var(--dease); }
-html.desk #s-cart .ups:hover { transform: translateY(-4px); box-shadow: 0 0 0 1px var(--line), 0 20px 34px -20px rgba(40, 24, 12, .55); }
-html.desk #s-cart .ups:hover .ups__pic img { transform: scale(1.06); }
-html.desk #s-cart .ups:hover::after { background: var(--brand); transform: scale(1.1); }
-html.desk #s-cart .ups:hover::before { transform: scale(1.1); background: #fff; }
-html.desk #s-cart .ups:active { transform: translateY(-1px) scale(.97); transition: transform .15s var(--dease); }
-html.desk #s-cart .citem:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
 /* стрелка «назад» у первого окна поверх — крестик: это закрытие, а не шаг назад (в оформлении — назад в корзину) */
 html.desk .screen.dk-first > .bar > .ibtn:first-child svg { display: none; }
 html.desk .screen.dk-first > .bar > .ibtn:first-child::before { content: ''; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M5 5l14 14M19 5L5 19'/%3E%3C/svg%3E") center / contain no-repeat; }
 html.desk .screen.dk-first > .bar > .ibtn:first-child { display: grid; place-items: center; width: 40px; height: 40px; margin-left: 10px; border-radius: 50%; }
 html.desk .screen.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 8%, transparent); transform: rotate(90deg); }
+/* ── корзина и оформление — модальные окна по центру (28.11), как остальные экраны поверх ── */
+/* шапка корзины (28.11): крупный заголовок и название заведения слева, «удалить всё» — чуть левее крестика, крестик — справа */
+html.desk #s-cart > .bar { display: flex; align-items: center; gap: 8px; padding: 24px 20px 14px 22px; }
+html.desk #s-cart > .bar > .bar__title { order: 1; flex: 1 1 auto; text-align: left; padding-right: 8px;
+    font: var(--display-weight) 30px/1.1 var(--font-display); letter-spacing: var(--display-track); }
+html.desk #s-cart > .bar > .bar__title small { margin-top: 4px; font: 550 17px/1.25 var(--font); letter-spacing: -.01em; color: var(--muted); }
+html.desk #s-cart > .bar > [data-act="clear-cart"] { order: 2; flex: none; width: 40px; height: 40px; border-radius: 50%; color: var(--muted);
+    transition: background-color .2s var(--dease), color .2s var(--dease), transform .18s var(--dease); }
+html.desk #s-cart > .bar > [data-act="clear-cart"] svg.i { width: 20px; height: 20px; }
+html.desk #s-cart > .bar > [data-act="clear-cart"]:hover { background: color-mix(in srgb, var(--brand) 10%, transparent); color: var(--brand); }
+html.desk #s-cart > .bar > [data-act="clear-cart"]:active { transform: scale(.92); }
+html.desk #s-cart > .bar > span:last-child { display: none; }
+html.desk #s-cart.dk-first > .bar > .ibtn:first-child { order: 3; flex: none; margin-left: 0; background: var(--surface);
+    transition: background-color .2s var(--dease), color .2s var(--dease), transform .25s var(--dease); }
+html.desk #s-cart.dk-first > .bar > .ibtn:first-child::after { inset: -2px; }
+html.desk #s-cart.dk-first > .bar > .ibtn:first-child:hover { background: color-mix(in srgb, var(--ink) 12%, var(--surface)); transform: rotate(90deg); }
+html.desk #s-cart.dk-first > .bar > .ibtn:first-child:active { transform: rotate(90deg) scale(.92); opacity: 1; }
+/* «Добавить к заказу?» в корзине (28.11): компактнее, без теней, всё по центру (все 5 карточек ровно по ширине окна);
+   при ховере — только мягкое затемнение без прыжка и теней */
+html.desk #s-cart .sec:has(> .hscroll) { gap: 12px; padding-top: 24px; }
+html.desk #s-cart .sec:has(> .hscroll) .sec__head { justify-content: center; text-align: center; }
+html.desk #s-cart .hscroll { gap: 7px; padding: 2px 16px 14px; margin: 0; scroll-padding: 16px; justify-content: safe center; }
+html.desk #s-cart .ups { position: relative; width: 108px; padding: 6px 6px 10px; gap: 6px; border-radius: 16px;
+    align-items: center; text-align: center; background: var(--surface); box-shadow: none;
+    transition: background-color .22s var(--dease), transform .22s var(--dease); }
+html.desk #s-cart .ups__pic { width: 100%; height: 82px; border-radius: 10px; background: var(--tile); }
+html.desk #s-cart .ups__pic.is-round { background: transparent; }
+html.desk #s-cart .ups__pic img.round { width: 70px; height: 70px; }
+html.desk #s-cart .ups b { width: 100%; font: 550 11.5px/1.24 var(--font); padding: 0 3px; margin: 0; min-height: 29px; text-align: center; }
+html.desk #s-cart .ups__price { width: 100%; margin-top: auto; padding: 0 3px; font: 700 13px/1.18 var(--font); text-align: center; }
+html.desk #s-cart .ups .is-sale { justify-items: center; }
+html.desk #s-cart .ups .is-sale .pr-old { justify-self: center; }
+html.desk #s-cart .ups:hover { transform: none; box-shadow: none; background: color-mix(in srgb, var(--ink) 7%, var(--surface)); }
+html.desk #s-cart .ups:active { transform: scale(.97); background: color-mix(in srgb, var(--ink) 11%, var(--surface)); transition: transform .15s var(--dease), background-color .15s var(--dease); }
+html.desk[data-theme="dark"] #s-cart .ups:hover { background: color-mix(in srgb, #000 22%, var(--surface)); }
+html.desk[data-theme="dark"] #s-cart .ups:active { background: color-mix(in srgb, #000 30%, var(--surface)); }
+@media (prefers-color-scheme: dark) {
+    html.desk:not([data-theme="light"]) #s-cart .ups:hover { background: color-mix(in srgb, #000 22%, var(--surface)); }
+    html.desk:not([data-theme="light"]) #s-cart .ups:active { background: color-mix(in srgb, #000 30%, var(--surface)); }
+}
+html.desk #s-cart .citem:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
 /* ── все экраны поверх (корзина, оформление, заказы и т. д.) — окна по центру ── */
 html.desk .screen:not(.is-tab):not(#s-rest) {
     left: 50%; right: auto; top: 50%; bottom: auto; width: 600px; height: min(820px, calc(100% - 64px)); translate: -50% -50%;
