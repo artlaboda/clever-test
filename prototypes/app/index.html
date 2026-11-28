@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 13:48';
+    var BUILD = '28.11 · 14:01';
 
     /* ── состояние ── */
     var S = {
@@ -7577,9 +7577,10 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        раскрывается), сама цифра при этом уходит перекатом, как остальные, прижатая к соседней: остальные цифры съезжаются, а не
        прыгают */
     function ddText(el, text, k, delay) {
-        var st = el._dd, was = st ? st.to : nbs(el.textContent);
+        var st = el._dd, was = st ? st.to : (el._to != null ? nbs(el._to) : nbs(el.textContent));
         if (st) { st.a.forEach(function (a) { a.cancel(); }); clearTimeout(st.t); el._dd = null; el.textContent = was; }
         text = String(text);
+        el._to = text;
         if (nbs(was) === nbs(text) || fxOff() || !el.isConnected || !el.animate) { el.textContent = text; return; }
         ddFilter();
         var A = nbs(was), B = nbs(text), la = A.length, lb = B.length, n = Math.max(la, lb), nodes = [], slots = [], i;
@@ -16097,15 +16098,19 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         if (soft && scr._hk === htmlKey(h)) return;
         scr._hk = htmlKey(h);
         var prev = {}, hs = open && scr.querySelector('.sec .hscroll'), hx = hs ? hs.scrollLeft : 0;
-        if (open) $$('[data-sum], .cta__sum', scr).forEach(function (e) { prev[e.dataset.sum || 'cta'] = e._to != null ? e._to : e.textContent; });
+        if (open) $$('[data-sum], .cta__sum', scr).forEach(function (e) {
+            prev[e.dataset.sum || 'cta'] = e._dd ? e._dd.to : (e._to != null ? e._to : e.textContent);
+            if (e._dd) { e._dd.a.forEach(function (a) { a.cancel(); }); clearTimeout(e._dd.t); e._dd = null; }
+        });
         scr.innerHTML = h;
         if (scr.querySelector('.citem--off')) strikeAll();   // убранные строки — со штрихом ручкой (готовым)
         var w = [];
         if (open) $$('[data-sum], .cta__sum', scr).forEach(function (e) {
             var old = prev[e.dataset.sum || 'cta'], now = e.textContent;
             if (old == null || nbs(old) === nbs(now)) return;
+            var dir = (parseFloat(nbs(now).replace(',', '.').replace(/[^\d.-]/g, '')) || 0) >= (parseFloat(nbs(old).replace(',', '.').replace(/[^\d.-]/g, '')) || 0) ? 1 : -1;
             e.textContent = old; e._to = old;
-            w.push({ el: e, run: function (dl) { odo(e, now, 1, dl); } });
+            w.push({ el: e, run: function (dl) { odo(e, now, dir, dl); } });
         });
         var sc1 = scr.querySelector('.scroll'); if (y0 && sc1) sc1.scrollTop = y0;
         dlvSet(r, t, open ? w : null);
@@ -16382,7 +16387,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         list.sort(function (a, b) { return a.y - b.y; });
         list.forEach(function (x, i) { x.run((at0 || 0) + i * WAVE_STEP); });
     }
-    function numTo(e) { return nbs(e._to != null ? e._to : e.textContent); }
+    function numTo(e) { return nbs(e._dd ? e._dd.to : e._to != null ? e._to : e.textContent); }
     // итоги, сумма на кнопке и ползунок — на месте, числа прокручиваются волной (fee0 — доставка до правки: вниз, если подешевела)
     function cartSums(d, fee0, at0) {
         var t = cartTotals(), r = rest(S.cartRest), scr = document.getElementById('s-cart'), w = [];
