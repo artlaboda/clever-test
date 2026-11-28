@@ -5762,7 +5762,7 @@ mark.hl { background: color-mix(in srgb, #ffb800 34%, transparent); color: inher
 /* десктопные кнопки шапки (логотип, адрес, поиск, «Войти»), стрелки лент и затемнение — только на компьютере: desktop.css
    показывает их под html.desk. Прячет их здесь, а не в desktop.css: телефон тот файл не скачивает (12.11: правило уехало
    в desktop.css — над таб-баром на телефоне вылезли четыре пустые серые кнопки и сдвинули «Главную») */
-.dlogo, .hsnav, .dh, .dscrim, .daddr-ask { display: none; }
+.dlogo, .hsnav, .dh, .dscrim, .daddr-ask, .dmapp { display: none; }
 html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddish-pnav, .ddish-eyebrow) { display: none; }
 
 @media (max-width: 860px) {
@@ -6818,7 +6818,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 15:11';
+    var BUILD = '28.11 · 15:16';
 
     /* ── состояние ── */
     var S = {
@@ -21563,6 +21563,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             case 'desk-close': if (Desk) Desk.close(); break;
             // шапка десктопа: логотип — на главную, поле — в поиск с курсором (без data-tab: по нему ищут вкладки таб-бара)
             case 'desk-home': { var dhs = S.stack.length, dhf = S.stack.indexOf('rest') >= 0 ? 'rest' : null; resetStack(); setTab('home', dhs ? 2 : 1, dhf); break; }
+            case 'desk-app': if (Desk && Desk.openApp) Desk.openApp(t); break;
             case 'desk-search': { var dss = S.stack.length, dsf = S.stack.indexOf('rest') >= 0 ? 'rest' : null; resetStack(); setTab('search', dss ? 2 : 1, dsf); var dsi = document.getElementById('searchInput'); if (dsi) kbFocus(dsi); break; }
             case 'open-cart': pushScreen('cart'); break;
             case 'open-dish': dishFrom = t; openSheet('dish', { id: id, rest: t.dataset.rest }); break;
@@ -22293,6 +22294,27 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
 
     // словарь переводов: русская строка интерфейса → [беларуская, English]; {0} — число из оригинала, {0:форма|формы} — форма по числу
     var I18N = {
+        "3,3 тыс. отзывов": ["3,3 тыс. водгукаў","3.3k reviews"],
+        "30 см · Классический": ["30 см · Класічны","30 cm · Classic"],
+        "QR-код для скачивания приложения clever.by": ["QR-код для спампоўвання дадатку clever.by","QR code to download the clever.by app"],
+        "×2 балла": ["×2 балы","2× points"],
+        "×2 за заказ в приложении": ["×2 за замову ў дадатку","2× points in the app"],
+        "Быстрый заказ в пару тапов": ["Хуткая замова ў пару дотыкаў","Fast order in a couple of taps"],
+        "В приложении ещё быстрее и выгоднее": ["У дадатку яшчэ хутчэй і выгадней","Even faster & more rewarding in the app"],
+        "Говядина · соус гриль": ["Ялавічына · соус грыль","Beef · grill sauce"],
+        "за каждый заказ": ["за кожную замову","on every order"],
+        "Курьер на карте онлайн": ["Кур’ер на карце анлайн","Live courier on the map"],
+        "Курьер уже в пути": ["Кур’ер ужо ў дарозе","Courier is on the way"],
+        "Наведите камеру телефона": ["Навядзіце камеру тэлефона","Point your phone camera"],
+        "Повтор любимых блюд и оплата без лишних шагов": ["Паўтор любімых страў і аплата без лішніх крокаў","Reorder favorites & pay with zero extra steps"],
+        "Промокод APP30": ["Промакод APP30","Promo code APP30"],
+        "Скидки, подарки и промокоды только в приложении": ["Зніжкі, падарункі і промакоды толькі ў дадатку","Discounts, gifts & promo codes only in the app"],
+        "Ссылка откроет нужный магазин приложений": ["Спасылка адкрые патрэбную краму дадаткаў","Opens the right app store automatically"],
+        "Только в приложении": ["Толькі ў дадатку","App exclusive"],
+        "Точное время доставки и пуш-уведомления о статусе": ["Дакладны час дастаўкі і пуш-апавяшчэнні пра статус","Accurate ETA & real-time push notifications"],
+        "Уникальные акции и ×2 баллов": ["Унікальныя акцыі і ×2 балаў","Exclusive deals & 2× points"],
+        "Уникальные акции и промокоды, ×2 бонусных баллов за каждый заказ и курьер на карте в реальном времени.": ["Унікальныя акцыі і промакоды, ×2 бонусных балаў за кожную замову і кур’ер на карце ў рэальным часе.","Exclusive deals and promo codes, 2× bonus points on every order, and live courier tracking."],
+        "Экран приложения": ["Экран дадатку","App screen"],
         "— без комментариев": ["— без каментароў","— no comments"],
         "— и доставка будет бесплатной": ["— і дастаўка будзе бясплатнай","more and delivery is free"],
         "— минус {0}% на первый заказ": ["— мінус {0}% на першую замову","— {0}% off your first order"],
@@ -22351,12 +22373,15 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         "{s} в заказе": ["{s} у замове","{s} in your order"],
         "{s} подтвердил заказ №{0}": ["{s} пацвердзіў замову №{0}","{s} confirmed order #{0}"],
         "~{0} ккал": ["~{0} ккал","~{0} kcal"],
+        "−30% в приложении": ["−30% у дадатку","−30% in the app"],
         "−{0}% на завтраки": ["−{0}% на сняданкі","−{0}% on breakfasts"],
         "−{0}% на комбо": ["−{0}% на комба","−{0}% on combos"],
         "−{0}% на обеды": ["−{0}% на абеды","−{0}% on lunches"],
         "−{0}% на сеты": ["−{0}% на сэты","−{0}% on sets"],
         "−{0}% на шашлык": ["−{0}% на шашлык","−{0}% on shashlik"],
         "−{0}% навынос": ["−{0}% на вынас","−{0}% takeaway"],
+        "★ 4,9 · на электробайке": ["★ 4,9 · на электрабайку","★ 4.9 · on e-bike"],
+        "📍 ул. Свердлова, 22": ["📍 вул. Свярдлова, 22","📍 Sverdlova St, 22"],
         "🔥 Акции": ["🔥 Акцыі","🔥 Deals"],
         "а сейчас": ["а зараз","and now"],
         "авг": ["жн","Aug"],
