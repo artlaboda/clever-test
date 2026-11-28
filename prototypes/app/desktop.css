@@ -773,6 +773,7 @@ html.desk #s-fav > .scroll {
     overscroll-behavior: none;
     scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--ink) 20%, transparent) transparent;
 }
+html.desk #s-dev .dev-addons__grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
 /* ── профиль и все его подразделы на десктопе (28.11):
    единые крупные заголовки, круглые кнопки назад/закрыть, чистая синяя подсветка в стиле apple.com

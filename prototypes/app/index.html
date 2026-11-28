@@ -922,6 +922,88 @@ a.btn2 { display: inline-flex; align-items: center; text-decoration: none; }   /
 .endnote__more { position: absolute; left: 0; right: 0; bottom: -14px; color: var(--muted); font-size: 12px; font-weight: 600; opacity: 0; transition: opacity .2s; pointer-events: none; }
 .endnote__more.is-on { opacity: 1; }
 .dev__note { margin: 0; padding: 6px 24px 2px; color: var(--muted); font-size: 13.5px; line-height: 1.4; }   /* скрытые настройки: пояснение */
+/* превью картинок добавок в скрытых настройках — точно такие же вертикальные карточки, как .ddish-addon.has-pic на сайте */
+.dev-addons { padding: 6px 16px 0; display: grid; gap: 16px; }
+.dev-addons__grp { display: grid; gap: 8px; }
+.dev-addons__head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 2px 4px 0; }
+.dev-addons__head h3 { margin: 0; font: 700 14px/1.25 var(--font); color: var(--ink); letter-spacing: -.01em; }
+.dev-addons__head small { font: 500 12px/1.2 var(--font); color: var(--muted); }
+.dev-addons__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.dev-addon {
+    position: relative; display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0;
+    padding: 0; border: 0; border-radius: 16px; text-align: center;
+    background: var(--card); color: var(--ink); box-shadow: none;
+    --ring-c: var(--line);
+    transition: background-color .22s ease;
+}
+.dev-addon:hover { --ring-c: color-mix(in srgb, var(--ink) 24%, var(--line)); }
+.dev-addon.is-on {
+    background: color-mix(in srgb, var(--ink) 3.2%, var(--card));
+    --ring-c: color-mix(in srgb, var(--ink) 36%, var(--line));
+}
+.dev-addon.is-on:hover { --ring-c: color-mix(in srgb, var(--ink) 44%, var(--line)); }
+.dev-addon__hit {
+    position: absolute; inset: 0; z-index: 1; margin: 0; padding: 0; border: 0; border-radius: 16px;
+    background: transparent; cursor: pointer;
+}
+.dev-addon__hit:disabled { cursor: default; }
+.dev-addon__pic {
+    position: relative; z-index: 0; flex: none; width: 100%; height: 82px; padding: 6px 6px 2px; box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center; pointer-events: none; background: transparent;
+}
+.dev-addon__pic img {
+    max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; pointer-events: none;
+}
+.dev-addon__body {
+    position: relative; z-index: 1; padding: 1px 7px 6px; pointer-events: none; min-width: 0; text-align: center;
+}
+.dev-addon__name {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    font: 600 12px/1.22 var(--font); color: var(--ink); text-align: center;
+}
+.dev-addon__foot {
+    position: relative; z-index: 2; margin: auto 6px 8px;
+    height: 26px; display: flex; align-items: center; justify-content: center; pointer-events: none;
+}
+.dev-addon__price {
+    font: 600 11.5px/1 var(--font); letter-spacing: -.015em; color: var(--muted);
+    text-align: center; white-space: nowrap;
+    transition: opacity .16s ease .06s, transform .22s var(--ease) .04s;
+}
+.dev-addon.is-on .dev-addon__price { opacity: 0; transform: scale(.88); transition: opacity .1s ease, transform .14s ease; }
+.dev-addon__ctl {
+    position: absolute; inset: 0; margin: auto; z-index: 3;
+    width: min(100%, 72px); height: 26px; border-radius: 999px; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--card); color: var(--ink);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 14%, var(--line)), 0 2px 6px -2px rgba(20, 14, 10, .10);
+    opacity: 0; transform: scale(.82); pointer-events: none;
+    transition: opacity .16s ease, transform .26s cubic-bezier(.22, 1.18, .36, 1), background-color .22s ease, box-shadow .24s ease;
+}
+.dev-addon__ctl::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 1;
+    opacity: 0; transition: opacity .18s ease;
+}
+.dev-addon.is-on .dev-addon__ctl { opacity: 1; transform: none; pointer-events: auto; }
+.dev-addon.is-on .dev-addon__ctl:has(.dev-addon__dec:hover:not(:disabled))::before {
+    opacity: 1; background: linear-gradient(to right, color-mix(in srgb, var(--ink) 13%, transparent) 0%, transparent 56%);
+}
+.dev-addon.is-on .dev-addon__ctl:has(.dev-addon__inc:hover:not(:disabled))::before {
+    opacity: 1; background: linear-gradient(to left, color-mix(in srgb, var(--ink) 13%, transparent) 0%, transparent 56%);
+}
+.dev-addon__btn {
+    position: relative; z-index: 3; flex: none; width: 24px; height: 26px; padding: 0; border: 0; border-radius: 0;
+    display: grid; place-items: center; background: none !important; color: inherit; cursor: pointer;
+    transition: opacity .2s ease;
+}
+.dev-addon.is-on .dev-addon__btn { will-change: scale; }
+.dev-addon__btn.is-held { scale: .86; transition: opacity .2s ease, scale .09s cubic-bezier(.3, 0, .4, 1); }
+.dev-addon__btn svg { width: 12px; height: 12px; stroke-width: 2.4; }
+.dev-addon__btn:disabled { opacity: .3; cursor: default; }
+.dev-addon__q {
+    position: relative; z-index: 3; flex: 1 1 0; width: auto; min-width: 16px; overflow: visible; text-align: center;
+    font: 700 12.5px/26px var(--font); font-variant-numeric: tabular-nums;
+}
 
 /* таб-бар и плашка корзины */
 .tabbar {
@@ -6818,7 +6900,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     ];
     function verOf(id) { var x = VERSIONS.filter(function (q) { return q.id === id; })[0]; return x ? x.v : ''; }
     // метка сборки внизу профиля: по ней видно, обновился ли сайт (меняется при каждой выкладке)
-    var BUILD = '28.11 · 17:27';
+    var BUILD = '28.11 · 17:43';
 
     /* ── состояние ── */
     var S = {
@@ -7415,8 +7497,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        раньше, по click — на скорости это не сказывается: новое касание сразу начинает своё нажатие, не дожидаясь, пока догорит
        прошлое. Строку заказа перерисовало (кнопка — уже другая) — отпускание доигрывается на новой (fxPress). Клик без пальца
        (клавиатура) — нажатие и отпускание подряд, как было */
-    var PRESS_SEL = '.stepper button, .qty button, .adder button, .plus, .ddish-addon__ctl button', pressHeld = null, pressAt = -1e9;
-    function pressBoxOf(btn) { var pill = btn.closest('.stepper, .qty, .adder, .ddish-addon__ctl'); return pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') || pill : pill) : btn; }
+    var PRESS_SEL = '.stepper button, .qty button, .adder button, .plus, .ddish-addon__ctl button, .dev-addon__ctl button', pressHeld = null, pressAt = -1e9;
+    function pressBoxOf(btn) { var pill = btn.closest('.stepper, .qty, .adder, .ddish-addon__ctl, .dev-addon__ctl'); return pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') || pill : pill) : btn; }
     function pressGrad(box, btn) {   // накладка-градиент со стороны кнопки (одна на плашку); у одиночной кнопки — ровная
         var old = box.querySelectorAll(':scope > .press-grad'), i, gr = document.createElement('i'), br = btn.getBoundingClientRect(), pr = box.getBoundingClientRect();
         for (i = 0; i < old.length; i++) old[i].remove();
@@ -7454,7 +7536,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     function fxPress(btn, dir) {
         if (fxOff() || !btn || !btn.isConnected) return;
         if (FXV.press === 'old') { fxTap(btn, dir); return; }
-        var pill = btn.closest('.stepper, .qty, .adder, .ddish-addon__ctl'), box = pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') : pill) : btn;
+        var pill = btn.closest('.stepper, .qty, .adder, .ddish-addon__ctl, .dev-addon__ctl'), box = pill ? (pill.classList.contains('adder') ? pill.querySelector('.adder__clip') : pill) : btn;
         if (!(FXV.press === 'grad' && performance.now() - pressAt < 1200)) btn.animate([{ scale: 1 }, { scale: .84, offset: .25 }, { scale: 1.06, offset: .6 }, { scale: 1 }], { duration: 460, easing: 'ease-out' });
         var br = btn.getBoundingClientRect(), pr = box.getBoundingClientRect(), k = box.offsetWidth / (pr.width || 1) || 1, W = box.offsetWidth;
         var cx = (br.left + br.width / 2 - pr.left) * k, cy = (br.top + br.height / 2 - pr.top) * k;
@@ -20612,6 +20694,64 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var hand = function () { try { window.prompt('Скопируйте и вставьте в чат', txt); } catch (e) {} };
         try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, hand); else hand(); } catch (e) { hand(); }
     }
+    var devAddonQ = {};
+    function devAddonsHtml() {
+        var groups = [
+            { t: 'Пицца', keys: ADDON_PIZZA },
+            { t: 'Бургеры и стритфуд', keys: ['cheddar', 'pickles', 'cheese_sauce'] },
+            { t: 'Топпинги', keys: ADDON_SWEET },
+            { t: 'Pad Thai · Дополнительно', keys: ['pt_sauce'] },
+            { t: 'Pad Thai · Начинка', keys: ADDON_PT_WOK }
+        ];
+        var mkCard = function (k) {
+            var a = ADDONS[k]; if (!a) return '';
+            var q = devAddonQ[k] || 0;
+            var priceStr = '+' + moneyShort(a.add) + '\u00a0' + BYN;
+            return '<div class="dev-addon' + (q > 0 ? ' is-on' : '') + '" data-id="' + k + '" data-qty="' + q + '">' +
+                '<button type="button" class="dev-addon__hit" data-act="dev-addon" data-id="' + k + '" data-d="1" aria-label="' + esc(a.name) + '"' + (q >= 5 ? ' disabled' : '') + '></button>' +
+                '<span class="dev-addon__pic"><img src="img/addons/' + k + '.webp" alt="" loading="lazy" decoding="async"></span>' +
+                '<span class="dev-addon__body"><b class="dev-addon__name">' + esc(a.name) + '</b></span>' +
+                '<span class="dev-addon__foot">' +
+                    '<small class="dev-addon__price num">' + priceStr + '</small>' +
+                    '<span class="dev-addon__ctl">' +
+                        '<button type="button" class="dev-addon__btn dev-addon__dec" data-act="dev-addon" data-id="' + k + '" data-d="-1" aria-label="Убрать порцию"' + (q > 0 ? '' : ' tabindex="-1"') + '>' +
+                            '<svg class="i" viewBox="0 0 24 24"><path d="M6 12h12"/></svg>' +
+                        '</button>' +
+                        '<span class="dev-addon__q num" aria-live="polite">' + (q || 1) + '</span>' +
+                        '<button type="button" class="dev-addon__btn dev-addon__inc" data-act="dev-addon" data-id="' + k + '" data-d="1" aria-label="Добавить порцию"' + (q > 0 ? '' : ' tabindex="-1"') + (q >= 5 ? ' disabled' : '') + '>' +
+                            '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>' +
+                        '</button>' +
+                    '</span>' +
+                '</span>' +
+            '</div>';
+        };
+        return '<div class="dev-addons">' + groups.map(function (g) {
+            return '<div class="dev-addons__grp">' +
+                '<div class="dev-addons__head"><h3>' + esc(g.t) + '</h3><small class="num">' + g.keys.length + '</small></div>' +
+                '<div class="dev-addons__grid">' + g.keys.map(mkCard).join('') + '</div>' +
+            '</div>';
+        }).join('') + '</div>';
+    }
+    function devAddonTap(id, d, btn) {
+        if (!ADDONS[id]) return;
+        var prev = devAddonQ[id] || 0, next = Math.max(0, Math.min(5, prev + (d < 0 ? -1 : 1)));
+        if (next === prev) return;
+        if (next) devAddonQ[id] = next; else delete devAddonQ[id];
+        var card = document.querySelector('#s-dev .dev-addon[data-id="' + id + '"]');
+        if (!card) return;
+        card.classList.toggle('is-on', next > 0);
+        card.dataset.qty = String(next);
+        var hit = card.querySelector('.dev-addon__hit'), dec = card.querySelector('.dev-addon__dec'), inc = card.querySelector('.dev-addon__inc'), qEl = card.querySelector('.dev-addon__q');
+        if (hit) hit.disabled = next >= 5;
+        if (dec) dec.tabIndex = next > 0 ? 0 : -1;
+        if (inc) { inc.tabIndex = next > 0 ? 0 : -1; inc.disabled = next >= 5; }
+        if (qEl && next > 0) {
+            if (prev === 0 || !window.cntSet) qEl.textContent = String(next);
+            else cntSet(qEl, next, next > prev ? 1 : -1);
+        }
+        var fxBtn = btn && btn.classList.contains('dev-addon__hit') ? (prev > 0 ? inc : null) : btn;
+        if (fxBtn) fxPress(fxBtn, d < 0 ? -1 : 1);
+    }
     function renderDev() {
         var h = '<div class="bar"><button type="button" class="ibtn" data-act="back" aria-label="Назад">' + ic('i-back') + '</button><div class="bar__title">Для разработчика</div><span></span></div>' +
             '<div class="scroll"><p class="dev__note">Скрытые настройки для разработки и проверки. Сюда — пять касаний подряд по строке «сборка» внизу профиля</p>' +
@@ -20639,6 +20779,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
                 return '<div class="lrow lrow--set">' + ic('i-check') + '<span>' + esc(q.name) + ' ' + esc(q.v) + '</span><a class="btn2" href="' + q.url + '" target="_blank" rel="noopener">Открыть</a>' +
                     '<small class="lrow__note">' + (q.note ? esc(q.note) + '. ' : '') + 'Зафиксирована ' + q.date + ' (README → «Версии»): копия на onrender — открыть и сравнить с тем, что сейчас</small></div>';
             }).join('') + '</div></div>' +
+            '<p class="dev__note">Картинки добавок — все 37 карточек в стиле сайта (пока только здесь, на сайте не включены)</p>' +
+            devAddonsHtml() +
             '<p class="endnote">сборка ' + BUILD + ' · ' + VERSIONS.filter(function (q) { return verOf(q.id) === q.v; }).map(function (q) { return q.name.toLowerCase() + ' ' + q.v; }).join(' · ') + '</p><div style="height:120px"></div></div>';
         var dev = document.getElementById('s-dev'), sc0 = dev.querySelector('.scroll'), y0 = sc0 ? sc0.scrollTop : 0;
         dev.innerHTML = h;
@@ -21936,6 +22078,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
             case 'ec-replay': replayPepper(t); break;
             case 'open-me': pushScreen('me'); break;
             case 'dev-tap': if (Date.now() - devTapAt > 700) devTap(); break;   // касание уже посчитано по pointerup — click за ним не считаем
+            case 'dev-addon': devAddonTap(id, +t.dataset.d || 1, t); break;
             case 'selftest': selfTest(); break;
             case 'pick-photo': camClick(t); break;
             case 'drop-photo': draft.photo = null; drawMe(); break;
@@ -22329,6 +22472,32 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         "3,3 тыс. отзывов": ["3,3 тыс. водгукаў","3.3k reviews"],
         "30 см · Классический": ["30 см · Класічны","30 cm · Classic"],
         "50–60 мин · бесплатно от 100 ⃅": ["50–60 хв · бясплатна ад 100 ⃅","50–60 min · free from 100 ⃅"],
+        "Ананас": ["Ананас","Pineapple"],
+        "Арахис": ["Арахіс","Peanuts"],
+        "Бобы эдамаме": ["Бабы эдамаме","Edamame"],
+        "Брокколи": ["Брокалі","Broccoli"],
+        "Бургеры и стритфуд": ["Бургеры і стрытфуд","Burgers & street food"],
+        "Говядина": ["Ялавічына","Beef"],
+        "Гриб муэр": ["Грыб муэр","Wood ear mushroom"],
+        "Картинки добавок — все 37 карточек в стиле сайта (пока только здесь, на сайте не включены)": ["Карцінкі дадаткаў — усе 37 картак у стылі сайта (пакуль толькі тут, на сайце не ўключаны)","Add-on pictures — all 37 cards in site style (preview only, not live on site yet)"],
+        "Колбаски": ["Каўбаскі","Sausages"],
+        "Креветки": ["Крэветкі","Shrimp"],
+        "Кукуруза": ["Кукуруза","Sweet corn"],
+        "Куриный попкорн": ["Курыны папкорн","Popcorn chicken"],
+        "Курица": ["Курыца","Chicken"],
+        "Лосось": ["Ласось","Salmon"],
+        "Лук фри": ["Цыбуля фры","Crispy fried onion"],
+        "Морской коктейль": ["Марскі кактэйль","Seafood mix"],
+        "Огурец": ["Агурок","Cucumber"],
+        "Пармезан": ["Пармезан","Parmesan"],
+        "Приготовить острее": ["Прыгатаваць вастрэй","Make it spicier"],
+        "Тофу": ["Тофу","Tofu"],
+        "Удвоить соус": ["Падвоіць соус","Double sauce"],
+        "Утка": ["Качка","Duck"],
+        "Шиитаке": ["Шыітаке","Shiitake"],
+        "Яйцо": ["Яйка","Egg"],
+        "Pad Thai · Дополнительно": ["Pad Thai · Дадаткова","Pad Thai · Extras"],
+        "Pad Thai · Начинка": ["Pad Thai · Начынка","Pad Thai · Toppings"],
         "QR-код для скачивания приложения clever.by": ["QR-код для спампоўвання дадатку clever.by","QR code to download the clever.by app"],
         "×2 clever-баллов за каждый заказ": ["×2 clever-балаў за кожную замову","2× clever points on every order"],
         "×2 балла": ["×2 балы","2× points"],
@@ -23770,8 +23939,8 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
        • обводка без фона (пунктир «Получатель — другой человек») — «line»: свою обводку прячем, слой рисует её по контуру.
        Мягкую тень (с размытием) так не повторить — у таких элементов она у обёртки: filter: drop-shadow идёт по контуру
        (.rcpt-w, .pticket). Что не подходит ни под один способ — по-старому («paint» или обычный радиус) */
-    var SQ_X = '.auth__ph, .cat__pic, .dcard, .item, .bcard, .list, .citem__pic, .dlv, .rcpt, .pticket__in, .cwho__card, .fgrp__cv, .tilecat img, .resrow__pic, .rev, .ostat, .oc, .oc__cover, .ocard__pics span, .nt, .nt__ic, .nt__pic, .cother, .bt__map, .auth__bot, .ccp--menu > .ccp__in, .ccp--unfold, .ccp--wheel, .dls__ph, .agn__list, .ddish-grid, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl, .dsup, .dsup__prow, .dsup__op, .dsup__copied, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .msg, .dsup__chat .quick .chip',   // .dls__ph — шторка акции (17.11): фото подарка;   // .agn__list — заказы блюда в шторке «Вы заказывали N раз» (17.11, «clip»); .auth__bot — макет капчи входа (17.11): обводка 1 px — «halo»; выбор страны: меню (стекло — «clip»), раскрытие и барабан («halo»); .ddish-grid / .ddish-nutr / .ddish-crust .opt / .ddish-addon / .ddish-excl (26.11): гладкие углы карточки блюда и элементов внутри без мерцания при наведении; .dsup* / .dsup__chat .msg (28.11): гладкие углы всей десктопной формы поддержки и баллонов чата
-        SQ_RING = '.cat__pic, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl, .dsup__prow, .dsup__op--a1, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .quick .chip';   // тонкая обводка по контуру изнутри у ::after (--sq-ring 1 px, --sq-ring2 1.5 px)
+    var SQ_X = '.auth__ph, .cat__pic, .dcard, .item, .bcard, .list, .citem__pic, .dlv, .rcpt, .pticket__in, .cwho__card, .fgrp__cv, .tilecat img, .resrow__pic, .rev, .ostat, .oc, .oc__cover, .ocard__pics span, .nt, .nt__ic, .nt__pic, .cother, .bt__map, .auth__bot, .ccp--menu > .ccp__in, .ccp--unfold, .ccp--wheel, .dls__ph, .agn__list, .ddish-grid, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl, .dev-addon, .dsup, .dsup__prow, .dsup__op, .dsup__copied, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .msg, .dsup__chat .quick .chip',   // .dls__ph — шторка акции (17.11): фото подарка;   // .agn__list — заказы блюда в шторке «Вы заказывали N раз» (17.11, «clip»); .auth__bot — макет капчи входа (17.11): обводка 1 px — «halo»; выбор страны: меню (стекло — «clip»), раскрытие и барабан («halo»); .ddish-grid / .ddish-nutr / .ddish-crust .opt / .ddish-addon / .ddish-excl (26.11): гладкие углы карточки блюда и элементов внутри без мерцания при наведении; .dev-addon (28.11): превью-карточки добавок в скрытых настройках; .dsup* / .dsup__chat .msg (28.11): гладкие углы всей десктопной формы поддержки и баллонов чата
+        SQ_RING = '.cat__pic, .ddish-nutr, .ddish-crust .opt, .ddish-addon, .ddish-excl, .dev-addon, .dsup__prow, .dsup__op--a1, .dsup__cb-field, .dsup__cb-btn, .dsup__cb-ok, .dsup__inwrap, .dsup__chat .quick .chip';   // тонкая обводка по контуру изнутри у ::after (--sq-ring 1 px, --sq-ring2 1.5 px)
     var SQ_SMOOTH = .6, SQ_SEL = 'button, .rest__pic, .sfield, .acard, .appseg, .slot, .field, .pay, .cchip, .ctile, .stepper, .qty, .btn2, .cta, .promo__banner, .tilecat, .rfact, .cartbar, .search, .adder__clip, .adder__slab, .cgrp, .bt, ' + SQ_X, sqN = 0;
     function sqCorner(r, budget) {
         if (r <= 0) return null;
@@ -24010,7 +24179,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
         var list = root.matches && root.matches(SQ_SEL) ? [root] : [];
         (root.querySelectorAll ? [].slice.call(root.querySelectorAll(SQ_SEL)) : []).forEach(function (e) { list.push(e); });
         list.forEach(function (el) {
-            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava') || el.classList.contains('ddish-nutr__tab') || (el.dataset && el.dataset.act === 'rtab') || (el.closest('.ddish-addon') && !el.classList.contains('ddish-addon'))) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него; вкладки КБЖУ, пункты меню (у них своя «Капля») и внутренние кнопки .ddish-addon — без перерисовки контура
+            if (el._sqOn || el.closest('.ckb') || el.classList.contains('me2__ava') || el.classList.contains('ddish-nutr__tab') || (el.dataset && el.dataset.act === 'rtab') || (el.closest('.ddish-addon') && !el.classList.contains('ddish-addon')) || (el.closest('.dev-addon') && !el.classList.contains('dev-addon'))) return;   // своя клавиатура — со своими формами клавиш; фото профиля — круг, камера выходит за него; вкладки КБЖУ, пункты меню (у них своя «Капля») и внутренние кнопки .ddish-addon / .dev-addon — без перерисовки контура
             el._sqX = el.matches(SQ_X); el._sqRing = el._sqX && el.matches(SQ_RING);
             if (el._sqX && el.closest('.ri-tk')) return;   // плашки акций: рисунки нарочно выходят за край
             el._sqOn = true; if (sqRO) sqRO.observe(el); else sqUpdate(el);
@@ -24050,7 +24219,7 @@ html:not(.desk) :is(.dpromo-h, .dpromo-shadow, .ddish-nutr, .ddish-addons, .ddis
     var SQ_SAME = { screen: ['is-on', 'is-under', 'is-tabout'], app: ['on-hero'], bar: ['is-hidden', 'is-low'], chip: ['is-on', 'is-multi'], sheet: ['is-dish-scr'] };
     function sqSameLook(was, now, el) {
         var a = String(was || '').split(/\s+/), b = String(now || '').split(/\s+/), d = a.filter(function (x) { return x && b.indexOf(x) < 0; }).concat(b.filter(function (x) { return x && a.indexOf(x) < 0; }));
-        var own = !el || !el.classList ? null : el === app ? SQ_SAME.app : el.id === 'sheet' || el.id === 'sheetUnder' ? SQ_SAME.sheet : el.classList.contains('screen') ? SQ_SAME.screen : el.id === 'tabbar' || el.id === 'cartbar' ? SQ_SAME.bar : (el.classList.contains('ddish-addon') || el.classList.contains('ddish-excl') || (el.classList.contains('opt') && el.closest('.ddish-crust'))) ? SQ_SAME.chip : null;
+        var own = !el || !el.classList ? null : el === app ? SQ_SAME.app : el.id === 'sheet' || el.id === 'sheetUnder' ? SQ_SAME.sheet : el.classList.contains('screen') ? SQ_SAME.screen : el.id === 'tabbar' || el.id === 'cartbar' ? SQ_SAME.bar : (el.classList.contains('ddish-addon') || el.classList.contains('ddish-excl') || el.classList.contains('dev-addon') || (el.classList.contains('opt') && el.closest('.ddish-crust'))) ? SQ_SAME.chip : null;
         return d.every(function (x) { return x === 'is-typing' || x === 'is-back' || x === 'is-fwd' || x === 'is-wave' || x === 'is-jelly' || (!!own && own.indexOf(x) >= 0); });
     }
     new MutationObserver(function () { sqRefresh(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
